@@ -93,7 +93,11 @@ class CourseCatalogScreenState extends State<CourseCatalogScreen> {
         style: TextStyle(color: Colors.black),
       ),
       centerTitle: true,
-      leading: const Icon(Icons.arrow_back, color: Colors.black),
+      leading: IconButton(
+        onPressed: () => Navigator.of(context).pop(),
+        icon: Icon(Icons.arrow_back),
+        color: Colors.black,
+      ),
       actions: const [
         Padding(
           padding: EdgeInsets.only(right: 16.0),

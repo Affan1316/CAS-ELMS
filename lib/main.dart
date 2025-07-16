@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/core/theme/app_theme.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/pages/elms_landing_page.dart';
+import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -38,6 +39,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return ElmsLandingPage();
+    return OnboardingScreen();
   }
 }

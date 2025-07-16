@@ -5,51 +5,56 @@ class FeatureCardWidget extends StatelessWidget {
   final double height;
   final String title;
   final IconData icon;
+  final GestureTapCallback ontap;
   const FeatureCardWidget({
     super.key,
     required this.height,
     required this.width,
     required this.icon,
     required this.title,
+    required this.ontap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width * 0.42,
-      height: height * 0.15,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8F5FB),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Color(0xFF0E96C5), width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [Icon(icon, size: 32)],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              FittedBox(
-                child: Text(
-                  title,
-                  style: TextStyle(fontWeight: FontWeight.bold),
+    return GestureDetector(
+      onTap: ontap,
+      child: Container(
+        width: width * 0.42,
+        height: height * 0.15,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE8F5FB),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Color(0xFF0E96C5), width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [Icon(icon, size: 32)],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                FittedBox(
+                  child: Text(
+                    title,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
