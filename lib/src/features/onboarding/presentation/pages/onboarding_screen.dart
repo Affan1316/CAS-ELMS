@@ -19,21 +19,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       title: 'Welcome to ELMS',
       description:
           'Your comprehensive Educational Learning Management System. Start your learning journey with us today.',
-      imagePath: 'assets/image/myImage.png',
+      imagePath: 'assets/images/image04.png',
       color: Colors.blue,
     ),
     OnboardingPageModel(
       title: 'Learn Anywhere',
       description:
           'Access your courses, assignments, and resources from anywhere at any time. Learning made flexible.',
-      imagePath: 'assets/image/image04.png',
+      imagePath: 'assets/images/image04.png',
       color: Colors.green,
     ),
     OnboardingPageModel(
       title: 'Track Progress',
       description:
           'Monitor your learning progress, view grades, and stay on top of your academic achievements.',
-      imagePath: 'assets/image/image03.png',
+      imagePath: 'assets/images/image03.png',
       color: Colors.purple,
     ),
   ];
@@ -63,9 +63,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     context,
   ).push(MaterialPageRoute(builder: (context) => ElmsLandingPage()));
 
-  void _navigateToHome() {
-    // Navigator.pushReplacementNamed(context, '/home');
-  }
+  // void _navigateToHome() {
+  //   // Navigator.pushReplacementNamed(context, '/home');
+  // }
 
   @override
   void dispose() {
