@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/core/theme/app_theme.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/pages/elms_landing_page.dart';
 
 void main() {
@@ -11,12 +13,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'CAS ELMS',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      home: const MyHomePage(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<OnboardingBloc>(create: (context) => OnboardingBloc()),
+      ],
+      child: MaterialApp(
+        title: 'CAS ELMS',
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        home: const MyHomePage(),
+      ),
     );
   }
 }
