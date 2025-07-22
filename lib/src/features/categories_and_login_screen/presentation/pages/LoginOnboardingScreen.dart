@@ -13,6 +13,8 @@ class LoginOnboardingScreen extends StatelessWidget {
   final PageController _pageController = PageController();
   final TextEditingController _userIdController = TextEditingController();
 
+  LoginOnboardingScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
