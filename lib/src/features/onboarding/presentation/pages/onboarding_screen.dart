@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/pages/elms_landing_page.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/OnboardingPageModel.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/widgets/onboarding_screen_widget.dart';
-
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
@@ -19,21 +19,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       title: 'Welcome to ELMS',
       description:
           'Your comprehensive Educational Learning Management System. Start your learning journey with us today.',
-      imagePath: 'assets/image/myImage.png',
+      imagePath: 'assets/images/image04.png',
       color: Colors.blue,
     ),
     OnboardingPageModel(
       title: 'Learn Anywhere',
       description:
           'Access your courses, assignments, and resources from anywhere at any time. Learning made flexible.',
-      imagePath: 'assets/image/image04.png',
+      imagePath: 'assets/images/image04.png',
       color: Colors.green,
     ),
     OnboardingPageModel(
       title: 'Track Progress',
       description:
           'Monitor your learning progress, view grades, and stay on top of your academic achievements.',
-      imagePath: 'assets/image/image03.png',
+      imagePath: 'assets/images/image03.png',
       color: Colors.purple,
     ),
   ];
@@ -56,12 +56,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  void _skipOnboarding() => _navigateToHome();
-  void _completeOnboarding() => _navigateToHome();
+  void _skipOnboarding() => Navigator.of(
+    context,
+  ).push(MaterialPageRoute(builder: (context) => ElmsLandingPage()));
+  void _completeOnboarding() => Navigator.of(
+    context,
+  ).push(MaterialPageRoute(builder: (context) => ElmsLandingPage()));
 
-  void _navigateToHome() {
-    // Navigator.pushReplacementNamed(context, '/home');
-  }
+  // void _navigateToHome() {
+  //   // Navigator.pushReplacementNamed(context, '/home');
+  // }
 
   @override
   void dispose() {
@@ -115,9 +119,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   width: _currentPage == index ? 24 : 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: _currentPage == index
-                        ? _pages[_currentPage].color
-                        : Colors.grey.shade300,
+                    color:
+                        _currentPage == index
+                            ? _pages[_currentPage].color
+                            : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -144,9 +149,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     const SizedBox(width: 80),
 
                   ElevatedButton(
-                    onPressed: _currentPage == _pages.length - 1
-                        ? _completeOnboarding
-                        : _nextPage,
+                    onPressed:
+                        _currentPage == _pages.length - 1
+                            ? _completeOnboarding
+                            : _nextPage,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _pages[_currentPage].color,
                       foregroundColor: Colors.white,

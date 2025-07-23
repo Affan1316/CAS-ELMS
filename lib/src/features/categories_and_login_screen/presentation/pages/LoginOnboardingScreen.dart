@@ -9,7 +9,7 @@ import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/pr
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildSecondPage.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildThirdPage.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class LoginOnboardingScreen extends StatelessWidget {
   final PageController _pageController = PageController();
   final TextEditingController _userIdController = TextEditingController();
 

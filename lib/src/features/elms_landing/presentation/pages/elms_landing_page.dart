@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/pages/OnboardingScreen.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/pages/LoginOnboardingScreen.dart';
+import 'package:flutter_cas_app_main/src/features/course_catalog/presentation/pages/course_catalog_screen_state.dart';
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/widgets/ai_floating_action_button.dart';
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/widgets/ceo_card_widget.dart';
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/widgets/feature_card_widget.dart';
@@ -126,12 +127,23 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
                           icon: Icons.menu_book,
                           height: height,
                           width: width,
+                          ontap: () {
+                            // ScaffoldMessenger.of(
+                            //   context,
+                            // ).showSnackBar(SnackBar(content: Text('data')));
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => CourseCatalogScreen(),
+                              ),
+                            );
+                          },
                         ),
                         FeatureCardWidget(
                           title: 'About CAS',
                           icon: Icons.info,
                           height: height,
                           width: width,
+                          ontap: () {},
                         ),
                       ],
                     ),
@@ -143,12 +155,14 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
                           icon: Icons.star_rate,
                           height: height,
                           width: width,
+                          ontap: () {},
                         ),
                         FeatureCardWidget(
                           title: 'Contact Us',
                           icon: Icons.call,
                           height: height,
                           width: width,
+                          ontap: () {},
                         ),
                       ],
                     ),
@@ -159,7 +173,9 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
             LoginButton(
               onTap: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => OnboardingScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => LoginOnboardingScreen(),
+                  ),
                 );
               },
               animationController: _animationController,
