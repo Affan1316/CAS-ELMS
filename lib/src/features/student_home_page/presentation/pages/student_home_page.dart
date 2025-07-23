@@ -6,7 +6,7 @@ import 'package:flutter_cas_app_main/src/features/student_home_page/presentation
 import 'package:flutter_cas_app_main/src/features/student_home_page/presentation/widgets/buildStatsCard.dart';
 
 class StudentHomePage extends StatefulWidget {
-  const StudentHomePage({Key? key}) : super(key: key);
+  const StudentHomePage({super.key});
 
   @override
   State<StudentHomePage> createState() => _StudentHomePageState();

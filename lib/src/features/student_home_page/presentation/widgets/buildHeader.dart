@@ -82,7 +82,7 @@ Widget buildHeader() {
                   ),
                 ],
               ),
-              child: Container(
+              child: SizedBox(
                 width: 50,
                 height: 50,
                 child: Stack(
