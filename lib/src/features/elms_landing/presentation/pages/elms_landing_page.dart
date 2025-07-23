@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/pages/LoginOnboardingScreen.dart';
-import 'package:flutter_cas_app_main/src/features/courses_detail_page/presentation/pages/year_selector_page.dart';
+import 'package:flutter_cas_app_main/src/features/alumni_page/presentation/pages/year_selector_page.dart';
+import 'package:flutter_cas_app_main/src/features/courses_detail_page/presentation/pages/course_catalog.dart';
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/widgets/ai_floating_action_button.dart';
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/widgets/ceo_card_widget.dart';
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/widgets/feature_card_widget.dart';
@@ -133,7 +134,7 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
                             // ).showSnackBar(SnackBar(content: Text('data')));
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => YearSelectorPage(),
+                                builder: (context) => CourseCatalog(),
                               ),
                             );
                           },
