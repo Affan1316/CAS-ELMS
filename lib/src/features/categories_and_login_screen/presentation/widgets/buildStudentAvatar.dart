@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 Widget buildStudentAvatar() {
-  return Container(
+  return SizedBox(
     width: 80,
     height: 80,
     child: ClipRRect(

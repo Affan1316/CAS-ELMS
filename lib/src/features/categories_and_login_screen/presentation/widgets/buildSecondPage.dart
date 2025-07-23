@@ -3,7 +3,7 @@ import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/pr
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/SlideInWidget.dart';
 
 Widget buildSecondPage(BuildContext context, OnboardingInitial state) {
-  final TextEditingController _userIdController = TextEditingController();
+  final TextEditingController userIdController = TextEditingController();
 
   return Column(
     children: [
@@ -181,7 +181,7 @@ Widget buildSecondPage(BuildContext context, OnboardingInitial state) {
                     border: Border.all(color: Colors.grey.shade200),
                   ),
                   child: TextField(
-                    controller: _userIdController,
+                    controller: userIdController,
                     decoration: const InputDecoration(
                       hintText: 'Your Id',
                       hintStyle: TextStyle(color: Colors.grey, fontSize: 16),

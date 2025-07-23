@@ -6,11 +6,11 @@ class SlideInWidget extends StatefulWidget {
   final Offset begin;
 
   const SlideInWidget({
-    Key? key,
+    super.key,
     required this.child,
     this.delay = Duration.zero,
     this.begin = const Offset(0, 1),
-  }) : super(key: key);
+  });
 
   @override
   _SlideInWidgetState createState() => _SlideInWidgetState();
