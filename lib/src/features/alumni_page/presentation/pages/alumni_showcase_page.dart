@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_cas_app_main/src/features/alumni_page/presentation/widgets/neumorphic_card.dart';
 import 'package:google_fonts/google_fonts.dart';
-// import 'package:project_cas/main.dart';
-// import 'package:project_cas/courses_detail_page/presentation/widgets/neumorphic_card.dart';
 
 class AlumniShowcasePage extends StatelessWidget {
   final String selectedYear;
@@ -125,14 +123,9 @@ class AlumniShowcasePage extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Expanded(
-            child: GridView.builder(
+            child: ListView.builder(
               itemCount: filteredAlumni.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 30,
-                childAspectRatio: 0.5,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               itemBuilder: (context, index) {
                 final alum = filteredAlumni[index];
                 final offset = index.isEven ? -5.0 : 5.0;
@@ -142,7 +135,7 @@ class AlumniShowcasePage extends StatelessWidget {
                   child: Transform.translate(
                     offset: Offset(0, offset),
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: NeumorphicCard(alum: alum),
                     ),
                   ),

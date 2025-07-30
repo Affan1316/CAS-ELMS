@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -20,11 +19,8 @@ class BuildHeaderCoursePage extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Back Button (you can add Navigator.pop if needed)
             NeumorphicButton(
               onPressed: () {
-                // If you want it to go back only when Navigator.canPop is true
-                // if (Navigator.of(context).canPop()) Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
               style: NeumorphicStyle(

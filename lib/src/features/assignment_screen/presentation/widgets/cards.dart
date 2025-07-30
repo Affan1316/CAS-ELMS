@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/features/assignment_screen/presentation/pages/assignments_detail_page.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 
@@ -109,7 +108,8 @@ class _StageCardState extends State<StageCard> {
                       padding: const EdgeInsets.all(12),
                       child: Icon(
                         isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                        color: isBookmarked ? Colors.deepPurple : Colors.black87,
+                        color:
+                            isBookmarked ? Colors.deepPurple : Colors.black87,
                         size: 22,
                       ),
                     ),

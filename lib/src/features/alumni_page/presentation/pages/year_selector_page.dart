@@ -22,7 +22,7 @@ class YearSelectorPage extends StatelessWidget {
           children: [
             const SizedBox(height: 40),
             Text(
-              "🎓 Select Year",
+              "Select Year",
               style: GoogleFonts.orbitron(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,

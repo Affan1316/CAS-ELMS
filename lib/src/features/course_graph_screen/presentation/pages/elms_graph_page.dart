@@ -3,6 +3,8 @@ import 'package:flutter_cas_app_main/src/features/course_graph_screen/presentati
 import 'package:flutter_cas_app_main/src/features/course_graph_screen/presentation/widgets/StudentPerformancePainter.dart';
 
 class ELMSGraphsPage extends StatefulWidget {
+  const ELMSGraphsPage({super.key});
+
   @override
   _ELMSGraphsPageState createState() => _ELMSGraphsPageState();
 }
