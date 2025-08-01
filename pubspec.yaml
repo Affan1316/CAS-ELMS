@@ -50,6 +50,7 @@ dependencies:
   responsive_ui_kit: ^0.0.3
   flutter_markdown_plus: ^1.0.3
   intl: ^0.20.2
+  flutter_slidable: ^4.0.0
   
 
 dev_dependencies:
