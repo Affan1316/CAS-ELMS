@@ -89,7 +89,7 @@ class ChatPageBloc extends Bloc<ChatPageEvent, ChatPageState> {
 
       // Create the final AI message
       final aiMessage = Message(
-        text: responseText!,
+        text: responseText ?? "unexpected Error",
         isUser: false,
         timestamp: DateTime.now(),
       );
