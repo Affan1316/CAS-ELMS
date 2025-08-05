@@ -121,14 +121,14 @@ void _navigateToScreen(BuildContext context, int index) {
         print('Navigating to Enroll Student');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => EnrollStudentPage()),
+          MaterialPageRoute(builder: (_) => StudentEnrollmentScreen()),
         );
         break;
       case 5: // Enroll Student
         print('Navigating to Student Enrollment');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => StudentEnrollmentScreen()),
+          MaterialPageRoute(builder: (_) => EnrollStudentPage()),
         );
         break;
       case 6: // Add Inquiry
@@ -142,14 +142,14 @@ void _navigateToScreen(BuildContext context, int index) {
         print('Navigating to Add Inquiry');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => AddInquiryScreen()),
+          MaterialPageRoute(builder: (_) => FeeHistoryScreen()),
         );
         break;
       case 8: // Add Course
         print('Add Course - Not implemented yet');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => FeeHistoryScreen()),
+          MaterialPageRoute(builder: (_) => AddInquiryScreen()),
         );
         break;
       case 9: // Add Fee Plan
