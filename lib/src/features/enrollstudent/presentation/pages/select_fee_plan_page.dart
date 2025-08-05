@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 class SelectFeePlanPage extends StatelessWidget {
@@ -20,19 +18,16 @@ class SelectFeePlanPage extends StatelessWidget {
         child: Container(
           width: width,
           height: height,
-          decoration: BoxDecoration(
-            color: Colors.white
-          ),
+          decoration: BoxDecoration(color: Colors.white),
           child: ListView.builder(
             itemCount: 15,
-            itemBuilder: (context, index) => NeumorphicFeeTile(
-              fee: '90,000',
-              installments: '11',
-              perMonth: '10,000',
-              onDelete: () {
-                
-              },
-            ),
+            itemBuilder:
+                (context, index) => NeumorphicFeeTile(
+                  fee: '90,000',
+                  installments: '11',
+                  perMonth: '10,000',
+                  onDelete: () {},
+                ),
           ),
         ),
       ),
@@ -56,7 +51,9 @@ class NeumorphicFeeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const background = Color(0xFFF3F6FA); // Light background for neumorphic effect
+    const background = Color(
+      0xFFF3F6FA,
+    ); // Light background for neumorphic effect
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -78,8 +75,10 @@ class NeumorphicFeeTile extends StatelessWidget {
         ],
       ),
       child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 10,
+        ),
         leading: Container(
           decoration: BoxDecoration(
             color: background,
@@ -100,11 +99,7 @@ class NeumorphicFeeTile extends StatelessWidget {
           child: const CircleAvatar(
             radius: 26,
             backgroundColor: Colors.transparent,
-            child: Icon(
-              Icons.attach_money,
-              color: Colors.black87,
-              size: 28,
-            ),
+            child: Icon(Icons.attach_money, color: Colors.black87, size: 28),
           ),
         ),
         title: Text(
@@ -117,21 +112,13 @@ class NeumorphicFeeTile extends StatelessWidget {
         ),
         subtitle: Text(
           "Installments: $installments\nPer Month: $perMonth",
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.black54,
-          ),
+          style: const TextStyle(fontSize: 14, color: Colors.black54),
         ),
         trailing: IconButton(
-          icon: const Icon(
-            Icons.delete,
-            color: Colors.redAccent,
-            size: 26,
-          ),
+          icon: const Icon(Icons.delete, color: Colors.redAccent, size: 26),
           onPressed: onDelete,
         ),
       ),
     );
   }
 }
-

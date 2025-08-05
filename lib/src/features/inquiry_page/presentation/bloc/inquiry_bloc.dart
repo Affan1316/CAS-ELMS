@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_inquery_page/inquiry_page/presentation/bloc/inquiry_tap_event.dart';
-import 'package:flutter_inquery_page/inquiry_page/presentation/bloc/inquiry_tap_state.dart';
+import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/bloc/inquiry_tap_event.dart';
+import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/bloc/inquiry_tap_state.dart';
 
 class InquiryBloc extends Bloc<InquiryEvent, InquiryState> {
   InquiryBloc() : super(InquiryState()) {
