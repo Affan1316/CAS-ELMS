@@ -50,41 +50,46 @@ class FormSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomTextField(
+            CustomTextFieldInquiry(
               controller: nameController,
               label: 'Student Name',
               icon: Icons.person_outline,
               validatorMsg: 'Please enter student name',
+              validator: (value) {},
             ),
             const SizedBox(height: 20),
-            CustomTextField(
+            CustomTextFieldInquiry(
               controller: addressController,
               label: 'Father Name',
               icon: Icons.person_2_outlined,
               validatorMsg: 'Please enter father name',
+              validator: (value) {},
             ),
             const SizedBox(height: 20),
-            CustomTextField(
+            CustomTextFieldInquiry(
               controller: emailController,
               label: 'Email',
               icon: Icons.email_outlined,
               validatorMsg: 'Please enter a valid email',
               isEmail: true,
+              validator: (value) {},
             ),
             const SizedBox(height: 20),
-            CustomTextField(
+            CustomTextFieldInquiry(
               controller: phoneController,
               label: 'Mobile Number',
               icon: Icons.phone_outlined,
               validatorMsg: 'Please enter phone number',
               isPhone: true,
+              validator: (value) {},
             ),
             const SizedBox(height: 20),
-            CustomTextField(
+            CustomTextFieldInquiry(
               controller: cnicController,
               label: 'Group Name',
               icon: Icons.group_outlined,
               validatorMsg: 'Please enter group name',
+              validator: (value) {},
             ),
             const SizedBox(height: 20),
             CourseDropdown(
@@ -92,12 +97,9 @@ class FormSection extends StatelessWidget {
               onChanged: onCourseChanged,
             ),
             const SizedBox(height: 24),
-            GenderSelection(
-              gender: gender,
-              onChanged: onGenderChanged,
-            ),
+            GenderSelection(gender: gender, onChanged: onGenderChanged),
             const SizedBox(height: 32),
-            const SubmitButton(),
+            SubmitButton(onPressed: () {}),
           ],
         ),
       ),

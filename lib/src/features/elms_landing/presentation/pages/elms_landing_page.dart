@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/pages/chat_page.dart';
 import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/widgets/page_floating_button.dart';
-import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/pages/LoginOnboardingScreen.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/pages/OnboardingScreen.dart';
 import 'package:flutter_cas_app_main/src/features/courses_detail_page/presentation/pages/course_catalog.dart';
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/widgets/ceo_card_widget.dart';
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/widgets/feature_card_widget.dart';

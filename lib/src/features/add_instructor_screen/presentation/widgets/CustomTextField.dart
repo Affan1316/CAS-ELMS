@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 
-class CustomTextFieldInquiry extends StatelessWidget {
+class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final IconData icon;
-  final String validatorMsg;
-  final bool isEmail;
-  final bool isPhone;
+  final TextInputType? keyboardType;
+  final String? Function(String?)? validator;
+  final int maxLines;
 
-  const CustomTextFieldInquiry({
-    super.key,
+  const CustomTextField({
+    Key? key,
     required this.controller,
     required this.label,
     required this.icon,
-    required this.validatorMsg,
-    this.isEmail = false,
-    this.isPhone = false,
-    required String? Function(dynamic value) validator,
-  });
+    this.keyboardType,
+    this.validator,
+    this.maxLines = 1,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -35,26 +34,15 @@ class CustomTextFieldInquiry extends StatelessWidget {
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
-          keyboardType:
-              isEmail
-                  ? TextInputType.emailAddress
-                  : isPhone
-                  ? TextInputType.phone
-                  : null,
-          validator: (value) {
-            if (value == null || value.isEmpty) return validatorMsg;
-            if (isEmail &&
-                !RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-              return 'Please enter a valid email';
-            }
-            return null;
-          },
+          keyboardType: keyboardType,
+          validator: validator,
+          maxLines: maxLines,
           decoration: InputDecoration(
+            prefixIcon: Icon(icon, color: const Color(0xFF6B7280), size: 20),
+            hintText: 'Enter $label',
+            hintStyle: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
             filled: true,
             fillColor: const Color(0xFFF9FAFB),
-            prefixIcon: Icon(icon, color: const Color(0xFF9CA3AF)),
-            hintText: label,
-            hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1),
@@ -66,6 +54,10 @@ class CustomTextFieldInquiry extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,

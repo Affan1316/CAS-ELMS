@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_state.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/SlideInWidget.dart';
 
-Widget buildStudentLoginPage(
+Widget buildTeacherLoginPage(
   BuildContext context,
   OnboardingInitial state,
   TextEditingController userIdController, // Accept controller from main screen
@@ -59,14 +59,14 @@ Widget buildStudentLoginPage(
                 ),
               ),
 
-              // Main illustration
+              // Main illustration - Teacher themed
               Center(
                 child: SlideInWidget(
                   delay: const Duration(milliseconds: 600),
                   child: Container(
                     margin: const EdgeInsets.only(top: 40),
                     child: Image.network(
-                      'assets/images/login.webp',
+                      'assets/images/admin_illustration.webp', // Teacher-specific image
                       width: 300,
                       height: 300,
                       fit: BoxFit.contain,
@@ -87,13 +87,13 @@ Widget buildStudentLoginPage(
                                     width: 80,
                                     height: 60,
                                     decoration: BoxDecoration(
-                                      color: Colors.blue.shade100,
+                                      color: Colors.teal.shade100,
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Icon(
-                                      Icons.person,
+                                      Icons.school, // Teacher icon
                                       size: 40,
-                                      color: Colors.blue.shade600,
+                                      color: Colors.teal.shade600,
                                     ),
                                   ),
                                   const SizedBox(height: 10),
@@ -101,13 +101,13 @@ Widget buildStudentLoginPage(
                                     width: 100,
                                     height: 40,
                                     decoration: BoxDecoration(
-                                      color: Colors.orange.shade100,
+                                      color: Colors.green.shade100,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Icon(
-                                      Icons.laptop,
+                                      Icons.laptop_mac, // Teaching laptop
                                       size: 24,
-                                      color: Colors.orange.shade600,
+                                      color: Colors.green.shade600,
                                     ),
                                   ),
                                 ],
@@ -136,12 +136,12 @@ Widget buildStudentLoginPage(
             children: [
               const SizedBox(height: 20),
 
-              // Title
+              // Title - Teacher specific
               SlideInWidget(
                 delay: const Duration(milliseconds: 800),
                 begin: const Offset(0, 0.5),
                 child: const Text(
-                  'Are You a CASIAN ?',
+                  'Welcome Back Teacher!',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
@@ -154,12 +154,12 @@ Widget buildStudentLoginPage(
 
               const SizedBox(height: 8),
 
-              // Subtitle
+              // Subtitle - Teacher specific
               SlideInWidget(
                 delay: const Duration(milliseconds: 1000),
                 begin: const Offset(0, 0.5),
                 child: const Text(
-                  'Login to see the result.',
+                  'Login to access your teaching dashboard.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -171,7 +171,7 @@ Widget buildStudentLoginPage(
 
               const SizedBox(height: 30),
 
-              // User ID input with neumorphic inner effect
+              // Teacher ID input with neumorphic inner effect
               SlideInWidget(
                 delay: const Duration(milliseconds: 1200),
                 begin: const Offset(0, 0.5),
@@ -215,12 +215,12 @@ Widget buildStudentLoginPage(
                       }
                     },
                     decoration: const InputDecoration(
-                      hintText: 'Your Id',
+                      hintText: 'Teacher ID',
                       hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(vertical: 16),
                       prefixIcon: Icon(
-                        Icons.person_outline,
+                        Icons.badge_outlined, // Teacher ID icon
                         color: Colors.grey,
                       ),
                     ),
@@ -300,8 +300,8 @@ Widget buildStudentLoginPage(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
                     onTap: () {
-                      // Handle forgot password
-                      print('Forgot password tapped');
+                      // Handle forgot password for teacher
+                      print('Teacher forgot password tapped');
                     },
                     child: const Text(
                       'Forgot Password?',
