@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_inquery_page/inquiry_page/presentation/bloc/inquiry_bloc.dart';
-import 'package:flutter_inquery_page/inquiry_page/presentation/bloc/inquiry_tap_event.dart';
-import 'package:flutter_inquery_page/inquiry_page/presentation/bloc/inquiry_tap_state.dart';
-import 'package:flutter_inquery_page/inquiry_page/presentation/widgets/expanded_column.dart';
-import 'package:flutter_inquery_page/inquiry_page/presentation/widgets/list_tile.dart';
-import 'package:flutter_inquery_page/inquiry_page/presentation/widgets/model/inquiry.dart';
+import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/bloc/inquiry_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/bloc/inquiry_tap_event.dart';
+import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/bloc/inquiry_tap_state.dart';
+import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/pages/widgets/expanded_column.dart';
+import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/pages/widgets/list_tile.dart';
+import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/pages/widgets/model/inquiry.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 
 class InquiryPage extends StatefulWidget {

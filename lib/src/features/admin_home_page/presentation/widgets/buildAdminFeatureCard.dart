@@ -10,6 +10,9 @@ import 'package:flutter_cas_app_main/src/features/feedefaulters/presentation/pag
 import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/pages/inquiry_page.dart';
 import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/groups_page.dart';
 import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/pages/student_enrollment_screen.dart';
+import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/presentation/page/students_screen.dart';
+import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/presentation/page/update_group_screen.dart';
+import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/presentation/widget/group_page.dart';
 
 Widget buildAdminFeatureCard(
   Map<String, dynamic> feature,
@@ -121,14 +124,14 @@ void _navigateToScreen(BuildContext context, int index) {
         print('Navigating to Enroll Student');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => EnrollStudentPage()),
+          MaterialPageRoute(builder: (_) => StudentEnrollmentScreen()),
         );
         break;
       case 5: // Enroll Student
         print('Navigating to Student Enrollment');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => StudentEnrollmentScreen()),
+          MaterialPageRoute(builder: (_) => EnrollStudentPage()),
         );
         break;
       case 6: // Add Inquiry
@@ -142,20 +145,21 @@ void _navigateToScreen(BuildContext context, int index) {
         print('Navigating to Add Inquiry');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => AddInquiryScreen()),
+          MaterialPageRoute(builder: (_) => FeeHistoryScreen()),
         );
         break;
       case 8: // Add Course
         print('Add Course - Not implemented yet');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => FeeHistoryScreen()),
+          MaterialPageRoute(builder: (_) => AddInquiryScreen()),
         );
         break;
       case 9: // Add Fee Plan
         print('Add Fee Plan - Not implemented yet');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Add Fee Plan feature coming soon!')),
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => GroupMainDetailPage()),
         );
         break;
       case 10: // Leaves Approved

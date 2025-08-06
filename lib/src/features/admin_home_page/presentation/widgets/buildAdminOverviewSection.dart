@@ -64,7 +64,7 @@ Widget buildFeaturesGrid(AnimationController _animationController) {
       'icon': Icons.schedule_outlined,
     },
     {
-      'title': 'Add Inquiry',
+      'title': 'Inquiry detail',
       'subtitle': 'Time management',
       'icon': Icons.schedule_outlined,
     },
@@ -74,7 +74,7 @@ Widget buildFeaturesGrid(AnimationController _animationController) {
       'icon': Icons.schedule_outlined,
     },
     {
-      'title': 'Add Course',
+      'title': 'Add Inquiry',
       'subtitle': 'Time management',
       'icon': Icons.schedule_outlined,
     },
