@@ -10,6 +10,7 @@ class WhyChooseUsPage extends StatelessWidget {
 
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(title: Text('Why choose us'),),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(

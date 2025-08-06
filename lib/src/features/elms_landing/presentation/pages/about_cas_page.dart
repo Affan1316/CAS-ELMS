@@ -10,6 +10,7 @@ class AboutCasPage extends StatelessWidget {
 
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(title: Text('About Cas'),),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(

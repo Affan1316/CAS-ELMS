@@ -10,6 +10,7 @@ class ContactUsPage extends StatelessWidget {
 
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(title: Text('Contact us'),),
         body: Container(
           width: double.infinity,
           height: size.height,
