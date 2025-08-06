@@ -86,10 +86,6 @@ class _StudentHomePageState extends State<StudentHomePage>
     },
   ];
 
-  // Student activities and features
-
-  // Recent activities
-
   @override
   void initState() {
     super.initState();
@@ -142,8 +138,8 @@ class _StudentHomePageState extends State<StudentHomePage>
                     buildStatsCard(),
                     buildQuickActions(),
                     buildPopularTeachersSection(),
-                    buildRecentActivities(),
 
+                    // buildRecentActivities(),
                     const SizedBox(height: 30),
                   ],
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/pages/admin_home_page.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_state.dart';
@@ -7,13 +8,13 @@ import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/pr
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/SlideInWidget.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildFirstPage.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildSecondPage.dart';
-import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildThirdPage.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildTeacherLoginPage.dart';
+import 'package:flutter_cas_app_main/src/features/student_home_page/presentation/pages/student_home_page.dart';
 
 class LoginOnboardingScreen extends StatelessWidget {
   final PageController _pageController = PageController();
   final TextEditingController _userIdController = TextEditingController();
-
-  LoginOnboardingScreen({super.key});
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +28,18 @@ class LoginOnboardingScreen extends StatelessWidget {
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
             );
+          } else if (state is OnboardingLoginSuccess) {
+            // Handle navigation based on selected role
+            _navigateBasedOnRole(context, state.selectedRole, state.userId);
           }
         },
         builder: (context, state) {
+          // Handle different state types
+          if (state is OnboardingLoginSuccess) {
+            // Show loading or return empty container while navigating
+            return const Center(child: CircularProgressIndicator());
+          }
+
           final currentState = state as OnboardingInitial;
 
           return Column(
@@ -83,8 +93,9 @@ class LoginOnboardingScreen extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
                     buildFirstPage(context, currentState),
-                    buildThirdPage(context, currentState),
-                    buildSecondPage(context, currentState),
+
+                    // Dynamic login page based on selected role
+                    _buildLoginPage(context, currentState),
                   ],
                 ),
               ),
@@ -100,7 +111,7 @@ class LoginOnboardingScreen extends StatelessWidget {
                       // Page indicators
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(3, (index) {
+                        children: List.generate(2, (index) {
                           return AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
                             margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -127,10 +138,20 @@ class LoginOnboardingScreen extends StatelessWidget {
                           height: 56,
                           child: ElevatedButton(
                             onPressed: () {
-                              if (currentState.currentPage < 2) {
-                                context.read<OnboardingBloc>().add(
-                                  NextPageEvent(),
-                                );
+                              if (currentState.currentPage < 1) {
+                                if (currentState.selectedRole == null ||
+                                    currentState.selectedRole!.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Select your role'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                } else {
+                                  context.read<OnboardingBloc>().add(
+                                    NextPageEvent(),
+                                  );
+                                }
                               } else {
                                 // Login logic
                                 context.read<OnboardingBloc>().add(
@@ -138,6 +159,7 @@ class LoginOnboardingScreen extends StatelessWidget {
                                 );
                               }
                             },
+
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF4DD0E1),
                               foregroundColor: Colors.white,
@@ -147,7 +169,7 @@ class LoginOnboardingScreen extends StatelessWidget {
                               elevation: 0,
                             ),
                             child: Text(
-                              currentState.currentPage == 2
+                              currentState.currentPage == 1
                                   ? 'Login'
                                   : 'Continue',
                               style: const TextStyle(
@@ -167,5 +189,59 @@ class LoginOnboardingScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  // Method to build the appropriate login page based on selected role
+  Widget _buildLoginPage(BuildContext context, OnboardingInitial state) {
+    switch (state.selectedRole) {
+      case 'Teacher':
+        return buildTeacherLoginPage(
+          context,
+          state,
+          _userIdController,
+          _passwordController,
+        );
+      case 'Student':
+        return buildStudentLoginPage(
+          context,
+          state,
+          _userIdController,
+          _passwordController,
+        );
+      default:
+        // Fallback to student login if no role is selected
+        return buildStudentLoginPage(
+          context,
+          state,
+          _userIdController,
+          _passwordController,
+        );
+    }
+  }
+
+  // Navigation method based on selected role
+  void _navigateBasedOnRole(BuildContext context, String role, String userId) {
+    // Clear the text controllers
+    _userIdController.clear();
+    _passwordController.clear();
+
+    switch (role) {
+      case 'Teacher':
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (context) => AdminHomePage()));
+        break;
+      case 'Student':
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (context) => StudentHomePage()));
+        break;
+      default:
+        // Default to student if role is not recognized
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (context) => StudentHomePage()));
+        break;
+    }
   }
 }
