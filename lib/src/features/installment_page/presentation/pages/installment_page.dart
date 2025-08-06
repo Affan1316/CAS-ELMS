@@ -1,8 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/installment_page/presentation/bloc/installment_page_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/installment_page/presentation/pages/widgets/app_bar_tilte.dart';
+import 'package:flutter_cas_app_main/src/features/installment_page/presentation/pages/widgets/main_card.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:installment_page/installment_page/presentation/bloc/installment_page_bloc.dart';
-import 'package:installment_page/installment_page/presentation/widgets/app_bar_tilte.dart';
-import 'package:installment_page/installment_page/presentation/widgets/main_card.dart';
+
 
 class CreateFeePlanPage extends StatefulWidget {
   const CreateFeePlanPage({super.key});

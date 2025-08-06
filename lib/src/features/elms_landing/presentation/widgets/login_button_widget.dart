@@ -36,11 +36,16 @@ class LoginButton extends AnimatedWidget {
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
-                  color: Colors.blueAccent.withOpacity(0.3),
+                  color: Colors.black12,
+                  offset: Offset(4, 4),
                   blurRadius: 8,
-                  offset: const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: Colors.white24,
+                  offset: Offset(-4, -4),
+                  blurRadius: 8,
                 ),
               ],
             ),

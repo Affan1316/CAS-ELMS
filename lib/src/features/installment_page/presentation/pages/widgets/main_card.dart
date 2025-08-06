@@ -1,5 +1,5 @@
+import 'package:flutter_cas_app_main/src/features/installment_page/presentation/pages/widgets/input_field.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:installment_page/installment_page/presentation/widgets/input_field.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 
 class MainCard extends StatelessWidget {
