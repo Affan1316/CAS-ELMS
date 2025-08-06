@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 class SlelectStudentPage extends StatelessWidget {
@@ -20,16 +18,15 @@ class SlelectStudentPage extends StatelessWidget {
         child: Container(
           width: width,
           height: height,
-          decoration: BoxDecoration(
-            color: Colors.white
-          ),
+          decoration: BoxDecoration(color: Colors.white),
           child: ListView.builder(
             itemCount: 15,
-            itemBuilder: (context, index) => LightNeumorphicStudentTile(
-              studentName: 'Saim',
-              fatherName: 'Riaz',
-              studentId: '34332',
-            ),
+            itemBuilder:
+                (context, index) => LightNeumorphicStudentTile(
+                  studentName: 'Saim',
+                  fatherName: 'Riaz',
+                  studentId: '34332',
+                ),
           ),
         ),
       ),
@@ -53,7 +50,9 @@ class LightNeumorphicStudentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const background = Color(0xFFF3F6FA); // Very light background for soft effect
+    const background = Color(
+      0xFFF3F6FA,
+    ); // Very light background for soft effect
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -75,8 +74,7 @@ class LightNeumorphicStudentTile extends StatelessWidget {
         ],
       ),
       child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           decoration: BoxDecoration(
             color: background,
@@ -97,11 +95,7 @@ class LightNeumorphicStudentTile extends StatelessWidget {
           child: const CircleAvatar(
             radius: 26,
             backgroundColor: Colors.transparent,
-            child: Icon(
-              Icons.person,
-              color: Colors.black54,
-              size: 28,
-            ),
+            child: Icon(Icons.person, color: Colors.black54, size: 28),
           ),
         ),
         title: Text(
@@ -114,15 +108,10 @@ class LightNeumorphicStudentTile extends StatelessWidget {
         ),
         subtitle: Text(
           "Father: $fatherName\nID: $studentId",
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.black54,
-          ),
+          style: const TextStyle(fontSize: 14, color: Colors.black54),
         ),
         onTap: onTap,
       ),
     );
   }
 }
-
-

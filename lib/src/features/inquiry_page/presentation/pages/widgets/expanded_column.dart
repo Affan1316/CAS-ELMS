@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/pages/widgets/info_row.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/pages/widgets/model/inquiry.dart';
 
-
 class ExpandedColumn extends StatelessWidget {
   const ExpandedColumn({super.key, required this.inquiry});
   final Inquiry inquiry;

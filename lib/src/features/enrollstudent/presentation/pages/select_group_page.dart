@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 class SelectGroupPage extends StatelessWidget {
@@ -20,15 +18,14 @@ class SelectGroupPage extends StatelessWidget {
         child: Container(
           width: width,
           height: height,
-          decoration: BoxDecoration(
-           color: Colors.white
-          ),
+          decoration: BoxDecoration(color: Colors.white),
           child: ListView.builder(
             itemCount: 15,
-            itemBuilder: (context, index) => NeumorphicGroupTile(
-              groupName: 'F19',
-              courseName: 'Flutter Development',
-            ),
+            itemBuilder:
+                (context, index) => NeumorphicGroupTile(
+                  groupName: 'F19',
+                  courseName: 'Flutter Development',
+                ),
           ),
         ),
       ),
@@ -50,7 +47,9 @@ class NeumorphicGroupTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const background = Color(0xFFF3F6FA); // Light background for neumorphic effect
+    const background = Color(
+      0xFFF3F6FA,
+    ); // Light background for neumorphic effect
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -72,8 +71,7 @@ class NeumorphicGroupTile extends StatelessWidget {
         ],
       ),
       child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           decoration: BoxDecoration(
             color: background,
@@ -94,11 +92,7 @@ class NeumorphicGroupTile extends StatelessWidget {
           child: const CircleAvatar(
             radius: 26,
             backgroundColor: Colors.transparent,
-            child: Icon(
-              Icons.people,
-              color: Colors.black87,
-              size: 28,
-            ),
+            child: Icon(Icons.people, color: Colors.black87, size: 28),
           ),
         ),
         title: Text(
@@ -111,10 +105,7 @@ class NeumorphicGroupTile extends StatelessWidget {
         ),
         subtitle: Text(
           courseName,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.black54,
-          ),
+          style: const TextStyle(fontSize: 14, color: Colors.black54),
         ),
         onTap: onTap,
       ),
