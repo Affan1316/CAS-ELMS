@@ -1,9 +1,11 @@
+// unchanged imports
 import 'package:flutter/material.dart';
 
 class CeoCardWidget extends AnimatedWidget {
   final AnimationController animationController;
   final double width;
   final double height;
+
   const CeoCardWidget({
     super.key,
     required this.height,
@@ -25,6 +27,7 @@ class CeoCardWidget extends AnimatedWidget {
       builder: (context, orientation) {
         final isPortrait = orientation == Orientation.portrait;
         var position = isPortrait ? -imageSizeWidth * 0.2 : -imageSizeWidth * 0.05;
+
         return FadeTransition(
           opacity: animationController.drive(
             CurveTween(curve: Interval(0.0, 0.25)),
@@ -35,21 +38,33 @@ class CeoCardWidget extends AnimatedWidget {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  // Card Background
+                  // Card with gradient and neumorphic shadows
                   Container(
                     width: cardWidth,
                     height: cardHeight,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
+                      gradient: const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          Color(0xFF0E96C5), // Primary blue
-                          Color(0xFF39B3D7), // Lighter blue/teal
-                          Color(0xFF82D8E8), // Soft aqua
+                          Color(0xFF0E96C5),
+                          Color(0xFF39B3D7),
+                          Color(0xFF82D8E8),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(20),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          offset: Offset(4, 4),
+                          blurRadius: 8,
+                        ),
+                        BoxShadow(
+                          color: Colors.white24,
+                          offset: Offset(-4, -4),
+                          blurRadius: 8,
+                        ),
+                      ],
                     ),
                     padding: EdgeInsets.symmetric(
                       horizontal: cardWidth * 0.05,
@@ -99,17 +114,17 @@ class CeoCardWidget extends AnimatedWidget {
                             ],
                           ),
                         ),
-                        // Spacer for image
-                        Expanded(flex: 4, child: SizedBox()),
+                        const Expanded(flex: 4, child: SizedBox()),
                       ],
                     ),
                   ),
 
+                  // CEO Image
                   Positioned(
-                    top: position, // Pop out from top
+                    top: position,
                     right: 0,
                     child: Image.asset(
-                      'assets/images/person 1-Photoroom.png', // your PNG path
+                      'assets/images/person 1-Photoroom.png',
                       width: imageSizeWidth,
                       height: imageSizeHeight,
                       fit: BoxFit.cover,
