@@ -8,14 +8,14 @@ import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20
 import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/presentation/page/students_screen.dart';
 import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/presentation/page/update_group_screen.dart';
 
-class GroupPage extends StatefulWidget {
-  const GroupPage({super.key});
+class GroupMainDetailPage extends StatefulWidget {
+  const GroupMainDetailPage({super.key});
 
   @override
-  State<GroupPage> createState() => _GroupPageState();
+  State<GroupMainDetailPage> createState() => _GroupMainDetailPageState();
 }
 
-class _GroupPageState extends State<GroupPage> {
+class _GroupMainDetailPageState extends State<GroupMainDetailPage> {
   List<Group> _groups = [
     Group(
       title: 'Flutter',

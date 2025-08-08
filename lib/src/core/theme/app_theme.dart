@@ -6,8 +6,9 @@ class AppTheme {
     primaryColor: AppColors.primaryColor,
     scaffoldBackgroundColor: AppColors.scaffoldLightThemeBackground,
     brightness: Brightness.light,
-    appBarTheme: const AppBarTheme(
+    appBarTheme:  AppBarTheme(
       backgroundColor: AppColors.primaryColor,
+      foregroundColor: Colors.white,
       elevation: 0,
     ),
     textTheme: Typography.material2021().black,
@@ -18,8 +19,9 @@ class AppTheme {
     primaryColor: AppColors.primaryColor,
     scaffoldBackgroundColor: AppColors.scaffoldDarkThemeBackground,
     brightness: Brightness.dark,
-    appBarTheme: const AppBarTheme(
+    appBarTheme:  AppBarTheme(
       backgroundColor: AppColors.primaryColor,
+      foregroundColor: Colors.white,
       elevation: 0,
     ),
     textTheme: Typography.material2021().white,

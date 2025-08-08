@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SubmitButton extends StatelessWidget {
-  const SubmitButton({super.key});
+  const SubmitButton({super.key, required void Function() onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,10 @@ class SubmitButton extends StatelessWidget {
           children: [
             Icon(Icons.person_add, size: 20),
             SizedBox(width: 8),
-            Text('Submit', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            Text(
+              'Submit',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
           ],
         ),
       ),

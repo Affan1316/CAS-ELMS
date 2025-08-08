@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class CustomTextField extends StatelessWidget {
+class CustomTextFieldInquiry extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final IconData icon;
@@ -8,7 +8,7 @@ class CustomTextField extends StatelessWidget {
   final bool isEmail;
   final bool isPhone;
 
-  const CustomTextField({
+  const CustomTextFieldInquiry({
     super.key,
     required this.controller,
     required this.label,
@@ -16,6 +16,7 @@ class CustomTextField extends StatelessWidget {
     required this.validatorMsg,
     this.isEmail = false,
     this.isPhone = false,
+    required String? Function(dynamic value) validator,
   });
 
   @override
@@ -23,18 +24,27 @@ class CustomTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF374151))),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF374151),
+          ),
+        ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
-          keyboardType: isEmail
-              ? TextInputType.emailAddress
-              : isPhone
+          keyboardType:
+              isEmail
+                  ? TextInputType.emailAddress
+                  : isPhone
                   ? TextInputType.phone
                   : null,
           validator: (value) {
             if (value == null || value.isEmpty) return validatorMsg;
-            if (isEmail && !RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+            if (isEmail &&
+                !RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
               return 'Please enter a valid email';
             }
             return null;
@@ -57,7 +67,10 @@ class CustomTextField extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
           ),
         ),
       ],

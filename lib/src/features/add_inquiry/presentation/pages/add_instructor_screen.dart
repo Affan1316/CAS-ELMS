@@ -3,14 +3,14 @@ import '../widgets/header.dart';
 import '../widgets/hero_section.dart';
 import '../widgets/form_section.dart';
 
-class AddInstructorScreen extends StatefulWidget {
-  const AddInstructorScreen({super.key});
+class AddInquiryScreen extends StatefulWidget {
+  const AddInquiryScreen({super.key});
 
   @override
-  State<AddInstructorScreen> createState() => _AddInstructorScreenState();
+  State<AddInquiryScreen> createState() => _AddInstructorScreenState();
 }
 
-class _AddInstructorScreenState extends State<AddInstructorScreen>
+class _AddInstructorScreenState extends State<AddInquiryScreen>
     with SingleTickerProviderStateMixin {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
@@ -77,7 +77,8 @@ class _AddInstructorScreenState extends State<AddInstructorScreen>
                         selectedCourse: _selectedCourse,
                         gender: _gender,
                         onGenderChanged: (val) => setState(() => _gender = val),
-                        onCourseChanged: (val) => setState(() => _selectedCourse = val),
+                        onCourseChanged:
+                            (val) => setState(() => _selectedCourse = val),
                       ),
                     ],
                   ),

@@ -29,6 +29,7 @@ class SelectInterestEvent extends OnboardingEvent {
 
 class LoginEvent extends OnboardingEvent {
   final String userId;
+  // final String password;
   const LoginEvent(this.userId);
 
   @override

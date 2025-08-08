@@ -6,6 +6,7 @@ class FeatureCardWidget extends StatelessWidget {
   final String title;
   final IconData icon;
   final GestureTapCallback ontap;
+
   const FeatureCardWidget({
     super.key,
     required this.height,
@@ -24,34 +25,34 @@ class FeatureCardWidget extends StatelessWidget {
         height: height * 0.15,
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: const Color(0xFFE8F5FB),
+          color: Colors.white, // Light background
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Color(0xFF0E96C5), width: 2),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black12,
-              blurRadius: 6,
-              offset: const Offset(0, 3),
+              color: Color(0xFFA3B1C6), // Darker shadow bottom right
+              offset: Offset(6, 6),
+              blurRadius: 12,
+            ),
+            BoxShadow(
+              color: Colors.white, // Lighter shadow top left
+              offset: Offset(-6, -6),
+              blurRadius: 12,
             ),
           ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [Icon(icon, size: 32)],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                FittedBox(
-                  child: Text(
-                    title,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+            Icon(icon, size: 32, color: Colors.black54),
+            FittedBox(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
-              ],
+              ),
             ),
           ],
         ),

@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_cas_app_main/src/features/alumni_page/presentation/pages/year_selector_page.dart';
+import 'package:flutter_cas_app_main/src/features/assignment_screen/presentation/pages/assignments_page.dart';
+import 'package:flutter_cas_app_main/src/features/profile/presentation/pages/profile_page.dart';
+import 'package:flutter_cas_app_main/src/features/request_leave/presentation/pages/history_leaves_page.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 final List<Map<String, dynamic>> studentFeatures = [
@@ -8,6 +13,7 @@ final List<Map<String, dynamic>> studentFeatures = [
     'color': Color(0xFF6366F1),
     'count': '5 Due',
     'isUrgent': true,
+    'screen': InterviewStagesPage(),
   },
   {
     'title': 'IQ Test',
@@ -15,6 +21,7 @@ final List<Map<String, dynamic>> studentFeatures = [
     'color': Color(0xFF10B981),
     'count': '3.8 GPA',
     'isUrgent': false,
+    'screen': YearSelectorPage(),
   },
   {
     'title': 'Workshop Tracker',
@@ -22,6 +29,7 @@ final List<Map<String, dynamic>> studentFeatures = [
     'color': Color(0xFF8B5CF6),
     'count': '6 Today',
     'isUrgent': false,
+    'screen': LeaveScreen(),
   },
   {
     'title': 'Library',
@@ -29,6 +37,7 @@ final List<Map<String, dynamic>> studentFeatures = [
     'color': Color(0xFF06B6D4),
     'count': '2 Borrowed',
     'isUrgent': false,
+    'screen': ProfilePage(),
   },
   {
     'title': 'Study Groups',
@@ -98,7 +107,13 @@ Widget buildQuickActions() {
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(20),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => feature['screen'],
+                      ),
+                    );
+                  },
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(

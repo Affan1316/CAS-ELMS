@@ -2,15 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/core/theme/app_theme.dart';
 import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/bloc/chat_page_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/alumni_page/presentation/pages/year_selector_page.dart';
+
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/data/local_fee_service.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/bloc/fee_history_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/bloc/fee_history_event.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/page/fee_history_screen.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/bloc/student_enrollment_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/pages/student_enrollment_screen.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 // import 'package:flutter_cas_app_main/src/features/course_catalog/presentation/pages/course_catalog_screen_state.dart';
 
@@ -35,15 +29,6 @@ class MyApp extends StatelessWidget {
         providers: [
           BlocProvider<OnboardingBloc>(create: (context) => OnboardingBloc()),
           BlocProvider<ChatPageBloc>(create: (context) => ChatPageBloc()),
-          BlocProvider(
-            create:
-                (context) => FeeHistoryBloc(LocalFeeService())..add(LoadFees()),
-            child: const FeeHistoryScreen(),
-          ),
-          BlocProvider(
-            create: (_) => StudentEnrollmentBloc(),
-            child: const StudentEnrollmentScreen(),
-          ),
         ],
         child: MaterialApp(
           title: 'CAS ELMS',

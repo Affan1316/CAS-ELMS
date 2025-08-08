@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_state.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/SlideInWidget.dart';
 
-Widget buildSecondPage(BuildContext context, OnboardingInitial state) {
-  final TextEditingController userIdController = TextEditingController();
+Widget buildStudentLoginPage(
+  BuildContext context,
+  OnboardingInitial state,
+  TextEditingController userIdController, // Accept controller from main screen
+  TextEditingController passwordController, // Accept password controller too
+) {
+  final ValueNotifier<String> errorMessage = ValueNotifier<String>('');
 
   return Column(
     children: [
@@ -62,8 +67,8 @@ Widget buildSecondPage(BuildContext context, OnboardingInitial state) {
                     margin: const EdgeInsets.only(top: 40),
                     child: Image.network(
                       'assets/images/login.webp',
-                      width: 350,
-                      height: 350,
+                      width: 300,
+                      height: 300,
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
                         return Column(
@@ -129,7 +134,7 @@ Widget buildSecondPage(BuildContext context, OnboardingInitial state) {
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
 
               // Title
               SlideInWidget(
@@ -164,9 +169,9 @@ Widget buildSecondPage(BuildContext context, OnboardingInitial state) {
                 ),
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
 
-              // Store name input
+              // User ID input with neumorphic inner effect
               SlideInWidget(
                 delay: const Duration(milliseconds: 1200),
                 begin: const Offset(0, 0.5),
@@ -176,17 +181,135 @@ Widget buildSecondPage(BuildContext context, OnboardingInitial state) {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade200),
+                    boxShadow: [
+                      // Dark shadow (creates depth)
+                      BoxShadow(
+                        color: Colors.grey.shade400,
+                        offset: const Offset(-4, -4),
+                        blurRadius: 8,
+                        spreadRadius: -1,
+                      ),
+                      // Light shadow (enhances inset effect)
+                      BoxShadow(
+                        color: Colors.grey.shade300,
+                        offset: const Offset(4, 4),
+                        blurRadius: 8,
+                        spreadRadius: -1,
+                      ),
+                      // Additional inner glow for more depth
+                      BoxShadow(
+                        color: Colors.grey.shade200,
+                        offset: const Offset(0, 0),
+                        blurRadius: 4,
+                        spreadRadius: -2,
+                      ),
+                    ],
                   ),
                   child: TextField(
-                    controller: userIdController,
+                    controller: userIdController, // Use the passed controller
+                    onChanged: (value) {
+                      if (errorMessage.value.isNotEmpty) {
+                        errorMessage.value = '';
+                      }
+                    },
                     decoration: const InputDecoration(
                       hintText: 'Your Id',
                       hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(vertical: 16),
+                      prefixIcon: Icon(
+                        Icons.person_outline,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              // Password input with neumorphic inner effect
+              SlideInWidget(
+                delay: const Duration(milliseconds: 1400),
+                begin: const Offset(0, 0.5),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      // Dark shadow (creates depth)
+                      BoxShadow(
+                        color: Colors.grey.shade400,
+                        offset: const Offset(-4, -4),
+                        blurRadius: 8,
+                        spreadRadius: -1,
+                      ),
+                      // Light shadow (enhances inset effect)
+                      BoxShadow(
+                        color: Colors.grey.shade300,
+                        offset: const Offset(4, 4),
+                        blurRadius: 8,
+                        spreadRadius: -1,
+                      ),
+                      // Additional inner glow for more depth
+                      BoxShadow(
+                        color: Colors.grey.shade200,
+                        offset: const Offset(0, 0),
+                        blurRadius: 4,
+                        spreadRadius: -2,
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller:
+                        passwordController, // Use the passed password controller
+                    obscureText: true,
+                    onChanged: (value) {
+                      if (errorMessage.value.isNotEmpty) {
+                        errorMessage.value = '';
+                      }
+                    },
+                    decoration: const InputDecoration(
+                      hintText: 'Password',
+                      hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 16),
+                      prefixIcon: Icon(Icons.lock_outline, color: Colors.grey),
+                      suffixIcon: Icon(
+                        Icons.visibility_off_outlined,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // Forgot Password
+              SlideInWidget(
+                delay: const Duration(milliseconds: 1600),
+                begin: const Offset(0, 0.5),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: () {
+                      // Handle forgot password
+                      print('Forgot password tapped');
+                    },
+                    child: const Text(
+                      'Forgot Password?',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.blue,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),
