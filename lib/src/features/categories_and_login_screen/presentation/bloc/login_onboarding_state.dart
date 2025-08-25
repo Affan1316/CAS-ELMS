@@ -28,16 +28,3 @@ class OnboardingInitial extends OnboardingState {
     shouldShake,
   ];
 }
-
-class OnboardingLoginSuccess extends OnboardingState {
-  final String userId;
-  final String selectedRole;
-
-  const OnboardingLoginSuccess({
-    required this.userId,
-    required this.selectedRole,
-  });
-
-  @override
-  List<Object> get props => [userId, selectedRole];
-}

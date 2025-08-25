@@ -10,9 +10,30 @@ Widget buildRoleCard(
   Color color,
   bool isSelected,
 ) {
+  // Get screen dimensions for responsiveness
+  final screenSize = MediaQuery.of(context).size;
+  final screenWidth = screenSize.width;
+  final screenHeight = screenSize.height;
+
+  // Calculate responsive dimensions
+  final cardWidth = screenWidth * 0.35; // 35% of screen width
+  final cardHeight = screenHeight * 0.25; // 25% of screen height
+
+  // Ensure minimum and maximum sizes
+  final responsiveWidth = cardWidth.clamp(140.0, 180.0);
+  final responsiveHeight = cardHeight.clamp(180.0, 240.0);
+
+  // Calculate avatar size based on card size - Made bigger
+  final avatarSize = (responsiveWidth * 0.45).clamp(50.0, 85.0);
+
+  // Calculate font size based on screen
+  final fontSize = (screenWidth * 0.04).clamp(14.0, 18.0);
+
+  // Calculate spacing based on card height
+  final spacing = (responsiveHeight * 0.08).clamp(12.0, 20.0);
+
   // Define the background color for neumorphic effect
-  final backgroundColor =
-      Colors.grey.shade200; // You can customize this base color
+  final backgroundColor = Colors.grey.shade200;
 
   return GestureDetector(
     onTap: () {
@@ -21,23 +42,21 @@ Widget buildRoleCard(
     child: AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-      width: 160,
-      height: 220,
+      width: responsiveWidth,
+      height: responsiveHeight,
       decoration: BoxDecoration(
-        color: backgroundColor, // Always keep neutral for neumorphic effect
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow:
             isSelected
                 ? [
-                  // Inset effect for selected state (pressed in)
-                  // Dark shadow on top-left to simulate depth
+                  // Inset effect for selected state
                   BoxShadow(
                     color: Colors.grey.shade400,
                     offset: const Offset(-3, -3),
                     blurRadius: 8,
                     spreadRadius: -2,
                   ),
-                  // Light shadow on bottom-right to enhance inset look
                   BoxShadow(
                     color: Colors.grey.shade300,
                     offset: const Offset(3, 3),
@@ -46,7 +65,7 @@ Widget buildRoleCard(
                   ),
                 ]
                 : [
-                  // Raised effect for unselected state (protruding out)
+                  // Raised effect for unselected state
                   BoxShadow(
                     color: Colors.grey.shade400,
                     offset: const Offset(6, 6),
@@ -60,7 +79,6 @@ Widget buildRoleCard(
                 ],
       ),
       child: Container(
-        // Inner content
         decoration: BoxDecoration(
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(14),
@@ -68,18 +86,17 @@ Widget buildRoleCard(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Avatar container with neumorphic effect
+            // Avatar container with responsive neumorphic effect
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
-              width: 60,
-              height: 60,
+              width: avatarSize,
+              height: avatarSize,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow:
                     isSelected
                         ? [
-                          // Inset avatar effect when selected
                           BoxShadow(
                             color: Colors.grey.shade300,
                             offset: const Offset(-2, -2),
@@ -94,7 +111,6 @@ Widget buildRoleCard(
                           ),
                         ]
                         : [
-                          // Raised avatar when not selected
                           BoxShadow(
                             color: Colors.grey.shade300,
                             offset: const Offset(3, 3),
@@ -112,20 +128,31 @@ Widget buildRoleCard(
                   color: color.withOpacity(isSelected ? 0.3 : 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: avatar,
+                child: Center(
+                  child: SizedBox(
+                    width: avatarSize * 0.85, // Increased from 0.7 to 0.85
+                    height: avatarSize * 0.85,
+                    child: avatar,
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 16),
 
-            // Role text
+            SizedBox(height: spacing),
+
+            // Role text with responsive font
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 300),
               style: TextStyle(
-                fontSize: 16,
+                fontSize: fontSize,
                 fontWeight: FontWeight.w600,
                 color: isSelected ? color : Colors.black87,
               ),
-              child: Text(role),
+              child: Text(
+                role,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
