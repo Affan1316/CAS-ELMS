@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/core/theme/app_theme.dart';
 import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/bloc/chat_page_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presentation/bloc/add_instructor_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_bloc.dart';
 
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/bloc/inquiry_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/installment_page/presentation/bloc/installment_page_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
+import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/bloc/student_enrollment_bloc.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 // import 'package:flutter_cas_app_main/src/features/course_catalog/presentation/pages/course_catalog_screen_state.dart';
 
@@ -29,6 +34,17 @@ class MyApp extends StatelessWidget {
         providers: [
           BlocProvider<OnboardingBloc>(create: (context) => OnboardingBloc()),
           BlocProvider<ChatPageBloc>(create: (context) => ChatPageBloc()),
+          BlocProvider<AdminHomeBloc>(create: (context) => AdminHomeBloc()),
+          BlocProvider<StudentEnrollmentBloc>(
+            create: (context) => StudentEnrollmentBloc(),
+          ),
+          BlocProvider<InstallmentPageBloc>(
+            create: (context) => InstallmentPageBloc(),
+          ),
+          BlocProvider<InquiryBloc>(create: (context) => InquiryBloc()),
+          BlocProvider<AddInstructorBloc>(
+            create: (context) => AddInstructorBloc(),
+          ),
         ],
         child: MaterialApp(
           title: 'CAS ELMS',

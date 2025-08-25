@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/pages/admin_home_page.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/SlideInWidget.dart';
@@ -234,6 +235,11 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                           onPressed: () {
                             context.read<OnboardingBloc>().add(
                               LoginEvent(_userIdController.text),
+                            );
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => AdminHomePage(),
+                              ),
                             );
                           },
                           style: ElevatedButton.styleFrom(
