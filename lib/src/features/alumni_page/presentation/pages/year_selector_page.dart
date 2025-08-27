@@ -17,17 +17,26 @@ class YearSelectorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Select Year",
+          style: GoogleFonts.orbitron(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white, // title in white
+          ),
+        ),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white), // white icon
+          onPressed: () => Navigator.pop(context),
+        ),
+        backgroundColor: Colors.deepPurple, // black background
+        elevation: 4, // slight shadow
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 40),
-            Text(
-              "Select Year",
-              style: GoogleFonts.orbitron(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
             const SizedBox(height: 20),
             Text(
               "Browse alumni by graduation year",

@@ -16,15 +16,16 @@ class StudentEnrollmentBloc
     Emitter<StudentEnrollmentState> emit,
   ) async {
     emit(StudentEnrollmentSubmitting());
-    await Future.delayed(const Duration(seconds: 2));
-
+    await Future.delayed(const Duration(seconds: 5));
+    print(event.address);
+    print(event.cnic);
     if (event.name.isEmpty) {
       emit(StudentEnrollmentFailure("Student name can't be empty"));
     } else {
       emit(StudentEnrollmentSuccess());
     }
 
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 5));
     emit(StudentEnrollmentInitial());
   }
 }
