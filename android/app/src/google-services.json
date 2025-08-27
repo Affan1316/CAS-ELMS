@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1080283537133",
+    "project_id": "cas-elms-new-data",
+    "storage_bucket": "cas-elms-new-data.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1080283537133:android:8ed90c67a8b135f2bab6e4",
+        "android_client_info": {
+          "package_name": "com.example.flutter_cas_app_main"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkiQ-Aio6DqRZVh8adc8HLC9FZZebRfuc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

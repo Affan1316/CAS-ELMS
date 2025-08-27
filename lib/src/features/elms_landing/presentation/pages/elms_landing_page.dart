@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/pages/chat_page.dart';
-import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/widgets/page_floating_button.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/pages/OnboardingScreen.dart';
 import 'package:flutter_cas_app_main/src/features/courses_detail_page/presentation/pages/course_catalog.dart';
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/pages/about_cas_page.dart';
@@ -10,7 +9,6 @@ import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/widg
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/widgets/ceo_card_widget.dart';
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/widgets/feature_card_widget.dart';
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/widgets/login_button_widget.dart';
-import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 
 class ElmsLandingPage extends StatefulWidget {
   const ElmsLandingPage({super.key});
@@ -201,7 +199,7 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => LoginOnboardingScreen(),
+                      builder: (context) => RoleSelectionScreen(),
                     ),
                   );
                 },

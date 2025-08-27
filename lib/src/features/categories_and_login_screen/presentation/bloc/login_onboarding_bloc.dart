@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_state.dart';
@@ -65,22 +64,9 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
       );
     });
 
-    // Add this debugging version to your OnboardingBloc
-
     on<LoginEvent>((event, emit) async {
       final currentState = state as OnboardingInitial;
-
-      // Debug prints
-      print('=== LOGIN DEBUG ===');
-      print('Received userId: "${event.userId}"');
-      print('UserId length: ${event.userId.length}');
-      print('UserId trimmed: "${event.userId.trim()}"');
-      print('Is empty after trim: ${event.userId.trim().isEmpty}');
-      print('Selected role: ${currentState.selectedRole}');
-      print('==================');
-
       if (event.userId.trim().isEmpty) {
-        print('LOGIN FAILED: Empty userId');
         // Trigger shake animation
         emit(
           OnboardingInitial(
@@ -106,17 +92,9 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
           );
         }
       } else {
-        // Login successful - emit success state with navigation info
-        print('LOGIN SUCCESS: Login successful with ID: ${event.userId}');
-        print('Selected Role: ${currentState.selectedRole}');
-
-        // Emit a success state that will trigger navigation
-        emit(
-          OnboardingLoginSuccess(
-            userId: event.userId,
-            selectedRole: currentState.selectedRole ?? 'Student',
-          ),
-        );
+        // Navigate to main app
+        print('Login successful with ID: ${event.userId}');
+        // Add your navigation logic here
       }
     });
   }
