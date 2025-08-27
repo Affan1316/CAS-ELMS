@@ -48,7 +48,7 @@ class StudentEnrollmentForm extends StatelessWidget {
               ),
             ),
           );
-          // Navigator.of(context).pop(); // optional: close the screen on success
+          Navigator.of(context).pop(); // optional: close the screen on success
         } else if (state is StudentEnrollmentFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -324,6 +324,11 @@ class StudentEnrollmentForm extends StatelessWidget {
                                                   address:
                                                       addressController.text,
                                                   gender: selectedGender,
+                                                  fatherName:
+                                                      fatherNameController.text,
+                                                  fatherOccupation:
+                                                      fatherOccupationController
+                                                          .text,
                                                 ),
                                               );
                                         }
