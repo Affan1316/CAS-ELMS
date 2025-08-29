@@ -106,7 +106,7 @@ Widget buildPopularTeachersSection() {
                   children: [
                     // Teacher image section
                     Expanded(
-                      flex: 3,
+                      flex: 2,
                       child: Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
@@ -161,48 +161,6 @@ Widget buildPopularTeachersSection() {
                                   Icons.person_rounded,
                                   color: Colors.white,
                                   size: 30,
-                                ),
-                              ),
-                            ),
-
-                            // Rating badge
-                            Positioned(
-                              top: 12,
-                              right: 12,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 3,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.star_rounded,
-                                      color: Color(0xFFFFA726),
-                                      size: 12,
-                                    ),
-                                    const SizedBox(width: 2),
-                                    Text(
-                                      teacher['rating'] as String,
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF1E293B),
-                                      ),
-                                    ),
-                                  ],
                                 ),
                               ),
                             ),

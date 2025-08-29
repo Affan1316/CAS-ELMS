@@ -84,7 +84,7 @@ Widget buildFeaturesGrid(AnimationController _animationController) {
       'icon': LucideIcons.badgeDollarSign,
     },
     {
-      'title': 'Leaves Approved',
+      'title': 'Installment Section',
       'subtitle': 'Time management',
       'icon': Icons.schedule_outlined,
     },
@@ -117,7 +117,7 @@ Widget buildFeaturesGrid(AnimationController _animationController) {
             ).animate(
               CurvedAnimation(
                 parent: _animationController,
-                curve: Interval(index * 0.1, 1.0, curve: Curves.easeOutCubic),
+                curve: Interval(0, 1.0, curve: Curves.easeOutCubic),
               ),
             );
 

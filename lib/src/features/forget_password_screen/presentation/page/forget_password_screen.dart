@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter_cas_app_main/src/features/forget_password_screen/presentation/widgets/email_step.dart';
-import 'package:flutter_cas_app_main/src/features/forget_password_screen/presentation/widgets/new_password_step.dart';
-import 'package:flutter_cas_app_main/src/features/forget_password_screen/presentation/widgets/otp_step.dart';
+import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
 
-enum ForgotPasswordStep { email, otp, newPassword }
+enum ForgotPasswordStep { email, emailSent }
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({Key? key}) : super(key: key);
@@ -17,30 +15,23 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  final _otpController = TextEditingController();
-  final _newPasswordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+  final _authService = AuthService();
 
   ForgotPasswordStep _currentStep = ForgotPasswordStep.email;
   bool _isLoading = false;
-  bool _isNewPasswordVisible = false;
-  bool _isConfirmPasswordVisible = false;
 
-  Timer? _otpTimer;
-  int _otpCountdown = 0;
-  bool _canResendOtp = true;
+  Timer? _resendTimer;
+  int _resendCountdown = 0;
+  bool _canResendEmail = true;
 
   @override
   void dispose() {
     _emailController.dispose();
-    _otpController.dispose();
-    _newPasswordController.dispose();
-    _confirmPasswordController.dispose();
-    _otpTimer?.cancel();
+    _resendTimer?.cancel();
     super.dispose();
   }
 
-  // Validators
+  // Validator
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) return 'Please enter your email';
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
@@ -48,116 +39,140 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return null;
   }
 
-  String? _validateOtp(String? value) {
-    if (value == null || value.isEmpty) return 'Please enter the OTP';
-    if (value.length != 6) return 'OTP must be 6 digits';
-    return null;
-  }
-
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) return 'Please enter your password';
-    if (value.length < 6) return 'Password must be at least 6 characters';
-    return null;
-  }
-
-  String? _validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) return 'Please confirm your password';
-    if (value != _newPasswordController.text) return 'Passwords do not match';
-    return null;
-  }
-
-  // Timer
-  void _startOtpTimer() {
+  // Timer for resend functionality
+  void _startResendTimer() {
     setState(() {
-      _canResendOtp = false;
-      _otpCountdown = 60;
+      _canResendEmail = false;
+      _resendCountdown = 60;
     });
 
-    _otpTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
-        if (_otpCountdown > 0) {
-          _otpCountdown--;
+        if (_resendCountdown > 0) {
+          _resendCountdown--;
         } else {
-          _canResendOtp = true;
+          _canResendEmail = true;
           timer.cancel();
         }
       });
     });
   }
 
-  // Step Handlers
+  // Firebase password reset
   Future<void> _handleEmailSubmit() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      await Future.delayed(const Duration(seconds: 2));
-      setState(() {
-        _isLoading = false;
-        _currentStep = ForgotPasswordStep.otp;
-      });
-      _startOtpTimer();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('OTP sent to your email!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+
+      try {
+        final success = await _authService.sendPasswordResetEmail(
+          _emailController.text.trim(),
+        );
+
+        setState(() => _isLoading = false);
+
+        if (success) {
+          setState(() => _currentStep = ForgotPasswordStep.emailSent);
+          _startResendTimer();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Reset link sent to ${_emailController.text.trim()}',
+              ),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                'Failed to send reset email. Please check your email and try again.',
+              ),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
+        }
+      } catch (e) {
+        setState(() => _isLoading = false);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An unexpected error occurred. Please try again.'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
     }
   }
 
-  Future<void> _handleOtpSubmit() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-      await Future.delayed(const Duration(seconds: 2));
-      setState(() {
-        _isLoading = false;
-        _currentStep = ForgotPasswordStep.newPassword;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('OTP verified successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
-  }
-
-  Future<void> _handleResendOtp() async {
+  Future<void> _handleResendEmail() async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isLoading = false);
-    _startOtpTimer();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('OTP resent to your email!'),
-        backgroundColor: Colors.blue,
-      ),
-    );
-  }
 
-  Future<void> _handlePasswordReset() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-      await Future.delayed(const Duration(seconds: 2));
+    try {
+      final success = await _authService.sendPasswordResetEmail(
+        _emailController.text.trim(),
+      );
+
       setState(() => _isLoading = false);
+
+      if (success) {
+        _startResendTimer();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Reset link resent to your email!'),
+            backgroundColor: Colors.blue,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to resend email. Please try again.'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Password reset successfully!'),
-          backgroundColor: Colors.green,
+        SnackBar(
+          content: Text('An unexpected error occurred. Please try again.'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
-      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 
-  // Titles
   String _getTitle() {
     switch (_currentStep) {
       case ForgotPasswordStep.email:
         return 'Forgot Password';
-      case ForgotPasswordStep.otp:
-        return 'Enter OTP';
-      case ForgotPasswordStep.newPassword:
-        return 'Create New Password';
+      case ForgotPasswordStep.emailSent:
+        return 'Check Your Email';
     }
   }
 
@@ -165,52 +180,230 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     switch (_currentStep) {
       case ForgotPasswordStep.email:
         return 'Enter your email to receive reset instructions';
-      case ForgotPasswordStep.otp:
-        return 'Enter the 6-digit code sent to ${_emailController.text}';
-      case ForgotPasswordStep.newPassword:
-        return 'Create a strong password for your account';
+      case ForgotPasswordStep.emailSent:
+        return 'We sent a password reset link to ${_emailController.text.trim()}';
     }
   }
 
   Widget _buildCurrentStep() {
     switch (_currentStep) {
       case ForgotPasswordStep.email:
-        return EmailStep(
-          emailController: _emailController,
-          isLoading: _isLoading,
-          onSubmit: _handleEmailSubmit,
-          validateEmail: _validateEmail,
-        );
-      case ForgotPasswordStep.otp:
-        return OtpStep(
-          otpController: _otpController,
-          isLoading: _isLoading,
-          canResendOtp: _canResendOtp,
-          otpCountdown: _otpCountdown,
-          onSubmit: _handleOtpSubmit,
-          onResend: _handleResendOtp,
-          validateOtp: _validateOtp,
-        );
-      case ForgotPasswordStep.newPassword:
-        return NewPasswordStep(
-          newPasswordController: _newPasswordController,
-          confirmPasswordController: _confirmPasswordController,
-          isLoading: _isLoading,
-          isNewPasswordVisible: _isNewPasswordVisible,
-          isConfirmPasswordVisible: _isConfirmPasswordVisible,
-          onToggleNewPassword:
-              () => setState(
-                () => _isNewPasswordVisible = !_isNewPasswordVisible,
-              ),
-          onToggleConfirmPassword:
-              () => setState(
-                () => _isConfirmPasswordVisible = !_isConfirmPasswordVisible,
-              ),
-          onSubmit: _handlePasswordReset,
-          validatePassword: _validatePassword,
-          validateConfirmPassword: _validateConfirmPassword,
-        );
+        return _buildEmailStep();
+      case ForgotPasswordStep.emailSent:
+        return _buildEmailSentStep();
     }
+  }
+
+  Widget _buildEmailStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Email icon
+        Container(
+          width: 80,
+          height: 80,
+          margin: const EdgeInsets.only(bottom: 32),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade100,
+            borderRadius: BorderRadius.circular(40),
+          ),
+          child: Icon(
+            Icons.email_outlined,
+            size: 40,
+            color: Colors.blue.shade600,
+          ),
+        ),
+
+        // Email input field
+        TextFormField(
+          controller: _emailController,
+          keyboardType: TextInputType.emailAddress,
+          validator: _validateEmail,
+          decoration: InputDecoration(
+            labelText: 'Email',
+            hintText: 'Enter your email',
+            prefixIcon: const Icon(Icons.email_outlined),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.blue.shade600),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 32),
+
+        // Send reset link button
+        SizedBox(
+          height: 48,
+          child: ElevatedButton(
+            onPressed: _isLoading ? null : _handleEmailSubmit,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue.shade600,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 2,
+            ),
+            child:
+                _isLoading
+                    ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                    : const Text(
+                      'Send Reset Link',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmailSentStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Success icon
+        Container(
+          width: 80,
+          height: 80,
+          margin: const EdgeInsets.only(bottom: 32),
+          decoration: BoxDecoration(
+            color: Colors.green.shade100,
+            borderRadius: BorderRadius.circular(40),
+          ),
+          child: Icon(
+            Icons.mark_email_read_outlined,
+            size: 40,
+            color: Colors.green.shade600,
+          ),
+        ),
+
+        // Instructions
+        Container(
+          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.only(bottom: 24),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.blue.shade100),
+          ),
+          child: Column(
+            children: [
+              Icon(Icons.info_outline, color: Colors.blue.shade600, size: 24),
+              const SizedBox(height: 8),
+              Text(
+                'Click the link in your email to reset your password. The link will expire in 1 hour.',
+                style: TextStyle(color: Colors.blue.shade700, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+
+        // Resend email section
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              Text(
+                "Didn't receive the email?",
+                style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Check your spam folder or',
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              ),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap:
+                    _canResendEmail && !_isLoading ? _handleResendEmail : null,
+                child: Text(
+                  _canResendEmail
+                      ? 'Resend Email'
+                      : 'Resend in ${_resendCountdown}s',
+                  style: TextStyle(
+                    color:
+                        _canResendEmail
+                            ? Colors.blue.shade600
+                            : Colors.grey.shade500,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 32),
+
+        // Back to login button
+        SizedBox(
+          height: 48,
+          child: ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey.shade100,
+              foregroundColor: Colors.blue.shade600,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.blue.shade600),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Back to Login',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // Try different email button
+        TextButton(
+          onPressed: () {
+            setState(() {
+              _currentStep = ForgotPasswordStep.email;
+              _emailController.clear();
+              _resendTimer?.cancel();
+            });
+          },
+          child: Text(
+            'Try a different email',
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -234,6 +427,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 40),
+
                 Text(
                   _getTitle(),
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
@@ -242,7 +436,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
+
                 const SizedBox(height: 8),
+
                 Text(
                   _getSubtitle(),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -250,7 +446,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
+
                 const SizedBox(height: 48),
+
                 _buildCurrentStep(),
               ],
             ),

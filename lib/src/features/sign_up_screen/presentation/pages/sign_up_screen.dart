@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
+import 'package:flutter_cas_app_main/src/features/student_home_page/presentation/pages/student_home_page.dart';
 import '../widgets/signup_email_field.dart';
 import '../widgets/signup_password_field.dart';
 import '../widgets/signup_confirm_password_field.dart';
@@ -17,6 +19,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _authService = AuthService();
 
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
@@ -53,16 +56,48 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
-      await Future.delayed(const Duration(seconds: 2));
+      try {
+        final result = await _authService.signUpWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
 
-      setState(() => _isLoading = false);
+        setState(() => _isLoading = false);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Account created successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+        if (result.success) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result.message),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+
+          // Navigate to home screen or sign in screen
+          Navigator.of(context).pop();
+          // Or if you want to navigate to sign in:
+          // Navigator.of(context).pop();
+        } else {
+          // Show error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result.message),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      } catch (e) {
+        setState(() => _isLoading = false);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('An unexpected error occurred. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

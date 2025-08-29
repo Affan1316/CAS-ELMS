@@ -4,7 +4,7 @@ import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/pr
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_state.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/SlideInWidget.dart';
-import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildSecondPage.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/StudentLoginScreen.dart';
 
 class UserIdInputScreen extends StatefulWidget {
   @override
