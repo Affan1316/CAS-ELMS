@@ -4,7 +4,15 @@
 abstract class StudentEnrollmentEvent {}
 
 class SubmitEnrollmentFormEvent extends StudentEnrollmentEvent {
-  final String id, name, email, cnic, phone, address, gender;
+  final String id,
+      name,
+      email,
+      cnic,
+      phone,
+      address,
+      gender,
+      fatherName,
+      fatherOccupation;
 
   SubmitEnrollmentFormEvent({
     required this.id,
@@ -14,5 +22,7 @@ class SubmitEnrollmentFormEvent extends StudentEnrollmentEvent {
     required this.phone,
     required this.address,
     required this.gender,
+    required this.fatherName,
+    required this.fatherOccupation,
   });
 }

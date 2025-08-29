@@ -11,9 +11,9 @@ import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/page
 import 'package:flutter_cas_app_main/src/features/installment_page/presentation/pages/installment_page.dart';
 import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/groups_page.dart';
 import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/pages/student_enrollment_screen.dart';
-import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/presentation/page/students_screen.dart';
-import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/presentation/page/update_group_screen.dart';
-import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/presentation/widget/group_page.dart';
+import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/presentation/widget/students_screen.dart';
+import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/presentation/widget/update_group_screen.dart';
+import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/presentation/page/group_page.dart';
 
 Widget buildAdminFeatureCard(
   Map<String, dynamic> feature,
