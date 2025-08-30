@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+class StudentProfilePage extends StatefulWidget {
+  const StudentProfilePage({super.key});
 
   @override
-  
-  ProfilePageState createState() => ProfilePageState();
+  StudentProfilePageState createState() => StudentProfilePageState();
 }
 
-class ProfilePageState extends State<ProfilePage>
+class StudentProfilePageState extends State<StudentProfilePage>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -27,13 +26,9 @@ class ProfilePageState extends State<ProfilePage>
       duration: Duration(milliseconds: 600),
       vsync: this,
     );
-    _animation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -64,12 +59,12 @@ class ProfilePageState extends State<ProfilePage>
             double screenWidth = constraints.maxWidth;
             double screenHeight = constraints.maxHeight;
             bool isTablet = screenWidth > 600;
-            
+
             return Column(
               children: [
                 // Header
                 _buildHeader(isTablet),
-                
+
                 // Profile Card Container
                 Expanded(
                   child: Container(
@@ -90,17 +85,23 @@ class ProfilePageState extends State<ProfilePage>
                             builder: (context, child) {
                               return Transform(
                                 alignment: Alignment.center,
-                                transform: Matrix4.identity()
-                                  ..setEntry(3, 2, 0.001)
-                                  ..rotateY(_animation.value * 3.14159),
-                                child: _animation.value < 0.5
-                                    ? _buildFrontCard(isTablet, screenWidth)
-                                    : Transform(
-                                        alignment: Alignment.center,
-                                        transform: Matrix4.identity()
-                                          ..rotateY(3.14159),
-                                        child: _buildBackCard(isTablet, screenWidth),
-                                      ),
+                                transform:
+                                    Matrix4.identity()
+                                      ..setEntry(3, 2, 0.001)
+                                      ..rotateY(_animation.value * 3.14159),
+                                child:
+                                    _animation.value < 0.5
+                                        ? _buildFrontCard(isTablet, screenWidth)
+                                        : Transform(
+                                          alignment: Alignment.center,
+                                          transform:
+                                              Matrix4.identity()
+                                                ..rotateY(3.14159),
+                                          child: _buildBackCard(
+                                            isTablet,
+                                            screenWidth,
+                                          ),
+                                        ),
                               );
                             },
                           ),
@@ -190,50 +191,51 @@ class ProfilePageState extends State<ProfilePage>
       decoration: BoxDecoration(
         color: _backgroundColor,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: isInset
-            ? [
-                BoxShadow(
-                  color: _shadowColor,
-                  offset: Offset(4, 4),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                ),
-                BoxShadow(
-                  color: _highlightColor,
-                  offset: Offset(-4, -4),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                ),
-              ]
-            : isPressed
+        boxShadow:
+            isInset
                 ? [
-                    BoxShadow(
-                      color: _shadowColor.withOpacity(0.5),
-                      offset: Offset(2, 2),
-                      blurRadius: 5,
-                      spreadRadius: 1,
-                    ),
-                    BoxShadow(
-                      color: _highlightColor.withOpacity(0.5),
-                      offset: Offset(-2, -2),
-                      blurRadius: 5,
-                      spreadRadius: 1,
-                    ),
-                  ]
+                  BoxShadow(
+                    color: _shadowColor,
+                    offset: Offset(4, 4),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                  BoxShadow(
+                    color: _highlightColor,
+                    offset: Offset(-4, -4),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ]
+                : isPressed
+                ? [
+                  BoxShadow(
+                    color: _shadowColor.withOpacity(0.5),
+                    offset: Offset(2, 2),
+                    blurRadius: 5,
+                    spreadRadius: 1,
+                  ),
+                  BoxShadow(
+                    color: _highlightColor.withOpacity(0.5),
+                    offset: Offset(-2, -2),
+                    blurRadius: 5,
+                    spreadRadius: 1,
+                  ),
+                ]
                 : [
-                    BoxShadow(
-                      color: _shadowColor,
-                      offset: Offset(8, 8),
-                      blurRadius: 15,
-                      spreadRadius: 1,
-                    ),
-                    BoxShadow(
-                      color: _highlightColor,
-                      offset: Offset(-8, -8),
-                      blurRadius: 15,
-                      spreadRadius: 1,
-                    ),
-                  ],
+                  BoxShadow(
+                    color: _shadowColor,
+                    offset: Offset(8, 8),
+                    blurRadius: 15,
+                    spreadRadius: 1,
+                  ),
+                  BoxShadow(
+                    color: _highlightColor,
+                    offset: Offset(-8, -8),
+                    blurRadius: 15,
+                    spreadRadius: 1,
+                  ),
+                ],
       ),
       child: child,
     );
@@ -307,9 +309,9 @@ class ProfilePageState extends State<ProfilePage>
                     ),
                   ),
                 ),
-                
+
                 SizedBox(height: isTablet ? 24 : 20),
-                
+
                 // Name
                 Text(
                   'Mujeeb',
@@ -319,9 +321,9 @@ class ProfilePageState extends State<ProfilePage>
                     color: Color(0xFF1F2937),
                   ),
                 ),
-                
+
                 SizedBox(height: isTablet ? 12 : 8),
-                
+
                 // Email
                 Text(
                   'admin@admin.com',
@@ -334,7 +336,7 @@ class ProfilePageState extends State<ProfilePage>
               ],
             ),
           ),
-          
+
           // Menu Items
           Flexible(
             child: Container(
@@ -368,23 +370,16 @@ class ProfilePageState extends State<ProfilePage>
                     isTablet,
                     isLogout: true,
                   ),
-                  
+
                   SizedBox(height: isTablet ? 24 : 16),
-                  
+
                   // Flip indicator
                   _buildNeomorphicContainer(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.flip,
-                          size: 16,
-                          color: _accentColor,
-                        ),
+                        Icon(Icons.flip, size: 16, color: _accentColor),
                         SizedBox(width: 8),
                         Text(
                           'Tap to flip',
@@ -421,9 +416,9 @@ class ProfilePageState extends State<ProfilePage>
               color: _accentColor,
             ),
           ),
-          
+
           SizedBox(height: isTablet ? 24 : 20),
-          
+
           Text(
             'Additional Information',
             style: TextStyle(
@@ -432,9 +427,9 @@ class ProfilePageState extends State<ProfilePage>
               color: Color(0xFF1F2937),
             ),
           ),
-          
+
           SizedBox(height: isTablet ? 16 : 12),
-          
+
           Text(
             'This is the back side of the profile card. You can add additional user information, statistics, or any other relevant details here.',
             textAlign: TextAlign.center,
@@ -444,9 +439,9 @@ class ProfilePageState extends State<ProfilePage>
               height: 1.5,
             ),
           ),
-          
+
           SizedBox(height: isTablet ? 32 : 24),
-          
+
           // Some stats with neomorphic containers
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -456,23 +451,16 @@ class ProfilePageState extends State<ProfilePage>
               _buildNeomorphicStatItem('180', 'Following', isTablet),
             ],
           ),
-          
+
           SizedBox(height: isTablet ? 32 : 24),
-          
+
           // Flip back indicator
           _buildNeomorphicContainer(
-            padding: EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.flip,
-                  size: 16,
-                  color: _accentColor,
-                ),
+                Icon(Icons.flip, size: 16, color: _accentColor),
                 SizedBox(width: 8),
                 Text(
                   'Tap to flip back',
@@ -490,7 +478,12 @@ class ProfilePageState extends State<ProfilePage>
     );
   }
 
-  Widget _buildNeomorphicMenuItem(IconData icon, String title, bool isTablet, {bool isLogout = false}) {
+  Widget _buildNeomorphicMenuItem(
+    IconData icon,
+    String title,
+    bool isTablet, {
+    bool isLogout = false,
+  }) {
     return _buildNeomorphicContainer(
       padding: EdgeInsets.symmetric(
         vertical: isTablet ? 16.0 : 12.0,

@@ -12,7 +12,8 @@ class SubmitEnrollmentFormEvent extends StudentEnrollmentEvent {
       address,
       gender,
       fatherName,
-      fatherOccupation;
+      fatherOccupation,
+      group;
 
   SubmitEnrollmentFormEvent({
     required this.id,
@@ -24,5 +25,6 @@ class SubmitEnrollmentFormEvent extends StudentEnrollmentEvent {
     required this.gender,
     required this.fatherName,
     required this.fatherOccupation,
+    required this.group,
   });
 }

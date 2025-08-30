@@ -2,10 +2,10 @@
 // import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/group_students_screen.dart';
 
 import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/data/group.dart';
 import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/data/student.dart';
-import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/presentation/widget/students_screen.dart';
 import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/presentation/widget/update_group_screen.dart';
 
 class GroupMainDetailPage extends StatefulWidget {
@@ -164,7 +164,7 @@ class _GroupMainDetailPageState extends State<GroupMainDetailPage> {
                 context,
                 MaterialPageRoute(
                   builder:
-                      (_) => StudentsScreen(
+                      (_) => GroupStudentsScreen(
                         groupTitle: group.title,
                         students: students,
                       ),

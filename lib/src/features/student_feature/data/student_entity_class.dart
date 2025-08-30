@@ -1,7 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-class Student {
+class StudentEntityClass {
   final String id;
   final String name;
   final String email;
@@ -11,7 +11,8 @@ class Student {
   final String gender;
   final String fatherName;
   final String fatherOccupation;
-  Student({
+  final String group;
+  StudentEntityClass({
     required this.id,
     required this.name,
     required this.email,
@@ -21,9 +22,10 @@ class Student {
     required this.gender,
     required this.fatherName,
     required this.fatherOccupation,
+    required this.group,
   });
 
-  Student copyWith({
+  StudentEntityClass copyWith({
     String? id,
     String? name,
     String? email,
@@ -33,8 +35,9 @@ class Student {
     String? gender,
     String? fatherName,
     String? fatherOccupation,
+    String? group,
   }) {
-    return Student(
+    return StudentEntityClass(
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
@@ -44,6 +47,7 @@ class Student {
       gender: gender ?? this.gender,
       fatherName: fatherName ?? this.fatherName,
       fatherOccupation: fatherOccupation ?? this.fatherOccupation,
+      group: group ?? this.group,
     );
   }
 
@@ -58,11 +62,12 @@ class Student {
       'gender': gender,
       'fatherName': fatherName,
       'fatherOccupation': fatherOccupation,
+      'group': group,
     };
   }
 
-  factory Student.fromMap(Map<String, dynamic> map) {
-    return Student(
+  factory StudentEntityClass.fromMap(Map<String, dynamic> map) {
+    return StudentEntityClass(
       id: map['id'] as String,
       name: map['name'] as String,
       email: map['email'] as String,
@@ -72,21 +77,22 @@ class Student {
       gender: map['gender'] as String,
       fatherName: map['fatherName'] as String,
       fatherOccupation: map['fatherOccupation'] as String,
+      group: map['group'] as String,
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory Student.fromJson(String source) =>
-      Student.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory StudentEntityClass.fromJson(String source) =>
+      StudentEntityClass.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
-    return 'Student(id: $id, name: $name, email: $email, cnic: $cnic, phone: $phone, address: $address, gender: $gender, fatherName: $fatherName, fatherOccupation: $fatherOccupation)';
+    return 'Student(id: $id, name: $name, email: $email, cnic: $cnic, phone: $phone, address: $address, gender: $gender, fatherName: $fatherName, fatherOccupation: $fatherOccupation, group: $group)';
   }
 
   @override
-  bool operator ==(covariant Student other) {
+  bool operator ==(covariant StudentEntityClass other) {
     if (identical(this, other)) return true;
 
     return other.id == id &&
@@ -97,7 +103,8 @@ class Student {
         other.address == address &&
         other.gender == gender &&
         other.fatherName == fatherName &&
-        other.fatherOccupation == fatherOccupation;
+        other.fatherOccupation == fatherOccupation &&
+        other.group == group;
   }
 
   @override
@@ -110,6 +117,7 @@ class Student {
         address.hashCode ^
         gender.hashCode ^
         fatherName.hashCode ^
-        fatherOccupation.hashCode;
+        fatherOccupation.hashCode ^
+        group.hashCode;
   }
 }

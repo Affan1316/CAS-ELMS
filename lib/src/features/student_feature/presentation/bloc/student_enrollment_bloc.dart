@@ -4,11 +4,11 @@
 import 'dart:ffi';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/data/actual_implementation_firebase_repo.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/domain/firestore_repositry.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/domain/student_usecase.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/bloc/student_enrollment_event.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/bloc/student_enrollment_state.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/data/actual_implementation_firebase_repo.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/domain/firestore_repositry.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/domain/student_usecase.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_event.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_state.dart';
 
 class StudentEnrollmentBloc
     extends Bloc<StudentEnrollmentEvent, StudentEnrollmentState> {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_cas_app_main/src/features/student_home_page/presentation/widgets/buildStatItem.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildStatItem.dart';
 
 Widget buildStatsCard() {
   return Container(

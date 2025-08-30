@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/bloc/student_enrollment_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/bloc/student_enrollment_event.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/bloc/student_enrollment_state.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_event.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_state.dart';
 
 class StudentEnrollmentForm extends StatelessWidget {
   final GlobalKey<FormState> formKey;
@@ -14,6 +14,8 @@ class StudentEnrollmentForm extends StatelessWidget {
   final TextEditingController fatherOccupationController;
   final TextEditingController phoneController;
   final TextEditingController addressController;
+  final TextEditingController groupController;
+
   final String selectedGender;
   final ValueChanged<String> onGenderChanged;
 
@@ -30,6 +32,7 @@ class StudentEnrollmentForm extends StatelessWidget {
     required this.addressController,
     required this.selectedGender,
     required this.onGenderChanged,
+    required this.groupController,
   });
 
   @override
@@ -270,6 +273,19 @@ class StudentEnrollmentForm extends StatelessWidget {
                                           : null,
                             ),
                           ),
+                          SizedBox(
+                            width: fieldWidth,
+                            child: _buildTextField(
+                              controller: groupController,
+                              label: "Group",
+                              icon: Icons.group,
+                              validator:
+                                  (v) =>
+                                      (v == null || v.isEmpty)
+                                          ? 'Required'
+                                          : null,
+                            ),
+                          ),
                         ],
                       ),
 
@@ -329,6 +345,7 @@ class StudentEnrollmentForm extends StatelessWidget {
                                                   fatherOccupation:
                                                       fatherOccupationController
                                                           .text,
+                                                  group: groupController.text,
                                                 ),
                                               );
                                         }

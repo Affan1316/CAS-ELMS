@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_cas_app_main/src/features/alumni_page/presentation/pages/year_selector_page.dart';
 import 'package:flutter_cas_app_main/src/features/assignment_screen/presentation/pages/assignments_page.dart';
-import 'package:flutter_cas_app_main/src/features/profile/presentation/pages/profile_page.dart';
 import 'package:flutter_cas_app_main/src/features/request_leave/presentation/pages/history_leaves_page.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_profile_page.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 final List<Map<String, dynamic>> studentFeatures = [
@@ -37,7 +37,7 @@ final List<Map<String, dynamic>> studentFeatures = [
     'color': Color(0xFF06B6D4),
     'count': '2 Borrowed',
     'isUrgent': false,
-    'screen': ProfilePage(),
+    'screen': StudentProfilePage(),
   },
   {
     'title': 'Study Groups',

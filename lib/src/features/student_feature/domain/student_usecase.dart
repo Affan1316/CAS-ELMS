@@ -1,14 +1,15 @@
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/data/student.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/domain/firestore_repositry.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/bloc/student_enrollment_event.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/domain/firestore_repositry.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_event.dart';
+
+import '../data/student_entity_class.dart';
 
 class StudentUsecase {
   FirestoreRepositry firestoreRepositry;
-  Student? s;
+  StudentEntityClass? s;
 
   StudentUsecase(this.firestoreRepositry);
   provideStudentData(SubmitEnrollmentFormEvent studentData) {
-    s = Student(
+    s = StudentEntityClass(
       id: studentData.id,
       name: studentData.name,
       email: studentData.email,
@@ -18,6 +19,7 @@ class StudentUsecase {
       gender: studentData.gender,
       fatherName: studentData.fatherName,
       fatherOccupation: studentData.fatherOccupation,
+      group: studentData.group,
     );
     return _addStudent();
   }

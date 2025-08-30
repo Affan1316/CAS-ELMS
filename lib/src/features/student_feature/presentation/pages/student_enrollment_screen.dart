@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/bloc/student_enrollment_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/bloc/student_enrollment_event.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/bloc/student_enrollment_state.dart';
-import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/widgets/student_enrollment_form.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_event.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_state.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/student_enrollment_form.dart';
 
 class StudentEnrollmentScreen extends StatefulWidget {
   const StudentEnrollmentScreen({super.key});
@@ -24,6 +24,7 @@ class _StudentEnrollmentScreenState extends State<StudentEnrollmentScreen> {
   final _fatherOccupationController = TextEditingController();
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
+  final _groupController = TextEditingController();
 
   String _selectedGender = 'Male';
 
@@ -37,6 +38,7 @@ class _StudentEnrollmentScreenState extends State<StudentEnrollmentScreen> {
     _fatherOccupationController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
+    _groupController.dispose();
     super.dispose();
   }
 
@@ -66,6 +68,7 @@ class _StudentEnrollmentScreenState extends State<StudentEnrollmentScreen> {
             _fatherOccupationController.clear();
             _phoneController.clear();
             _addressController.clear();
+            _groupController.clear;
             setState(() {
               _selectedGender = 'Male';
             });
@@ -95,6 +98,7 @@ class _StudentEnrollmentScreenState extends State<StudentEnrollmentScreen> {
                   fatherOccupationController: _fatherOccupationController,
                   phoneController: _phoneController,
                   addressController: _addressController,
+                  groupController: _groupController,
                   selectedGender: _selectedGender,
                   onGenderChanged: (gender) {
                     setState(() {

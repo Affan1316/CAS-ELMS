@@ -6,7 +6,7 @@ import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/pr
 import 'package:flutter_cas_app_main/src/features/forget_password_screen/presentation/page/forget_password_screen.dart';
 import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/group_detail_page.dart';
 import 'package:flutter_cas_app_main/src/features/sign_up_screen/presentation/pages/sign_up_screen.dart';
-import 'package:flutter_cas_app_main/src/features/student_home_page/presentation/pages/student_home_page.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_home_page.dart';
 
 class StudentLoginScreen extends StatefulWidget {
   @override

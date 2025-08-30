@@ -1,13 +1,12 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/data/student.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-class StudentsScreen extends StatelessWidget {
+class GroupStudentsScreen extends StatelessWidget {
   final String groupTitle;
   final List<Student> students;
 
-  const StudentsScreen({
+  const GroupStudentsScreen({
     super.key,
     required this.groupTitle,
     required this.students,

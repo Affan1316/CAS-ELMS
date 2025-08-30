@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_cas_app_main/src/features/student_home_page/presentation/widgets/buildHeader.dart';
-import 'package:flutter_cas_app_main/src/features/student_home_page/presentation/widgets/buildPopularTeachersSection.dart';
-import 'package:flutter_cas_app_main/src/features/student_home_page/presentation/widgets/buildQuickActions.dart';
-import 'package:flutter_cas_app_main/src/features/student_home_page/presentation/widgets/buildRecentActivities.dart';
-import 'package:flutter_cas_app_main/src/features/student_home_page/presentation/widgets/buildStatsCard.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildHeader.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildPopularTeachersSection.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildQuickActions.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildRecentActivities.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildStatsCard.dart';
 
 class StudentHomePage extends StatefulWidget {
   const StudentHomePage({super.key});
