@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildSecondPage.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/StudentLoginScreen.dart';
 
 class SignUpFooter extends StatelessWidget {
   const SignUpFooter({Key? key}) : super(key: key);

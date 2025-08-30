@@ -8,6 +8,7 @@ import 'package:flutter_cas_app_main/src/features/enrollstudent/presentation/pag
 import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/page/fee_history_screen.dart';
 import 'package:flutter_cas_app_main/src/features/feedefaulters/presentation/pages/fee_defaulters.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/pages/inquiry_page.dart';
+import 'package:flutter_cas_app_main/src/features/installment_page/presentation/pages/installment_page.dart';
 import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/groups_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_enrollment_screen.dart';
 import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/presentation/widget/update_group_screen.dart';
@@ -169,9 +170,9 @@ void _navigateToScreen(BuildContext context, int index) {
         break;
       case 11: // Update Group Data
         print('Update Group Data - Not implemented yet');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Update Group Data feature coming soon!')),
-        );
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (context) => CreateFeePlanPage()));
         break;
       default:
         print('Invalid index: $index');

@@ -131,7 +131,7 @@ Widget _buildCarouselCard(Map<String, dynamic> item) {
                       color: Color(0xFF1F2937),
                     ),
                   ),
-                  SizedBox(height: 6),
+                  SizedBox(height: 4),
                   Text(
                     item['subtitle'] as String,
                     style: TextStyle(
@@ -140,7 +140,7 @@ Widget _buildCarouselCard(Map<String, dynamic> item) {
                       color: item['color'] as Color,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 5),
                   Text(
                     item['description'] as String,
                     style: TextStyle(

@@ -5,16 +5,17 @@ import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/w
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/widgets/buildAdminTitleSection.dart';
 
 class AdminHomePage extends StatefulWidget {
+  const AdminHomePage({super.key});
   @override
-  _AdminHomePageState createState() => _AdminHomePageState();
+  State<AdminHomePage> createState() => _AdminHomePageState();
 }
 
 class _AdminHomePageState extends State<AdminHomePage>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late PageController _pageController;
-  //int _currentPage = 0;
+  // int _currentPage = 0;
 
   @override
   void initState() {
@@ -41,25 +42,20 @@ class _AdminHomePageState extends State<AdminHomePage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFFAFAFA),
-      body: SafeArea(
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: SingleChildScrollView(
-            physics: BouncingScrollPhysics(),
-            child: Column(
-              children: [
-                buildAdminHeader(),
-                buildAdminTitleSection(),
-                SizedBox(height: 24),
-                buildAdminCarouselSlider(_pageController),
-                SizedBox(height: 32),
-                buildAdminOverviewSection(),
-                SizedBox(height: 24),
-                buildFeaturesGrid(_animationController),
-                SizedBox(height: 20),
-              ],
-            ),
-          ),
+      body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        child: Column(
+          children: [
+            buildAdminHeader(),
+            buildAdminTitleSection(),
+            SizedBox(height: 24),
+            buildAdminCarouselSlider(_pageController),
+            SizedBox(height: 32),
+            buildAdminOverviewSection(),
+            SizedBox(height: 24),
+            buildFeaturesGrid(_animationController),
+            SizedBox(height: 20),
+          ],
         ),
       ),
     );

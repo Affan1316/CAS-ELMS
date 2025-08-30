@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/SlideInWidget.dart';
 import 'package:flutter_cas_app_main/src/features/forget_password_screen/presentation/page/forget_password_screen.dart';
-import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/group_detail_page.dart';
 import 'package:flutter_cas_app_main/src/features/sign_up_screen/presentation/pages/sign_up_screen.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_home_page.dart';
 
@@ -17,7 +17,96 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final ValueNotifier<String> errorMessage = ValueNotifier<String>('');
+  final _authService = AuthService(); // Add Firebase Auth Service
+
   bool _isPasswordVisible = false;
+  bool _isLoading = false; // Add loading state
+
+  // Add validation methods
+  String? _validateEmail(String email) {
+    if (email.isEmpty) return 'Please enter your email';
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) return 'Please enter a valid email';
+    return null;
+  }
+
+  String? _validatePassword(String password) {
+    if (password.isEmpty) return 'Please enter your password';
+    if (password.length < 6) return 'Password must be at least 6 characters';
+    return null;
+  }
+
+  // Updated login handler with Firebase Auth
+  Future<void> _handleSignIn() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // Client-side validation
+    final emailError = _validateEmail(email);
+    final passwordError = _validatePassword(password);
+
+    if (emailError != null) {
+      _showErrorMessage(emailError);
+      return;
+    }
+
+    if (passwordError != null) {
+      _showErrorMessage(passwordError);
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await _authService.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      setState(() => _isLoading = false);
+
+      if (result.success) {
+        // Update BLoC if needed
+        context.read<OnboardingBloc>().add(LoginEvent(email));
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.message),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+
+        // Navigate to home screen
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => StudentHomePage()),
+        );
+      } else {
+        // Show Firebase error message
+        _showErrorMessage(result.message);
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showErrorMessage('An unexpected error occurred. Please try again.');
+    }
+  }
+
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red.shade400,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 4),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -325,7 +414,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
 
                   SizedBox(height: 30),
 
-                  // Login Button
+                  // Updated Login Button with Firebase Auth
                   SlideInWidget(
                     delay: const Duration(milliseconds: 1800),
                     begin: const Offset(0, 0.5),
@@ -333,37 +422,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: () {
-                          final email = _emailController.text.trim();
-                          final password = _passwordController.text.trim();
-
-                          if (email.isNotEmpty && password.isNotEmpty) {
-                            context.read<OnboardingBloc>().add(
-                              LoginEvent(email),
-                            );
-                            // Handle successful login here
-                            print('Login with email: $email');
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => StudentHomePage(),
-                              ),
-                            );
-                          } else {
-                            // Show error message
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text(
-                                  'Please fill in all fields',
-                                ),
-                                backgroundColor: Colors.red.shade400,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            );
-                          }
-                        },
+                        onPressed: _isLoading ? null : _handleSignIn,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF4DD0E1),
                           foregroundColor: Colors.white,
@@ -373,13 +432,25 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                           elevation: 0,
                           shadowColor: Colors.transparent,
                         ),
-                        child: const Text(
-                          'Sign In',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child:
+                            _isLoading
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                                : const Text(
+                                  'Sign In',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                       ),
                     ),
                   ),
