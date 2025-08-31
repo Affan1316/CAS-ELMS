@@ -15,6 +15,10 @@ import 'package:flutter_cas_app_main/src/features/fee%20history/data/local_fee_s
 import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/bloc/fee_history_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/bloc/fee_history_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/page/fee_history_screen.dart';
+import 'package:flutter_cas_app_main/src/features/group/data/repositories/group_repository_implementation.dart';
+import 'package:flutter_cas_app_main/src/features/group/domain/usecases/add_group_usecase.dart';
+import 'package:flutter_cas_app_main/src/features/group/domain/usecases/update_group_usecase.dart';
+import 'package:flutter_cas_app_main/src/features/group/presentation/bloc/group_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/bloc/inquiry_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/installment_page/presentation/bloc/installment_page_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
@@ -60,6 +64,17 @@ class MyApp extends StatelessWidget {
                 (context) => FeeHistoryBloc(LocalFeeService())..add(LoadFees()),
             child: FeeHistoryScreen(),
           ),
+          BlocProvider<AddGroupBloc>(
+            create:
+                (context) => AddGroupBloc(
+                  addGroupUsecase: AddGroupUsecase(
+                    abstractGroupRepository: GroupRepositoryImplementation(),
+                  ),
+                  updateGroupUsecase: UpdateGroupUsecase(
+                    abstractGroupRepository: GroupRepositoryImplementation(),
+                  ),
+                ),
+          ),
         ],
         child: MaterialApp(
           title: 'CAS ELMS',
@@ -83,6 +98,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return StudentHomePage();
+    return OnboardingScreen();
   }
 }

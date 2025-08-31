@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
-import 'package:flutter_cas_app_main/src/features/student_home_page/presentation/pages/student_home_page.dart';
 import '../widgets/signup_email_field.dart';
 import '../widgets/signup_password_field.dart';
 import '../widgets/signup_confirm_password_field.dart';

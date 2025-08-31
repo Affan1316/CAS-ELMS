@@ -2,10 +2,17 @@
 // import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/group/data/repositories/group_repository_implementation.dart';
+import 'package:flutter_cas_app_main/src/features/group/domain/entities/group_entity.dart';
+import 'package:flutter_cas_app_main/src/features/group/domain/usecases/update_group_usecase.dart';
+import 'package:flutter_cas_app_main/src/features/group/presentation/bloc/group_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/group/presentation/bloc/group_events.dart';
 import 'package:intl/intl.dart';
 
 class UpdateGroupScreen extends StatefulWidget {
-  const UpdateGroupScreen({super.key});
+  final GroupEntity groupEntity;
+  const UpdateGroupScreen({super.key, required this.groupEntity});
 
   @override
   State<UpdateGroupScreen> createState() => _UpdateGroupScreenState();
@@ -24,17 +31,12 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
   // Form validation key
   final _formKey = GlobalKey<FormState>();
 
-  // Dummy data
-  static const String _dummyCourseName = "Artificial Intelligence";
-  static const int _dummyDurationMonths = 7;
-  static const double _dummyFee = 100000.0;
-
   @override
   void initState() {
     super.initState();
-    _courseNameController.text = _dummyCourseName;
-    _durationController.text = _dummyDurationMonths.toString();
-    _feeController.text = _dummyFee.toString();
+    _courseNameController.text = widget.groupEntity.courseName;
+    _durationController.text = widget.groupEntity.enterDuration;
+    _feeController.text = widget.groupEntity.enterFee;
     _startTime = const TimeOfDay(hour: 17, minute: 18);
     _endTime = const TimeOfDay(hour: 19, minute: 18);
     _selectedDate = DateTime.now();
@@ -71,47 +73,6 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
     }
   }
 
-  Future<void> _selectStartTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: _startTime ?? const TimeOfDay(hour: 9, minute: 0),
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            primaryColor: const Color(0xFF4A6FA5),
-            colorScheme: const ColorScheme.light(primary: Color(0xFF4A6FA5)),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null && picked != _startTime) {
-      setState(() {
-        _startTime = picked;
-      });
-    }
-  }
-
-  Future<void> _selectEndTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: _endTime ?? const TimeOfDay(hour: 17, minute: 0),
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            primaryColor: const Color(0xFF4A6FA5),
-            colorScheme: const ColorScheme.light(primary: Color(0xFF4A6FA5)),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null && picked != _endTime) {
-      setState(() {
-        _endTime = picked;
-      });
-    }
-  }
 
   void _updateGroup() {
     if (_formKey.currentState!.validate()) {
@@ -167,9 +128,9 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
                         if (value == null || value.isEmpty) {
                           return 'Please enter duration';
                         }
-                        if (int.tryParse(value) == null) {
-                          return 'Please enter a valid number';
-                        }
+                        // if (int.tryParse(value) == null) {
+                        //   return 'Please enter a valid number';
+                        // }
                         return null;
                       },
                     ),
@@ -195,16 +156,11 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
 
                     // Date picker
                     _buildDatePicker(),
-
-                    const SizedBox(height: 20),
-
-                    // Time range picker
-                    _buildTimeRangePicker(),
-
+                    
                     const SizedBox(height: 40),
 
                     // Update button
-                    _buildUpdateButton(),
+                    _buildUpdateButton(context),
                   ],
                 ),
               ),
@@ -352,114 +308,26 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
     );
   }
 
-  Widget _buildTimeRangePicker() {
-    return Row(
-      children: [
-        Expanded(
-          child: InkWell(
-            onTap: () => _selectStartTime(context),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    offset: const Offset(2, 2),
-                    blurRadius: 6,
-                    spreadRadius: 1,
-                    color: Colors.grey.withOpacity(0.15),
-                  ),
-                  const BoxShadow(
-                    offset: Offset(-2, -2),
-                    blurRadius: 6,
-                    spreadRadius: 1,
-                    color: Colors.white,
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.access_time, color: Color(0xFF4A6FA5)),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      _startTime == null
-                          ? "Start Time"
-                          : _startTime!.format(context),
-                      style: TextStyle(
-                        fontSize: 16,
-                        color:
-                            _startTime == null
-                                ? Colors.grey.shade500
-                                : const Color(0xFF4A6FA5),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        const Text(
-          "To",
-          style: TextStyle(fontSize: 16, color: Color(0xFF4A6FA5)),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: InkWell(
-            onTap: () => _selectEndTime(context),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    offset: const Offset(2, 2),
-                    blurRadius: 6,
-                    spreadRadius: 1,
-                    color: Colors.grey.withOpacity(0.15),
-                  ),
-                  const BoxShadow(
-                    offset: Offset(-2, -2),
-                    blurRadius: 6,
-                    spreadRadius: 1,
-                    color: Colors.white,
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.access_time, color: Color(0xFF4A6FA5)),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      _endTime == null ? "End Time" : _endTime!.format(context),
-                      style: TextStyle(
-                        fontSize: 16,
-                        color:
-                            _endTime == null
-                                ? Colors.grey.shade500
-                                : const Color(0xFF4A6FA5),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildUpdateButton() {
+  Widget _buildUpdateButton(BuildContext context) {
     return InkWell(
-      onTap: _updateGroup,
+      onTap: () {
+        if (_formKey.currentState!.validate()) {
+          context.read<AddGroupBloc>().add(
+            UpdateGroupEvent(
+              groupId: widget.groupEntity.groupName,
+              groupEntity: GroupEntity(
+                courseName: _courseNameController.text.toString(),
+                enterDate: _selectedDate.toString(),
+                enterDuration: _durationController.text.toString(),
+                enterFee: _feeController.text.toString(),
+                groupName: widget.groupEntity.groupName,
+              ),
+            ),
+          );
+          _showSuccessMessage();
+        }
+      },
       borderRadius: BorderRadius.circular(12),
       child: Container(
         width: double.infinity,
@@ -506,3 +374,155 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Widget _buildTimeRangePicker() {
+  //   return Row(
+  //     children: [
+  //       Expanded(
+  //         child: InkWell(
+  //           onTap: () => _selectStartTime(context),
+  //           borderRadius: BorderRadius.circular(12),
+  //           child: Container(
+  //             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+  //             decoration: BoxDecoration(
+  //               color: Colors.white,
+  //               borderRadius: BorderRadius.circular(12),
+  //               boxShadow: [
+  //                 BoxShadow(
+  //                   offset: const Offset(2, 2),
+  //                   blurRadius: 6,
+  //                   spreadRadius: 1,
+  //                   color: Colors.grey.withOpacity(0.15),
+  //                 ),
+  //                 const BoxShadow(
+  //                   offset: Offset(-2, -2),
+  //                   blurRadius: 6,
+  //                   spreadRadius: 1,
+  //                   color: Colors.white,
+  //                 ),
+  //               ],
+  //             ),
+  //             child: Row(
+  //               children: [
+  //                 const Icon(Icons.access_time, color: Color(0xFF4A6FA5)),
+  //                 const SizedBox(width: 10),
+  //                 Expanded(
+  //                   child: Text(
+  //                     _startTime == null
+  //                         ? "Start Time"
+  //                         : _startTime!.format(context),
+  //                     style: TextStyle(
+  //                       fontSize: 16,
+  //                       color:
+  //                           _startTime == null
+  //                               ? Colors.grey.shade500
+  //                               : const Color(0xFF4A6FA5),
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //       const SizedBox(width: 10),
+  //       const Text(
+  //         "To",
+  //         style: TextStyle(fontSize: 16, color: Color(0xFF4A6FA5)),
+  //       ),
+  //       const SizedBox(width: 10),
+  //       Expanded(
+  //         child: InkWell(
+  //           onTap: () => _selectEndTime(context),
+  //           borderRadius: BorderRadius.circular(12),
+  //           child: Container(
+  //             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+  //             decoration: BoxDecoration(
+  //               color: Colors.white,
+  //               borderRadius: BorderRadius.circular(12),
+  //               boxShadow: [
+  //                 BoxShadow(
+  //                   offset: const Offset(2, 2),
+  //                   blurRadius: 6,
+  //                   spreadRadius: 1,
+  //                   color: Colors.grey.withOpacity(0.15),
+  //                 ),
+  //                 const BoxShadow(
+  //                   offset: Offset(-2, -2),
+  //                   blurRadius: 6,
+  //                   spreadRadius: 1,
+  //                   color: Colors.white,
+  //                 ),
+  //               ],
+  //             ),
+  //             child: Row(
+  //               children: [
+  //                 const Icon(Icons.access_time, color: Color(0xFF4A6FA5)),
+  //                 const SizedBox(width: 10),
+  //                 Expanded(
+  //                   child: Text(
+  //                     _endTime == null ? "End Time" : _endTime!.format(context),
+  //                     style: TextStyle(
+  //                       fontSize: 16,
+  //                       color:
+  //                           _endTime == null
+  //                               ? Colors.grey.shade500
+  //                               : const Color(0xFF4A6FA5),
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
