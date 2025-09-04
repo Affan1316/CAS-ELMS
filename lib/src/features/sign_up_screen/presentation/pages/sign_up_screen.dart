@@ -7,7 +7,8 @@ import '../widgets/signup_button.dart';
 import '../widgets/signup_footer.dart';
 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({Key? key}) : super(key: key);
+  final String id;
+  const SignUpScreen({Key? key, required this.id}) : super(key: key);
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -187,7 +188,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 24),
 
                 // Footer
-                const SignUpFooter(),
+                SignUpFooter(id: widget.id),
               ],
             ),
           ),

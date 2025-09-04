@@ -3,12 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_state.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/SlideInWidget.dart';
 import 'package:flutter_cas_app_main/src/features/forget_password_screen/presentation/page/forget_password_screen.dart';
 import 'package:flutter_cas_app_main/src/features/sign_up_screen/presentation/pages/sign_up_screen.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_home_page.dart';
 
 class StudentLoginScreen extends StatefulWidget {
+  final String studentid;
+  const StudentLoginScreen({super.key, required this.studentid});
   @override
   _StudentLoginScreenState createState() => _StudentLoginScreenState();
 }
@@ -68,7 +72,9 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
       if (result.success) {
         // Update BLoC if needed
         context.read<OnboardingBloc>().add(LoginEvent(email));
-
+        context.read<OnboardingBloc>().add(
+          ReadStudentNameFromFireBaseEvent(id: widget.studentid),
+        );
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -80,11 +86,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
             ),
             duration: const Duration(seconds: 2),
           ),
-        );
-
-        // Navigate to home screen
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => StudentHomePage()),
         );
       } else {
         // Show Firebase error message
@@ -153,313 +154,329 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
           style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
         ),
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            // Top section with illustration
-            Container(
-              height: topSectionHeight,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 216, 240, 239),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
+      body: BlocListener<OnboardingBloc, OnboardingState>(
+        listener: (context, state) {
+          if (state is ReadingStudentNameCompleted) {
+            // Navigate to home screen
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder:
+                    (context) =>
+                        StudentHomePage(id: widget.studentid, name: state.name),
+              ),
+            );
+          }
+        },
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            children: [
+              // Top section with illustration
+              Container(
+                height: topSectionHeight,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Color.fromARGB(255, 216, 240, 239),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30),
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    // Decorative elements
+                    Positioned(
+                      top: 20,
+                      left: 20,
+                      child: SlideInWidget(
+                        delay: const Duration(milliseconds: 200),
+                        begin: const Offset(-1, -1),
+                        child: Container(
+                          width: isSmallScreen ? 40 : 60,
+                          height: isSmallScreen ? 40 : 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(
+                              isSmallScreen ? 20 : 30,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 40,
+                      right: 30,
+                      child: SlideInWidget(
+                        delay: const Duration(milliseconds: 400),
+                        begin: const Offset(1, -1),
+                        child: Container(
+                          width: isSmallScreen ? 30 : 40,
+                          height: isSmallScreen ? 30 : 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(
+                              isSmallScreen ? 15 : 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Main illustration
+                    Positioned.fill(
+                      child: SlideInWidget(
+                        delay: const Duration(milliseconds: 600),
+                        child: Container(
+                          margin: EdgeInsets.only(top: 20),
+                          alignment: Alignment.center,
+                          child: Image.asset(
+                            'assets/images/login.webp',
+                            width: illustrationSize.clamp(150.0, 220.0),
+                            height: illustrationSize.clamp(150.0, 220.0),
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: illustrationSize.clamp(120.0, 180.0),
+                                height: illustrationSize.clamp(120.0, 180.0),
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 60,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade100,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Icon(
+                                        Icons.person,
+                                        size: 30,
+                                        color: Colors.blue.shade600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Container(
+                                      width: 80,
+                                      height: 30,
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.shade100,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Icon(
+                                        Icons.laptop,
+                                        size: 20,
+                                        color: Colors.orange.shade600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: Stack(
-                children: [
-                  // Decorative elements
-                  Positioned(
-                    top: 20,
-                    left: 20,
-                    child: SlideInWidget(
-                      delay: const Duration(milliseconds: 200),
-                      begin: const Offset(-1, -1),
-                      child: Container(
-                        width: isSmallScreen ? 40 : 60,
-                        height: isSmallScreen ? 40 : 60,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(
-                            isSmallScreen ? 20 : 30,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 40,
-                    right: 30,
-                    child: SlideInWidget(
-                      delay: const Duration(milliseconds: 400),
-                      begin: const Offset(1, -1),
-                      child: Container(
-                        width: isSmallScreen ? 30 : 40,
-                        height: isSmallScreen ? 30 : 40,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(
-                            isSmallScreen ? 15 : 20,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
 
-                  // Main illustration
-                  Positioned.fill(
-                    child: SlideInWidget(
-                      delay: const Duration(milliseconds: 600),
-                      child: Container(
-                        margin: EdgeInsets.only(top: 20),
-                        alignment: Alignment.center,
-                        child: Image.asset(
-                          'assets/images/login.webp',
-                          width: illustrationSize.clamp(150.0, 220.0),
-                          height: illustrationSize.clamp(150.0, 220.0),
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              width: illustrationSize.clamp(120.0, 180.0),
-                              height: illustrationSize.clamp(120.0, 180.0),
-                              padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 60,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.shade100,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Icon(
-                                      Icons.person,
-                                      size: 30,
-                                      color: Colors.blue.shade600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Container(
-                                    width: 80,
-                                    height: 30,
-                                    decoration: BoxDecoration(
-                                      color: Colors.orange.shade100,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Icon(
-                                      Icons.laptop,
-                                      size: 20,
-                                      color: Colors.orange.shade600,
-                                    ),
-                                  ),
-                                ],
+              // Bottom section with form
+              Container(
+                width: double.infinity,
+                color: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                child: Column(
+                  children: [
+                    SizedBox(height: verticalSpacing),
+
+                    // Title
+                    SlideInWidget(
+                      delay: const Duration(milliseconds: 800),
+                      begin: const Offset(0, 0.5),
+                      child: Text(
+                        'Welcome Back!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                          height: 1.3,
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 8),
+
+                    // Subtitle
+                    SlideInWidget(
+                      delay: const Duration(milliseconds: 1000),
+                      begin: const Offset(0, 0.5),
+                      child: Text(
+                        'Sign in with your email and password.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: subtitleFontSize,
+                          color: Colors.grey,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: titleSpacing),
+
+                    // Email input
+                    SlideInWidget(
+                      delay: const Duration(milliseconds: 1200),
+                      begin: const Offset(0, 0.5),
+                      child: _buildInputField(
+                        controller: _emailController,
+                        hintText: 'Enter Email',
+                        icon: Icons.email_outlined,
+                        fontSize: inputFontSize,
+                        isSmallScreen: isSmallScreen,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                    ),
+
+                    SizedBox(height: inputSpacing),
+
+                    // Password input
+                    SlideInWidget(
+                      delay: const Duration(milliseconds: 1400),
+                      begin: const Offset(0, 0.5),
+                      child: _buildInputField(
+                        controller: _passwordController,
+                        hintText: 'Password',
+                        icon: Icons.lock_outline,
+                        fontSize: inputFontSize,
+                        isSmallScreen: isSmallScreen,
+                        isPassword: true,
+                      ),
+                    ),
+
+                    SizedBox(height: 10),
+
+                    // Forgot Password
+                    SlideInWidget(
+                      delay: const Duration(milliseconds: 1600),
+                      begin: const Offset(0, 0.5),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => ForgotPasswordScreen(),
                               ),
                             );
                           },
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Bottom section with form
-            Container(
-              width: double.infinity,
-              color: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child: Column(
-                children: [
-                  SizedBox(height: verticalSpacing),
-
-                  // Title
-                  SlideInWidget(
-                    delay: const Duration(milliseconds: 800),
-                    begin: const Offset(0, 0.5),
-                    child: Text(
-                      'Welcome Back!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: titleFontSize,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                        height: 1.3,
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 8),
-
-                  // Subtitle
-                  SlideInWidget(
-                    delay: const Duration(milliseconds: 1000),
-                    begin: const Offset(0, 0.5),
-                    child: Text(
-                      'Sign in with your email and password.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: subtitleFontSize,
-                        color: Colors.grey,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: titleSpacing),
-
-                  // Email input
-                  SlideInWidget(
-                    delay: const Duration(milliseconds: 1200),
-                    begin: const Offset(0, 0.5),
-                    child: _buildInputField(
-                      controller: _emailController,
-                      hintText: 'Enter Email',
-                      icon: Icons.email_outlined,
-                      fontSize: inputFontSize,
-                      isSmallScreen: isSmallScreen,
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                  ),
-
-                  SizedBox(height: inputSpacing),
-
-                  // Password input
-                  SlideInWidget(
-                    delay: const Duration(milliseconds: 1400),
-                    begin: const Offset(0, 0.5),
-                    child: _buildInputField(
-                      controller: _passwordController,
-                      hintText: 'Password',
-                      icon: Icons.lock_outline,
-                      fontSize: inputFontSize,
-                      isSmallScreen: isSmallScreen,
-                      isPassword: true,
-                    ),
-                  ),
-
-                  SizedBox(height: 10),
-
-                  // Forgot Password
-                  SlideInWidget(
-                    delay: const Duration(milliseconds: 1600),
-                    begin: const Offset(0, 0.5),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => ForgotPasswordScreen(),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          'Forgot Password?',
-                          style: TextStyle(
-                            fontSize: isSmallScreen ? 13.0 : 14.0,
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 20),
-
-                  // Sign up link
-                  SlideInWidget(
-                    delay: const Duration(milliseconds: 1600),
-                    begin: const Offset(0, 0.5),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => SignUpScreen(),
-                            ),
-                          );
-                        },
-                        child: RichText(
-                          text: TextSpan(
+                          child: Text(
+                            'Forgot Password?',
                             style: TextStyle(
                               fontSize: isSmallScreen ? 13.0 : 14.0,
-                              color: Colors.grey.shade600,
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
                             ),
-                            children: [
-                              const TextSpan(text: "Don't have an account? "),
-                              TextSpan(
-                                text: 'Sign Up',
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
                           ),
                         ),
                       ),
                     ),
-                  ),
 
-                  SizedBox(height: 30),
+                    SizedBox(height: 20),
 
-                  // Updated Login Button with Firebase Auth
-                  SlideInWidget(
-                    delay: const Duration(milliseconds: 1800),
-                    begin: const Offset(0, 0.5),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _handleSignIn,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF4DD0E1),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                    // Sign up link
+                    SlideInWidget(
+                      delay: const Duration(milliseconds: 1600),
+                      begin: const Offset(0, 0.5),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder:
+                                    (context) =>
+                                        SignUpScreen(id: widget.studentid),
+                              ),
+                            );
+                          },
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                fontSize: isSmallScreen ? 13.0 : 14.0,
+                                color: Colors.grey.shade600,
+                              ),
+                              children: [
+                                const TextSpan(text: "Don't have an account? "),
+                                TextSpan(
+                                  text: 'Sign Up',
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          elevation: 0,
-                          shadowColor: Colors.transparent,
                         ),
-                        child:
-                            _isLoading
-                                ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
+                      ),
+                    ),
+
+                    SizedBox(height: 30),
+
+                    // Updated Login Button with Firebase Auth
+                    SlideInWidget(
+                      delay: const Duration(milliseconds: 1800),
+                      begin: const Offset(0, 0.5),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _handleSignIn,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF4DD0E1),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 0,
+                            shadowColor: Colors.transparent,
+                          ),
+                          child:
+                              _isLoading
+                                  ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                  : const Text(
+                                    'Sign In',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                )
-                                : const Text(
-                                  'Sign In',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
+                        ),
                       ),
                     ),
-                  ),
 
-                  SizedBox(height: 40),
-                ],
+                    SizedBox(height: 40),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

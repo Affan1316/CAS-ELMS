@@ -22,7 +22,9 @@ import 'package:flutter_cas_app_main/src/features/group/presentation/bloc/group_
 import 'package:flutter_cas_app_main/src/features/inquiry_page/presentation/bloc/inquiry_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/installment_page/presentation/bloc/installment_page_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/presentation/page/group_page.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_enrollment_screen.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_home_page.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 // import 'package:flutter_cas_app_main/src/features/course_catalog/presentation/pages/course_catalog_screen_state.dart';
@@ -49,8 +51,8 @@ class MyApp extends StatelessWidget {
           BlocProvider<OnboardingBloc>(create: (context) => OnboardingBloc()),
           BlocProvider<ChatPageBloc>(create: (context) => ChatPageBloc()),
           BlocProvider<AdminHomeBloc>(create: (context) => AdminHomeBloc()),
-          BlocProvider<StudentEnrollmentBloc>(
-            create: (context) => StudentEnrollmentBloc(),
+          BlocProvider<StudentFeatureBloc>(
+            create: (context) => StudentFeatureBloc(),
           ),
           BlocProvider<InstallmentPageBloc>(
             create: (context) => InstallmentPageBloc(),
@@ -101,3 +103,41 @@ class _MyHomePageState extends State<MyHomePage> {
     return OnboardingScreen();
   }
 }
+
+// import 'package:flutter/material.dart';
+// import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
+// import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/StudentDetailPage.dart';
+
+// void main() {
+//   runApp(const DemoApp());
+// }
+
+// class DemoApp extends StatelessWidget {
+//   const DemoApp({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       title: 'Student Detail Demo',
+//       theme: ThemeData(
+//         brightness: Brightness.light,
+//         scaffoldBackgroundColor: const Color(0xFFE0E0E0), // light grey base
+//       ),
+//       home: StudentDetailPage(
+//         student: StudentEntityClass(
+//           id: "STU123",
+//           name: "Ali Raza",
+//           email: "ali.raza@example.com",
+//           cnic: "35202-1234567-8",
+//           phone: "+92 301 2345678",
+//           address: "123 Main Street, Lahore",
+//           gender: "Male",
+//           fatherName: "Ahmed Raza",
+//           fatherOccupation: "Businessman",
+//           group: "Science",
+//         ),
+//       ),
+//     );
+//   }
+// }

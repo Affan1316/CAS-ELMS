@@ -6,25 +6,52 @@ import 'student_entity_class.dart';
 
 class ActualImplementationFirebaseRepo implements FirestoreRepositry {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-
+  final String completeStudentsCollectionName = "students";
   @override
   addStudentDataToFirebase(StudentEntityClass student) async {
-    addStudentDataAccordingToGroupsToFirebase(student);
+    print(
+      "++++++++++++++++++++++executing second function___________________________",
+    );
 
-    return await firestore.collection("students").doc(student.id).set({
-      "name": student.name,
-      "fatherName": student.fatherName,
-      "address": student.address,
-      "cnic": student.cnic,
-      "gender": student.gender,
-      "email": student.email,
-      "fatherOccupation": student.fatherOccupation,
-      "group": student.group,
-    });
+    await addStudentDataAccordingToGroupsToFirebase(student);
+    return await firestore
+        .collection(completeStudentsCollectionName)
+        .doc(student.id)
+        .set({
+          "name": student.name,
+          "fatherName": student.fatherName,
+          "address": student.address,
+          "cnic": student.cnic,
+          "gender": student.gender,
+          "email": student.email,
+          "fatherOccupation": student.fatherOccupation,
+          "group": student.group,
+          "phone": student.phone,
+        });
   }
 
+  @override
   addStudentDataAccordingToGroupsToFirebase(StudentEntityClass student) async {
     String collectionName = student.group;
-    return await firestore.collection("$collectionName data").doc(student.id);
+
+    print(
+      "++++++++++++++++++++++ executing fitst function___________________________",
+    );
+
+    return await firestore
+        .collection("$collectionName students")
+        .doc(student.id)
+        .set({"name": student.name});
+  }
+
+  @override
+  Future<Map<String, dynamic>?> readStudentDataBasedOnId(String id) async {
+    DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
+        await FirebaseFirestore.instance
+            .collection(completeStudentsCollectionName)
+            .doc(id)
+            .get();
+
+    return documentSnapshot.data();
   }
 }

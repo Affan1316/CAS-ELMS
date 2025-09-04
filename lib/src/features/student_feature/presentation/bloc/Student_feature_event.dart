@@ -1,9 +1,9 @@
 // import 'package:flutter/material.dart';
 // import 'dart:ui';
 
-abstract class StudentEnrollmentEvent {}
+abstract class StudentFeatureEvent {}
 
-class SubmitEnrollmentFormEvent extends StudentEnrollmentEvent {
+class SubmitEnrollmentFormEvent extends StudentFeatureEvent {
   final String id,
       name,
       email,
@@ -27,4 +27,9 @@ class SubmitEnrollmentFormEvent extends StudentEnrollmentEvent {
     required this.fatherOccupation,
     required this.group,
   });
+}
+
+class FetchGroupStudentsEvent extends StudentFeatureEvent {
+  final String id;
+  FetchGroupStudentsEvent({required this.id});
 }
