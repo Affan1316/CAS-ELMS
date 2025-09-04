@@ -6,56 +6,55 @@ import 'package:flutter_cas_app_main/src/features/request_leave/presentation/pag
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_profile_page.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-final List<Map<String, dynamic>> studentFeatures = [
-  {
-    'title': 'My Assignments',
-    'icon': Icons.assignment_rounded,
-    'color': Color(0xFF6366F1),
-    'count': '5 Due',
-    'isUrgent': true,
-    'screen': InterviewStagesPage(),
-  },
-  {
-    'title': 'IQ Test',
-    'icon': LucideIcons.brain,
-    'color': Color(0xFF10B981),
-    'count': '3.8 GPA',
-    'isUrgent': false,
-    'screen': YearSelectorPage(),
-  },
-  {
-    'title': 'Workshop Tracker',
-    'icon': Icons.schedule_rounded,
-    'color': Color(0xFF8B5CF6),
-    'count': '6 Today',
-    'isUrgent': false,
-    'screen': LeaveScreen(),
-  },
-  {
-    'title': 'Library',
-    'icon': Icons.library_books_rounded,
-    'color': Color(0xFF06B6D4),
-    'count': '2 Borrowed',
-    'isUrgent': false,
-    'screen': StudentProfilePage(),
-  },
-  {
-    'title': 'Study Groups',
-    'icon': Icons.group_rounded,
-    'color': Color(0xFFEF4444),
-    'count': '3 Active',
-    'isUrgent': false,
-  },
-  {
-    'title': 'Attendance',
-    'icon': Icons.event_available_rounded,
-    'color': Color(0xFF84CC16),
-    'count': '95%',
-    'isUrgent': false,
-  },
-];
-
-Widget buildQuickActions() {
+Widget buildQuickActions(String id) {
+  final List<Map<String, dynamic>> studentFeatures = [
+    {
+      'title': 'My Assignments',
+      'icon': Icons.assignment_rounded,
+      'color': Color(0xFF6366F1),
+      'count': '5 Due',
+      'isUrgent': true,
+      'screen': InterviewStagesPage(),
+    },
+    {
+      'title': 'IQ Test',
+      'icon': LucideIcons.brain,
+      'color': Color(0xFF10B981),
+      'count': '3.8 GPA',
+      'isUrgent': false,
+      'screen': YearSelectorPage(),
+    },
+    {
+      'title': 'Workshop Tracker',
+      'icon': Icons.schedule_rounded,
+      'color': Color(0xFF8B5CF6),
+      'count': '6 Today',
+      'isUrgent': false,
+      'screen': LeaveScreen(),
+    },
+    {
+      'title': 'Library',
+      'icon': Icons.library_books_rounded,
+      'color': Color(0xFF06B6D4),
+      'count': '2 Borrowed',
+      'isUrgent': false,
+      'screen': Container(child: Text("Not set yet")),
+    },
+    {
+      'title': 'Study Groups',
+      'icon': Icons.group_rounded,
+      'color': Color(0xFFEF4444),
+      'count': '3 Active',
+      'isUrgent': false,
+    },
+    {
+      'title': 'Attendance',
+      'icon': Icons.event_available_rounded,
+      'color': Color(0xFF84CC16),
+      'count': '95%',
+      'isUrgent': false,
+    },
+  ];
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [

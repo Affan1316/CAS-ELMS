@@ -6,7 +6,9 @@ import 'package:flutter_cas_app_main/src/features/student_feature/presentation/w
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildStatsCard.dart';
 
 class StudentHomePage extends StatefulWidget {
-  const StudentHomePage({super.key});
+  final String id;
+  final String name;
+  const StudentHomePage({super.key, required this.id, required this.name});
 
   @override
   State<StudentHomePage> createState() => _StudentHomePageState();
@@ -134,9 +136,9 @@ class _StudentHomePageState extends State<StudentHomePage>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    buildHeader(),
+                    buildHeader(widget.name, context, widget.id),
                     buildStatsCard(),
-                    buildQuickActions(),
+                    buildQuickActions(widget.id),
                     buildPopularTeachersSection(),
 
                     // buildRecentActivities(),

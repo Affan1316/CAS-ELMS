@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/group_detail_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
 
 abstract class FirestoreRepositry {
   addStudentDataToFirebase(StudentEntityClass student);
+  addStudentDataAccordingToGroupsToFirebase(StudentEntityClass student);
+  Future<Map<String, dynamic>?> readStudentDataBasedOnId(String id);
 }

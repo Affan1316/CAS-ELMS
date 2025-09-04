@@ -287,7 +287,9 @@ class _UserIdInputScreenState extends State<UserIdInputScreen>
                               // Navigate to login screen
                               Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (context) => StudentLoginScreen(),
+                                  builder:
+                                      (context) =>
+                                          StudentLoginScreen(studentid: userId),
                                 ),
                               );
                             } else {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_event.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_state.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/student_enrollment_form.dart';
 
 class StudentEnrollmentScreen extends StatefulWidget {
@@ -51,7 +51,7 @@ class _StudentEnrollmentScreenState extends State<StudentEnrollmentScreen> {
         backgroundColor: const Color(0xFF3B82F6),
         foregroundColor: Colors.white,
       ),
-      body: BlocConsumer<StudentEnrollmentBloc, StudentEnrollmentState>(
+      body: BlocConsumer<StudentFeatureBloc, StudentFeatureState>(
         listener: (context, state) {
           if (state is StudentEnrollmentSuccess) {
             // ScaffoldMessenger.of(context).showSnackBar(

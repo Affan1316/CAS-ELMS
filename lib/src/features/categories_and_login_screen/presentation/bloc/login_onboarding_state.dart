@@ -28,3 +28,10 @@ class OnboardingInitial extends OnboardingState {
     shouldShake,
   ];
 }
+
+class ReadingStudentName extends OnboardingState {}
+
+class ReadingStudentNameCompleted extends OnboardingState {
+  final String name;
+  const ReadingStudentNameCompleted({required this.name});
+}

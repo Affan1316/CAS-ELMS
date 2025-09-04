@@ -88,7 +88,7 @@ class StudentEntityClass {
 
   @override
   String toString() {
-    return 'Student(id: $id, name: $name, email: $email, cnic: $cnic, phone: $phone, address: $address, gender: $gender, fatherName: $fatherName, fatherOccupation: $fatherOccupation, group: $group)';
+    return 'StudentEntityClass(id: $id, name: $name, email: $email, cnic: $cnic, phone: $phone, address: $address, gender: $gender, fatherName: $fatherName, fatherOccupation: $fatherOccupation, group: $group)';
   }
 
   @override

@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/StudentDetailPage.dart';
 
 class StudentProfilePage extends StatefulWidget {
-  const StudentProfilePage({super.key});
+  final String id;
+  const StudentProfilePage({super.key, required this.id});
 
   @override
   StudentProfilePageState createState() => StudentProfilePageState();
@@ -153,6 +160,7 @@ class StudentProfilePageState extends State<StudentProfilePage>
             ),
             onPressed: () {
               // Navigate back
+              Navigator.pop(context);
             },
             size: isTablet ? 56 : 48,
           ),
@@ -259,145 +267,185 @@ class StudentProfilePageState extends State<StudentProfilePage>
   }
 
   Widget _buildFrontCard(bool isTablet, double screenWidth) {
-    return _buildNeomorphicContainer(
-      padding: EdgeInsets.all(0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Profile Picture Section
-          Container(
-            padding: EdgeInsets.all(isTablet ? 40.0 : 30.0),
-            child: Column(
-              children: [
-                // Profile Picture with neomorphic effect
-                _buildNeomorphicContainer(
-                  width: isTablet ? 120 : 100,
-                  height: isTablet ? 120 : 100,
-                  isInset: true,
-                  child: Container(
-                    margin: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: _shadowColor,
-                          offset: Offset(4, 4),
-                          blurRadius: 8,
-                        ),
-                        BoxShadow(
-                          color: _highlightColor,
-                          offset: Offset(-4, -4),
-                          blurRadius: 8,
-                        ),
-                      ],
-                    ),
-                    child: ClipOval(
-                      child: Image.asset(
-                        'assets/images/profile_image.jpg',
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: _backgroundColor,
-                            child: Icon(
-                              Icons.person,
-                              size: isTablet ? 60 : 50,
-                              color: Color(0xFF6B7280),
+    return BlocConsumer<StudentFeatureBloc, StudentFeatureState>(
+      listener: (context, state) {
+        if (state is GroupStudentsDatafetched) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return StudentDetailPage(
+                  student: StudentEntityClass(
+                    id: state.id,
+                    name: state.name,
+                    email: state.email,
+                    cnic: state.cnic,
+                    phone: state.phone,
+                    address: state.address,
+                    gender: state.gender,
+                    fatherName: state.fatherName,
+                    fatherOccupation: state.fatherOccupation,
+                    group: state.group,
+                  ),
+                );
+              },
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        return _buildNeomorphicContainer(
+          padding: EdgeInsets.all(0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Profile Picture Section
+              Container(
+                padding: EdgeInsets.all(isTablet ? 40.0 : 30.0),
+                child: Column(
+                  children: [
+                    // Profile Picture with neomorphic effect
+                    _buildNeomorphicContainer(
+                      width: isTablet ? 120 : 100,
+                      height: isTablet ? 120 : 100,
+                      isInset: true,
+                      child: Container(
+                        margin: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: _shadowColor,
+                              offset: Offset(4, 4),
+                              blurRadius: 8,
                             ),
+                            BoxShadow(
+                              color: _highlightColor,
+                              offset: Offset(-4, -4),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/images/profile_image.jpg',
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: _backgroundColor,
+                                child: Icon(
+                                  Icons.person,
+                                  size: isTablet ? 60 : 50,
+                                  color: Color(0xFF6B7280),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: isTablet ? 24 : 20),
+
+                    // Name
+                    Text(
+                      'Mujeeb',
+                      style: TextStyle(
+                        fontSize: isTablet ? 28 : 24,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1F2937),
+                      ),
+                    ),
+
+                    SizedBox(height: isTablet ? 12 : 8),
+
+                    // Email
+                    Text(
+                      'admin@admin.com',
+                      style: TextStyle(
+                        fontSize: isTablet ? 18 : 16,
+                        color: Color(0xFF6B7280),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Menu Items
+              Flexible(
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isTablet ? 32.0 : 24.0,
+                    vertical: isTablet ? 16.0 : 12.0,
+                  ),
+                  child: Column(
+                    children: [
+                      _buildNeomorphicMenuItem(
+                        Icons.person_outline,
+                        'User Details',
+                        isTablet,
+                        onTap: () {
+                          context.read<StudentFeatureBloc>().add(
+                            FetchGroupStudentsEvent(id: widget.id),
                           );
                         },
                       ),
-                    ),
-                  ),
-                ),
+                      SizedBox(height: 16),
+                      _buildNeomorphicMenuItem(
+                        Icons.settings_outlined,
+                        'Profile Settings',
+                        isTablet,
+                        onTap: () {},
+                      ),
+                      SizedBox(height: 16),
+                      _buildNeomorphicMenuItem(
+                        Icons.lock_outline,
+                        'Change Password',
+                        isTablet,
+                        onTap: () {},
+                      ),
+                      SizedBox(height: 16),
+                      _buildNeomorphicMenuItem(
+                        Icons.logout_outlined,
+                        'Logout',
+                        isTablet,
+                        isLogout: true,
+                        onTap: () {},
+                      ),
 
-                SizedBox(height: isTablet ? 24 : 20),
+                      SizedBox(height: isTablet ? 24 : 16),
 
-                // Name
-                Text(
-                  'Mujeeb',
-                  style: TextStyle(
-                    fontSize: isTablet ? 28 : 24,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1F2937),
-                  ),
-                ),
-
-                SizedBox(height: isTablet ? 12 : 8),
-
-                // Email
-                Text(
-                  'admin@admin.com',
-                  style: TextStyle(
-                    fontSize: isTablet ? 18 : 16,
-                    color: Color(0xFF6B7280),
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Menu Items
-          Flexible(
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: isTablet ? 32.0 : 24.0,
-                vertical: isTablet ? 16.0 : 12.0,
-              ),
-              child: Column(
-                children: [
-                  _buildNeomorphicMenuItem(
-                    Icons.person_outline,
-                    'User Details',
-                    isTablet,
-                  ),
-                  SizedBox(height: 16),
-                  _buildNeomorphicMenuItem(
-                    Icons.settings_outlined,
-                    'Profile Settings',
-                    isTablet,
-                  ),
-                  SizedBox(height: 16),
-                  _buildNeomorphicMenuItem(
-                    Icons.lock_outline,
-                    'Change Password',
-                    isTablet,
-                  ),
-                  SizedBox(height: 16),
-                  _buildNeomorphicMenuItem(
-                    Icons.logout_outlined,
-                    'Logout',
-                    isTablet,
-                    isLogout: true,
-                  ),
-
-                  SizedBox(height: isTablet ? 24 : 16),
-
-                  // Flip indicator
-                  _buildNeomorphicContainer(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.flip, size: 16, color: _accentColor),
-                        SizedBox(width: 8),
-                        Text(
-                          'Tap to flip',
-                          style: TextStyle(
-                            color: _accentColor,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
+                      // Flip indicator
+                      _buildNeomorphicContainer(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
                         ),
-                      ],
-                    ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.flip, size: 16, color: _accentColor),
+                            SizedBox(width: 8),
+                            Text(
+                              'Tap to flip',
+                              style: TextStyle(
+                                color: _accentColor,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -483,36 +531,40 @@ class StudentProfilePageState extends State<StudentProfilePage>
     String title,
     bool isTablet, {
     bool isLogout = false,
+    required void Function() onTap,
   }) {
-    return _buildNeomorphicContainer(
-      padding: EdgeInsets.symmetric(
-        vertical: isTablet ? 16.0 : 12.0,
-        horizontal: 16.0,
-      ),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: isTablet ? 28 : 24,
-            color: isLogout ? Colors.red.shade400 : Color(0xFF6B7280),
-          ),
-          SizedBox(width: isTablet ? 20 : 16),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: isTablet ? 18 : 16,
-                fontWeight: FontWeight.w500,
-                color: isLogout ? Colors.red.shade400 : Color(0xFF1F2937),
+    return GestureDetector(
+      onTap: onTap,
+      child: _buildNeomorphicContainer(
+        padding: EdgeInsets.symmetric(
+          vertical: isTablet ? 16.0 : 12.0,
+          horizontal: 16.0,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: isTablet ? 28 : 24,
+              color: isLogout ? Colors.red.shade400 : Color(0xFF6B7280),
+            ),
+            SizedBox(width: isTablet ? 20 : 16),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: isTablet ? 18 : 16,
+                  fontWeight: FontWeight.w500,
+                  color: isLogout ? Colors.red.shade400 : Color(0xFF1F2937),
+                ),
               ),
             ),
-          ),
-          Icon(
-            Icons.arrow_forward_ios,
-            size: isTablet ? 20 : 16,
-            color: Color(0xFF9CA3AF),
-          ),
-        ],
+            Icon(
+              Icons.arrow_forward_ios,
+              size: isTablet ? 20 : 16,
+              color: Color(0xFF9CA3AF),
+            ),
+          ],
+        ),
       ),
     );
   }

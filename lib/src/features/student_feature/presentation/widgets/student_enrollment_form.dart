@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_event.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_enrollment_state.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';
 
 class StudentEnrollmentForm extends StatelessWidget {
   final GlobalKey<FormState> formKey;
@@ -38,7 +38,7 @@ class StudentEnrollmentForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Listen for success/failure to show snackbars / navigate
-    return BlocListener<StudentEnrollmentBloc, StudentEnrollmentState>(
+    return BlocListener<StudentFeatureBloc, StudentFeatureState>(
       listener: (context, state) {
         if (state is StudentEnrollmentSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -190,15 +190,15 @@ class StudentEnrollmentForm extends StatelessWidget {
                               label: 'Email Address',
                               icon: Icons.email_outlined,
                               keyboardType: TextInputType.emailAddress,
-                              validator: (v) {
-                                if (v == null || v.isEmpty)
-                                  return 'Email is required';
-                                if (!RegExp(
-                                  r'^[\w\-\.\+]+@([\w\-]+\.)+[\w\-]{2,4}$',
-                                ).hasMatch(v))
-                                  return 'Enter a valid email';
-                                return null;
-                              },
+                              // validator: (v) {
+                              //   if (v == null || v.isEmpty)
+                              //     return 'Email is required';
+                              //   if (!RegExp(
+                              //     r'^[\w\-\.\+]+@([\w\-]+\.)+[\w\-]{2,4}$',
+                              //   ).hasMatch(v))
+                              //     return 'Enter a valid email';
+                              //   return null;
+                              // },
                             ),
                           ),
                           SizedBox(
@@ -208,13 +208,13 @@ class StudentEnrollmentForm extends StatelessWidget {
                               label: 'CNIC',
                               icon: Icons.credit_card_outlined,
                               keyboardType: TextInputType.number,
-                              validator: (v) {
-                                if (v == null || v.isEmpty)
-                                  return 'CNIC is required';
-                                if (!RegExp(r'^\d{13}$').hasMatch(v))
-                                  return 'Enter 13 digit CNIC';
-                                return null;
-                              },
+                              // validator: (v) {
+                              //   if (v == null || v.isEmpty)
+                              //     return 'CNIC is required';
+                              //   if (!RegExp(r'^\d{13}$').hasMatch(v))
+                              //     return 'Enter 13 digit CNIC';
+                              //   return null;
+                              // },
                             ),
                           ),
                           SizedBox(
@@ -250,13 +250,13 @@ class StudentEnrollmentForm extends StatelessWidget {
                               label: 'Phone Number',
                               icon: Icons.phone_outlined,
                               keyboardType: TextInputType.phone,
-                              validator: (v) {
-                                if (v == null || v.isEmpty)
-                                  return 'Phone required';
-                                if (!RegExp(r'^\d{11}$').hasMatch(v))
-                                  return 'Enter 11-digit Pakistani number';
-                                return null;
-                              },
+                              // validator: (v) {
+                              //   if (v == null || v.isEmpty)
+                              //     return 'Phone required';
+                              //   if (!RegExp(r'^\d{11}$').hasMatch(v))
+                              //     return 'Enter 11-digit Pakistani number';
+                              //   return null;
+                              // },
                             ),
                           ),
                           SizedBox(
@@ -310,10 +310,7 @@ class StudentEnrollmentForm extends StatelessWidget {
                       const SizedBox(height: 24),
 
                       // Submit button (uses your bloc states/events)
-                      BlocBuilder<
-                        StudentEnrollmentBloc,
-                        StudentEnrollmentState
-                      >(
+                      BlocBuilder<StudentFeatureBloc, StudentFeatureState>(
                         builder: (context, state) {
                           final isLoading =
                               state is StudentEnrollmentSubmitting;
@@ -329,7 +326,7 @@ class StudentEnrollmentForm extends StatelessWidget {
                                             false) {
                                           // Use your exact event and fields
                                           context
-                                              .read<StudentEnrollmentBloc>()
+                                              .read<StudentFeatureBloc>()
                                               .add(
                                                 SubmitEnrollmentFormEvent(
                                                   id: studentIdController.text,

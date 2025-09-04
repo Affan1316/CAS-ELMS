@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
-import 'package:flutter_cas_app_main/src/features/student_home_page/presentation/pages/student_home_page.dart';
 import '../widgets/signup_email_field.dart';
 import '../widgets/signup_password_field.dart';
 import '../widgets/signup_confirm_password_field.dart';
@@ -8,7 +7,8 @@ import '../widgets/signup_button.dart';
 import '../widgets/signup_footer.dart';
 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({Key? key}) : super(key: key);
+  final String id;
+  const SignUpScreen({Key? key, required this.id}) : super(key: key);
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -188,7 +188,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 24),
 
                 // Footer
-                const SignUpFooter(),
+                SignUpFooter(id: widget.id),
               ],
             ),
           ),
