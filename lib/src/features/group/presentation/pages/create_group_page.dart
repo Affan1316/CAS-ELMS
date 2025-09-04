@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/core/theme/app_colors.dart';
+import 'package:flutter_cas_app_main/src/features/group/domain/entities/group_entity.dart';
+import 'package:flutter_cas_app_main/src/features/group/presentation/bloc/group_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/group/presentation/bloc/group_events.dart';
+import 'package:flutter_cas_app_main/src/features/group/presentation/bloc/group_states.dart';
 
 class CreateGroupPage extends StatefulWidget {
   const CreateGroupPage({super.key});
@@ -15,14 +21,13 @@ class _CreateGroupPageState extends State<CreateGroupPage>
 
   // Controllers
   final _instructorIdController = TextEditingController();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _cnicController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _addressController = TextEditingController();
+  final _groupNameController = TextEditingController();
+  final _courseNameController = TextEditingController();
+  final _groupDurationController = TextEditingController();
+  final _groupFeeController = TextEditingController();
+  final _groupDateController = TextEditingController();
 
-  String _selectedGender = 'Male';
-  bool _isLoading = false;
+  
 
   @override
   void initState() {
@@ -41,11 +46,11 @@ class _CreateGroupPageState extends State<CreateGroupPage>
   void dispose() {
     _animationController.dispose();
     _instructorIdController.dispose();
-    _nameController.dispose();
-    _emailController.dispose();
-    _cnicController.dispose();
-    _phoneController.dispose();
-    _addressController.dispose();
+    _groupNameController.dispose();
+    _courseNameController.dispose();
+    _groupDurationController.dispose();
+    _groupFeeController.dispose();
+    _groupDateController.dispose();
     super.dispose();
   }
 
@@ -196,51 +201,66 @@ class _CreateGroupPageState extends State<CreateGroupPage>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildTextField(
-              controller: _nameController,
+              controller: _groupNameController,
               label: 'Group Name',
               icon: Icons.people,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Please enter group name' : null,
+              validator:
+                  (value) =>
+                      value?.isEmpty ?? true ? 'Please enter group name' : null,
             ),
             const SizedBox(height: 20),
             _buildTextField(
-              controller: _emailController,
+              controller: _courseNameController,
               label: 'Course Name',
               icon: Icons.book,
               keyboardType: TextInputType.emailAddress,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Please enter course' : null,
+              validator:
+                  (value) =>
+                      value?.isEmpty ?? true ? 'Please enter course' : null,
             ),
             const SizedBox(height: 20),
             _buildTextField(
-              controller: _cnicController,
+              controller: _groupDurationController,
               label: 'Duration',
               icon: Icons.timer,
               keyboardType: TextInputType.number,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Please enter duration' : null,
+              validator:
+                  (value) =>
+                      value?.isEmpty ?? true ? 'Please enter duration' : null,
             ),
             const SizedBox(height: 20),
             _buildTextField(
-              controller: _phoneController,
+              controller: _groupFeeController,
               label: 'Fee',
               icon: Icons.money,
               keyboardType: TextInputType.phone,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Please enter fee' : null,
+              validator:
+                  (value) => value?.isEmpty ?? true ? 'Please enter fee' : null,
             ),
             const SizedBox(height: 20),
             _buildTextField(
-              controller: _addressController,
+              controller: _groupDateController,
               label: 'Date',
               icon: Icons.calendar_month,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Please enter date' : null,
+              validator:
+                  (value) =>
+                      value?.isEmpty ?? true ? 'Please enter date' : null,
             ),
             const SizedBox(height: 24),
-            _buildGenderSelection(),
-            const SizedBox(height: 32),
-            _buildSubmitButton(),
+            BlocBuilder<AddGroupBloc, GroupStates>(
+              builder: (context, state) {
+                return switch (state) {
+                  GroupInitialState() => _buildSubmitButton(context: context),
+                  GroupLoadingState() => _buildLoadingButton(),
+                  GroupSubmittedState() => _buildSubmitButton(context: context),
+                  GroupErrorState(message: String message) => SizedBox(
+                    height: 20,
+                    width: 50,
+                    child: Center(child: Text(message)),
+                  ),
+                };
+              },
+            ),
           ],
         ),
       ),
@@ -304,86 +324,42 @@ class _CreateGroupPageState extends State<CreateGroupPage>
     );
   }
 
-  Widget _buildGenderSelection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Time',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF374151),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildGenderOption('Start time', Icons.access_time),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildGenderOption('End time', Icons.access_time_filled),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGenderOption(String gender, IconData icon) {
-    final isSelected = _selectedGender == gender;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedGender = gender),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFF3B82F6).withOpacity(0.1)
-              : const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected
-                ? const Color(0xFF3B82F6)
-                : const Color(0xFFE5E7EB),
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: isSelected
-                  ? const Color(0xFF3B82F6)
-                  : const Color(0xFF6B7280),
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              gender,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isSelected
-                    ? const Color(0xFF3B82F6)
-                    : const Color(0xFF6B7280),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSubmitButton() {
+  Widget _buildSubmitButton({required BuildContext context}) {
     return SizedBox(
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
-        onPressed: _isLoading ? null : _handleSubmit,
+        onPressed: () {
+          if (_formKey.currentState!.validate()) {
+            context.read<AddGroupBloc>().add(
+              AddGroupEvent(
+                groupEntity: GroupEntity(
+                  courseName: _courseNameController.text.toString(),
+                  enterDate: _groupDateController.text.toString(),
+                  enterDuration: _groupDurationController.text.toString(),
+                  enterFee: _groupFeeController.text.toString(),
+                  groupName: _groupNameController.text.toString(),
+                ),
+              ),
+            );
+            // Show success message
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Group added successfully!'),
+                  backgroundColor: AppColors.primaryColor,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+
+              // Navigate back or clear form
+              Navigator.pop(context);
+            }
+          }
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF3B82F6),
           foregroundColor: Colors.white,
@@ -393,55 +369,43 @@ class _CreateGroupPageState extends State<CreateGroupPage>
           ),
           shadowColor: const Color(0xFF3B82F6).withOpacity(0.3),
         ),
-        child: _isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              )
-            : const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.people, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    'Create Group',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.people, size: 20),
+            SizedBox(width: 8),
+            Text(
+              'Create Group',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  void _handleSubmit() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      setState(() => _isLoading = false);
-
-      // Show success message
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Instructor added successfully!'),
-            backgroundColor: const Color(0xFF10B981),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+  Widget _buildLoadingButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton(
+        onPressed: null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF3B82F6),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-        );
-
-        // Navigate back or clear form
-        Navigator.pop(context);
-      }
-    }
+          shadowColor: const Color(0xFF3B82F6).withOpacity(0.3),
+        ),
+        child: const SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+        ),
+      ),
+    );
   }
+
 }
