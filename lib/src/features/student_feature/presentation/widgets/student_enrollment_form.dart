@@ -190,15 +190,15 @@ class StudentEnrollmentForm extends StatelessWidget {
                               label: 'Email Address',
                               icon: Icons.email_outlined,
                               keyboardType: TextInputType.emailAddress,
-                              // validator: (v) {
-                              //   if (v == null || v.isEmpty)
-                              //     return 'Email is required';
-                              //   if (!RegExp(
-                              //     r'^[\w\-\.\+]+@([\w\-]+\.)+[\w\-]{2,4}$',
-                              //   ).hasMatch(v))
-                              //     return 'Enter a valid email';
-                              //   return null;
-                              // },
+                              validator: (v) {
+                                if (v == null || v.isEmpty)
+                                  return 'Email is required';
+                                if (!RegExp(
+                                  r'^[\w\-\.\+]+@([\w\-]+\.)+[\w\-]{2,4}$',
+                                ).hasMatch(v))
+                                  return 'Enter a valid email';
+                                return null;
+                              },
                             ),
                           ),
                           SizedBox(
@@ -208,13 +208,13 @@ class StudentEnrollmentForm extends StatelessWidget {
                               label: 'CNIC',
                               icon: Icons.credit_card_outlined,
                               keyboardType: TextInputType.number,
-                              // validator: (v) {
-                              //   if (v == null || v.isEmpty)
-                              //     return 'CNIC is required';
-                              //   if (!RegExp(r'^\d{13}$').hasMatch(v))
-                              //     return 'Enter 13 digit CNIC';
-                              //   return null;
-                              // },
+                              validator: (v) {
+                                if (v == null || v.isEmpty)
+                                  return 'CNIC is required';
+                                if (!RegExp(r'^\d{13}$').hasMatch(v))
+                                  return 'Enter 13 digit CNIC';
+                                return null;
+                              },
                             ),
                           ),
                           SizedBox(
@@ -250,13 +250,13 @@ class StudentEnrollmentForm extends StatelessWidget {
                               label: 'Phone Number',
                               icon: Icons.phone_outlined,
                               keyboardType: TextInputType.phone,
-                              // validator: (v) {
-                              //   if (v == null || v.isEmpty)
-                              //     return 'Phone required';
-                              //   if (!RegExp(r'^\d{11}$').hasMatch(v))
-                              //     return 'Enter 11-digit Pakistani number';
-                              //   return null;
-                              // },
+                              validator: (v) {
+                                if (v == null || v.isEmpty)
+                                  return 'Phone required';
+                                if (!RegExp(r'^\d{11}$').hasMatch(v))
+                                  return 'Enter 11-digit Pakistani number';
+                                return null;
+                              },
                             ),
                           ),
                           SizedBox(

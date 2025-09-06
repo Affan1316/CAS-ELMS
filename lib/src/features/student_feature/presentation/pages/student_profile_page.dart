@@ -44,16 +44,16 @@ class StudentProfilePageState extends State<StudentProfilePage>
     super.dispose();
   }
 
-  void _flipCard() {
-    if (_isFlipped) {
-      _animationController.reverse();
-    } else {
-      _animationController.forward();
-    }
-    setState(() {
-      _isFlipped = !_isFlipped;
-    });
-  }
+  // void _flipCard() {
+  //   if (_isFlipped) {
+  //     _animationController.reverse();
+  //   } else {
+  //     _animationController.forward();
+  //   }
+  //   setState(() {
+  //     _isFlipped = !_isFlipped;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -85,33 +85,27 @@ class StudentProfilePageState extends State<StudentProfilePage>
                           maxWidth: isTablet ? 400 : double.infinity,
                           maxHeight: screenHeight * 0.8,
                         ),
-                        child: GestureDetector(
-                          onTap: _flipCard,
-                          child: AnimatedBuilder(
-                            animation: _animation,
-                            builder: (context, child) {
-                              return Transform(
-                                alignment: Alignment.center,
-                                transform:
-                                    Matrix4.identity()
-                                      ..setEntry(3, 2, 0.001)
-                                      ..rotateY(_animation.value * 3.14159),
-                                child:
-                                    _animation.value < 0.5
-                                        ? _buildFrontCard(isTablet, screenWidth)
-                                        : Transform(
-                                          alignment: Alignment.center,
-                                          transform:
-                                              Matrix4.identity()
-                                                ..rotateY(3.14159),
-                                          child: _buildBackCard(
-                                            isTablet,
-                                            screenWidth,
-                                          ),
-                                        ),
-                              );
-                            },
-                          ),
+
+                        child: AnimatedBuilder(
+                          animation: _animation,
+                          builder: (context, child) {
+                            return Transform(
+                              alignment: Alignment.center,
+                              transform:
+                                  Matrix4.identity()
+                                    ..setEntry(3, 2, 0.001)
+                                    ..rotateY(_animation.value * 3.14159),
+                              child:
+                                  _animation.value < 0.5
+                                      ? _buildFrontCard(isTablet, screenWidth)
+                                      : Transform(
+                                        alignment: Alignment.center,
+                                        transform:
+                                            Matrix4.identity()
+                                              ..rotateY(3.14159),
+                                      ),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -449,82 +443,82 @@ class StudentProfilePageState extends State<StudentProfilePage>
     );
   }
 
-  Widget _buildBackCard(bool isTablet, double screenWidth) {
-    return _buildNeomorphicContainer(
-      padding: EdgeInsets.all(isTablet ? 32.0 : 24.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildNeomorphicContainer(
-            width: isTablet ? 100 : 80,
-            height: isTablet ? 100 : 80,
-            child: Icon(
-              Icons.info_outline,
-              size: isTablet ? 50 : 40,
-              color: _accentColor,
-            ),
-          ),
+  // Widget _buildBackCard(bool isTablet, double screenWidth) {
+  //   return _buildNeomorphicContainer(
+  //     padding: EdgeInsets.all(isTablet ? 32.0 : 24.0),
+  //     child: Column(
+  //       mainAxisSize: MainAxisSize.min,
+  //       children: [
+  //         _buildNeomorphicContainer(
+  //           width: isTablet ? 100 : 80,
+  //           height: isTablet ? 100 : 80,
+  //           child: Icon(
+  //             Icons.info_outline,
+  //             size: isTablet ? 50 : 40,
+  //             color: _accentColor,
+  //           ),
+  //         ),
 
-          SizedBox(height: isTablet ? 24 : 20),
+  //         SizedBox(height: isTablet ? 24 : 20),
 
-          Text(
-            'Additional Information',
-            style: TextStyle(
-              fontSize: isTablet ? 24 : 20,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1F2937),
-            ),
-          ),
+  //         Text(
+  //           'Additional Information',
+  //           style: TextStyle(
+  //             fontSize: isTablet ? 24 : 20,
+  //             fontWeight: FontWeight.w600,
+  //             color: Color(0xFF1F2937),
+  //           ),
+  //         ),
 
-          SizedBox(height: isTablet ? 16 : 12),
+  //         SizedBox(height: isTablet ? 16 : 12),
 
-          Text(
-            'This is the back side of the profile card. You can add additional user information, statistics, or any other relevant details here.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: isTablet ? 16 : 14,
-              color: Color(0xFF6B7280),
-              height: 1.5,
-            ),
-          ),
+  //         Text(
+  //           'This is the back side of the profile card. You can add additional user information, statistics, or any other relevant details here.',
+  //           textAlign: TextAlign.center,
+  //           style: TextStyle(
+  //             fontSize: isTablet ? 16 : 14,
+  //             color: Color(0xFF6B7280),
+  //             height: 1.5,
+  //           ),
+  //         ),
 
-          SizedBox(height: isTablet ? 32 : 24),
+  //         SizedBox(height: isTablet ? 32 : 24),
 
-          // Some stats with neomorphic containers
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildNeomorphicStatItem('120', 'Posts', isTablet),
-              _buildNeomorphicStatItem('1.5K', 'Followers', isTablet),
-              _buildNeomorphicStatItem('180', 'Following', isTablet),
-            ],
-          ),
+  //         // Some stats with neomorphic containers
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  //           children: [
+  //             _buildNeomorphicStatItem('120', 'Posts', isTablet),
+  //             _buildNeomorphicStatItem('1.5K', 'Followers', isTablet),
+  //             _buildNeomorphicStatItem('180', 'Following', isTablet),
+  //           ],
+  //         ),
 
-          SizedBox(height: isTablet ? 32 : 24),
+  //         SizedBox(height: isTablet ? 32 : 24),
 
-          // Flip back indicator
-          _buildNeomorphicContainer(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.flip, size: 16, color: _accentColor),
-                SizedBox(width: 8),
-                Text(
-                  'Tap to flip back',
-                  style: TextStyle(
-                    color: _accentColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  //         // Flip back indicator
+  //         _buildNeomorphicContainer(
+  //           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  //           child: Row(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               Icon(Icons.flip, size: 16, color: _accentColor),
+  //               SizedBox(width: 8),
+  //               Text(
+  //                 'Tap to flip back',
+  //                 style: TextStyle(
+  //                   color: _accentColor,
+  //                   fontSize: 12,
+  //                   fontWeight: FontWeight.w500,
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildNeomorphicMenuItem(
     IconData icon,

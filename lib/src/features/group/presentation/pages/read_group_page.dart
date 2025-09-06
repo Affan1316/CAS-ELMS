@@ -3,6 +3,7 @@ import 'package:flutter_cas_app_main/src/features/group/data/repositories/group_
 import 'package:flutter_cas_app_main/src/features/group/domain/entities/group_entity.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/usecases/read_group_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/update_group_screen.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/group_students_screen.dart';
 
 class GroupMainDetailPage extends StatefulWidget {
   const GroupMainDetailPage({super.key});
@@ -12,7 +13,6 @@ class GroupMainDetailPage extends StatefulWidget {
 }
 
 class _GroupMainDetailPageState extends State<GroupMainDetailPage> {
-
   @override
   Widget build(BuildContext context) {
     final darkPurple = const Color(0xFF3D0075);
@@ -38,7 +38,19 @@ class _GroupMainDetailPageState extends State<GroupMainDetailPage> {
               itemBuilder: (context, index) {
                 final group = snapshot.data?[index];
                 return GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return GroupStudentsScreen(
+                            groupTitle: group.groupName,
+                            // students: [],
+                          );
+                        },
+                      ),
+                    );
+                  },
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 24),
                     padding: const EdgeInsets.all(18),
@@ -86,7 +98,7 @@ class _GroupMainDetailPageState extends State<GroupMainDetailPage> {
                                       builder: (context) {
                                         return
                                         // Container();
-                                        UpdateGroupScreen(groupEntity: group,);
+                                        UpdateGroupScreen(groupEntity: group);
                                       },
                                     ),
                                   ),

@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
 
 class StudentDetailPage extends StatefulWidget {
@@ -12,10 +14,23 @@ class StudentDetailPage extends StatefulWidget {
 class _StudentDetailPageState extends State<StudentDetailPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  File? _pickedImage;
 
   final Color darkPurple = const Color(0xFF3D0075);
   final Color cardColor = Colors.white;
   final Color shadowColor = const Color(0xFFB0D6F9);
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        _pickedImage = File(image.path);
+      });
+      print("Picked Image Path: ${image.path}");
+    }
+  }
 
   Widget _neoInfoCard(String title, String value, IconData icon, int index) {
     return AnimatedBuilder(
@@ -113,35 +128,36 @@ class _StudentDetailPageState extends State<StudentDetailPage>
         children: [
           const SizedBox(height: 40),
 
-          // Avatar
+          // Avatar with picker
           Center(
             child: Hero(
               tag: student.id,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 700),
-                curve: Curves.easeInOut,
-                height: 110,
-                width: 110,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: cardColor,
-                  boxShadow: [
-                    BoxShadow(
-                      color: shadowColor.withOpacity(0.45),
-                      offset: const Offset(4, 4),
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Text(
-                    student.name[0].toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 42,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.5,
-                      color: darkPurple,
-                    ),
+              child: GestureDetector(
+                onTap: _pickImage,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 700),
+                  curve: Curves.easeInOut,
+                  height: 110,
+                  width: 110,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: cardColor,
+                    boxShadow: [
+                      BoxShadow(
+                        color: shadowColor.withOpacity(0.45),
+                        offset: const Offset(4, 4),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child:
+                        _pickedImage != null
+                            ? Image.file(_pickedImage!, fit: BoxFit.cover)
+                            : Image.asset(
+                              "assets/images/person 1-Photoroom.png",
+                              fit: BoxFit.contain,
+                            ),
                   ),
                 ),
               ),
@@ -192,51 +208,6 @@ class _StudentDetailPageState extends State<StudentDetailPage>
             8,
           ),
 
-          const SizedBox(height: 30),
-
-          // Button
-          Center(
-            child: Container(
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: [
-                  BoxShadow(
-                    color: shadowColor.withOpacity(0.45),
-                    offset: const Offset(4, 4),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 28,
-                    vertical: 14,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
-                  ),
-                ),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Messaging ${student.name}...")),
-                  );
-                },
-                icon: Icon(Icons.message, color: darkPurple, size: 20),
-                label: Text(
-                  "Send Message",
-                  style: TextStyle(
-                    color: darkPurple,
-                    fontSize: 15.5,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-          ),
           const SizedBox(height: 30),
         ],
       ),
