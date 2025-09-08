@@ -120,7 +120,6 @@ class _StudentDetailPageState extends State<StudentDetailPage>
   @override
   Widget build(BuildContext context) {
     final student = widget.student;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF6F8FC), // soft neutral background
       body: ListView(

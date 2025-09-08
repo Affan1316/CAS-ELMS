@@ -5,6 +5,7 @@ import 'dart:ffi';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/actual_implementation_firebase_repo.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/data/cached_data.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/firestore_repositry.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/add_student_use_case.dart';
@@ -68,11 +69,30 @@ class StudentFeatureBloc
   ) async {
     print("43343434343434343starting process4433333434334343434");
     emit(GroupStudentsDatafetching());
+    StudentEntityClass studentData;
+    if (CachedData.listOfAlreadyFetchedStudentsData.containsKey(event.id)) {
+      studentData = CachedData.listOfAlreadyFetchedStudentsData[event.id]!;
+      emit(
+        GroupStudentsDatafetched(
+          id: studentData.id,
+          name: studentData.name,
+          email: studentData.email,
+          cnic: studentData.cnic,
+          phone: studentData.phone,
+          address: studentData.address,
+          gender: studentData.gender,
+          fatherName: studentData.fatherName,
+          fatherOccupation: studentData.fatherOccupation,
+          group: studentData.group,
+        ),
+      );
+      return;
+    }
     final ReadStudentUseCase readStudentUseCase = ReadStudentUseCase(
       firestoreRepositry: _firestoreRepositry,
     );
-    StudentEntityClass studentData = await readStudentUseCase
-        .readStudentDataUsingId(event.id);
+    studentData = await readStudentUseCase.readStudentDataUsingId(event.id);
+    CachedData.listOfAlreadyFetchedStudentsData[event.id] = studentData;
     emit(
       GroupStudentsDatafetched(
         id: studentData.id,
