@@ -59,7 +59,7 @@ Widget buildFeaturesGrid(AnimationController _animationController) {
       'icon': Icons.person_add_alt_1_rounded,
     },
     {
-      'title': 'Enroll Student',
+      'title': 'Add Courses',
       'subtitle': 'Time management',
       'icon': Icons.schedule_outlined,
     },
