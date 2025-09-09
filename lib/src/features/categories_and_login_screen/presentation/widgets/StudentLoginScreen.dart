@@ -156,6 +156,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
       ),
       body: BlocListener<OnboardingBloc, OnboardingState>(
         listener: (context, state) {
+          print(state);
           if (state is ReadingStudentNameCompleted) {
             // Navigate to home screen
             Navigator.of(context).pushReplacement(
