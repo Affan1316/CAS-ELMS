@@ -8,7 +8,7 @@ import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/bloc/ch
 import 'package:flutter_cas_app_main/src/features/add_courses/presentation/bloc/add_course_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presentation/bloc/add_instructor_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/pages/admin_home_page.dart';
+import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/admin_login_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee%20history/data/local_fee_service.dart';
 import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/bloc/fee_history_bloc.dart';
@@ -60,6 +60,7 @@ class MyApp extends StatelessWidget {
           BlocProvider<AddInstructorBloc>(
             create: (context) => AddInstructorBloc(),
           ),
+          BlocProvider<AdminLoginBloc>(create: (context) => AdminLoginBloc()),
           BlocProvider<FeeHistoryBloc>(
             create:
                 (context) => FeeHistoryBloc(LocalFeeService())..add(LoadFees()),
