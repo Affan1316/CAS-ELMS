@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildSecondPage.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/StudentLoginScreen.dart';
 
 class SignUpFooter extends StatelessWidget {
-  const SignUpFooter({Key? key}) : super(key: key);
+  final String id;
+  const SignUpFooter({Key? key, required this.id}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +18,9 @@ class SignUpFooter extends StatelessWidget {
           onTap: () {
             // Navigate to sign in screen
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => StudentLoginScreen()),
+              MaterialPageRoute(
+                builder: (context) => StudentLoginScreen(studentid: id),
+              ),
             );
           },
           child: Text(

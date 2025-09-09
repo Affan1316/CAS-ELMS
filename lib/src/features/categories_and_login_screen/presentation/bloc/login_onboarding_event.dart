@@ -35,3 +35,8 @@ class LoginEvent extends OnboardingEvent {
   @override
   List<Object> get props => [userId];
 }
+
+class ReadStudentNameFromFireBaseEvent extends OnboardingEvent {
+  final String id;
+  const ReadStudentNameFromFireBaseEvent({required this.id});
+}

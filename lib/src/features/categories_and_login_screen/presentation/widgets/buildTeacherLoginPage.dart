@@ -241,6 +241,9 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                                 builder: (context) => AdminHomePage(),
                               ),
                             );
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(SnackBar(content: Text('hello')));
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.teal,
