@@ -11,6 +11,8 @@ import 'package:flutter_cas_app_main/src/features/installment_page/presentation/
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
 import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/bloc/student_enrollment_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student%20enrolement%20form%20admin%20side/presentation/pages/student_enrollment_screen.dart';
+import 'package:flutter_cas_app_main/src/features/time_graph_page/presentation/bloc/time_graph_page_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/bloc/group_time_tracker_bloc.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 // import 'package:flutter_cas_app_main/src/features/course_catalog/presentation/pages/course_catalog_screen_state.dart';
 
@@ -46,6 +48,8 @@ class MyApp extends StatelessWidget {
           BlocProvider<AddInstructorBloc>(
             create: (context) => AddInstructorBloc(),
           ),
+           BlocProvider(create: (context) => GroupTimeTrackerBloc()),
+            BlocProvider(create: (context) => TimeGraphPageBloc()),
         ],
         child: MaterialApp(
           title: 'CAS ELMS',
