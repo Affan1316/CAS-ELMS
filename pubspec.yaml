@@ -57,6 +57,7 @@ dependencies:
   clay_containers: ^0.3.4
   spring: ^2.0.2
   bounce: ^1.0.2
+  flutter_secure_storage: ^9.2.4
   
 
 dev_dependencies:

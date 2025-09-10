@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/page/admin_login_page.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_state.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/SlideInWidget.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildRoleCard.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildStudentAvatar.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildTeacherAvatar.dart';
-import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildTeacherLoginPage.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildUserIdScreen.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
@@ -252,7 +252,7 @@ class RoleSelectionScreen extends StatelessWidget {
     if (role == 'Teacher') {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => TeacherLoginScreen()),
+        MaterialPageRoute(builder: (context) => AdminLoginScreen()),
       );
     } else {
       Navigator.push(
