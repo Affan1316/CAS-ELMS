@@ -115,6 +115,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     );
     var a = await readStudentDataUsecase.readStudentUseCase
         .readStudentDataUsingId(event.id);
+    print("$a");
     emit(ReadingStudentNameCompleted(name: a.name));
   }
 }

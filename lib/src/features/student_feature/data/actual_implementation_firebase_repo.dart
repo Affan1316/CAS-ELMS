@@ -48,6 +48,7 @@ class ActualImplementationFirebaseRepo implements FirestoreRepositry {
 
   @override
   Future<Map<String, dynamic>?> readStudentDataBasedOnId(String id) async {
+    print("++++++++++++ Being fetched from firebase +++++++");
     DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
         await FirebaseFirestore.instance
             .collection(completeStudentsCollectionName)
