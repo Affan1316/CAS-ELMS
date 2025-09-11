@@ -1,3 +1,5 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/installment_page/presentation/bloc/installment_page_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/installment_page/presentation/pages/widgets/input_field.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
@@ -5,15 +7,20 @@ import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 class MainCard extends StatelessWidget {
   const MainCard({
     super.key,
+    required this.studentId,
     required this.totalFeeController,
     required this.installmentsController,
     required this.installmentAmountController,
     required this.installmentAmount,
+    required this.isLoading,
   });
+
+  final String studentId;
   final TextEditingController totalFeeController;
   final TextEditingController installmentsController;
   final TextEditingController installmentAmountController;
   final double installmentAmount;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -82,9 +89,60 @@ class MainCard extends StatelessWidget {
 
                 const SizedBox(height: 30),
                 NeumorphicButton(
-                  onPressed: () {
-                    //TODO :  handle generate btn
-                  },
+                  onPressed:
+                      isLoading
+                          ? null
+                          : () {
+                            // Validate inputs
+                            if (totalFeeController.text.trim().isEmpty) {
+                              _showErrorSnackBar(
+                                context,
+                                'Please enter total fee',
+                              );
+                              return;
+                            }
+
+                            if (installmentsController.text.trim().isEmpty) {
+                              _showErrorSnackBar(
+                                context,
+                                'Please enter number of installments',
+                              );
+                              return;
+                            }
+
+                            final totalFee = double.tryParse(
+                              totalFeeController.text.trim(),
+                            );
+                            final installments = int.tryParse(
+                              installmentsController.text.trim(),
+                            );
+
+                            if (totalFee == null || totalFee <= 0) {
+                              _showErrorSnackBar(
+                                context,
+                                'Please enter a valid total fee',
+                              );
+                              return;
+                            }
+
+                            if (installments == null || installments <= 0) {
+                              _showErrorSnackBar(
+                                context,
+                                'Please enter valid number of installments',
+                              );
+                              return;
+                            }
+
+                            // Trigger the create installment event
+                            context.read<InstallmentPageBloc>().add(
+                              CreateInstallmentEvent(
+                                studentId: studentId,
+                                totalFee: totalFee,
+                                numberOfInstallments: installments,
+                                amountPerMonth: installmentAmount,
+                              ),
+                            );
+                          },
                   style: NeumorphicStyle(
                     color: const Color(0xFF4A9DBF),
                     shape: NeumorphicShape.flat,
@@ -97,18 +155,39 @@ class MainCard extends StatelessWidget {
                     horizontal: 40,
                     vertical: 12,
                   ),
-                  child: const Text(
-                    "Generate",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child:
+                      isLoading
+                          ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                          : const Text(
+                            "Generate",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showErrorSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFFEF4444),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

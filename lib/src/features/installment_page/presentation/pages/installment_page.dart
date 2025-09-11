@@ -4,9 +4,10 @@ import 'package:flutter_cas_app_main/src/features/installment_page/presentation/
 import 'package:flutter_cas_app_main/src/features/installment_page/presentation/pages/widgets/main_card.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 
-
 class CreateFeePlanPage extends StatefulWidget {
-  const CreateFeePlanPage({super.key});
+  final String studentId;
+
+  const CreateFeePlanPage({super.key, required this.studentId});
 
   @override
   State<CreateFeePlanPage> createState() => _CreateFeePlanPageState();
@@ -44,16 +45,7 @@ class _CreateFeePlanPageState extends State<CreateFeePlanPage> {
         ),
       );
     });
-    // _calculateInstallment();
   }
-
-  // void _calculateInstallment() {
-  //   final total = double.tryParse(totalFeeController.text) ?? 0;
-  //   final count = int.tryParse(installmentsController.text) ?? 1;
-  //   setState(() {
-  //     installmentAmount = count > 0 ? total / count : 0;
-  //   });
-  // }
 
   @override
   void dispose() {
@@ -77,28 +69,57 @@ class _CreateFeePlanPageState extends State<CreateFeePlanPage> {
         title: AppBarTitle(),
       ),
       body: SafeArea(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Main Card
-            Align(
-              alignment: Alignment.center,
-              child: BlocBuilder<InstallmentPageBloc, InstallmentPageState>(
-                bloc: context.read<InstallmentPageBloc>(),
-                builder: (context, state) {
-                  return MainCard(
-                    totalFeeController: totalFeeController,
-                    installmentsController: installmentsController,
-                    installmentAmountController: installmentAmountController,
-                    installmentAmount:
-                        state is InstallmentPageintallmentCalculatedState
-                        ? state.installment
-                        : 0,
-                  );
-                },
+        child: BlocListener<InstallmentPageBloc, InstallmentPageState>(
+          listener: (context, state) {
+            if (state is InstallmentCreatedSuccessState) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Installment plan created successfully!'),
+                  backgroundColor: const Color(0xFF10B981),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+              Navigator.of(context).pop();
+            } else if (state is InstallmentCreatedFailureState) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.error),
+                  backgroundColor: const Color(0xFFEF4444),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+            }
+          },
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Align(
+                alignment: Alignment.center,
+                child: BlocBuilder<InstallmentPageBloc, InstallmentPageState>(
+                  bloc: context.read<InstallmentPageBloc>(),
+                  builder: (context, state) {
+                    return MainCard(
+                      studentId: widget.studentId,
+                      totalFeeController: totalFeeController,
+                      installmentsController: installmentsController,
+                      installmentAmountController: installmentAmountController,
+                      installmentAmount:
+                          state is InstallmentPageintallmentCalculatedState
+                              ? state.installment
+                              : 0,
+                      isLoading: state is InstallmentCreatingState,
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

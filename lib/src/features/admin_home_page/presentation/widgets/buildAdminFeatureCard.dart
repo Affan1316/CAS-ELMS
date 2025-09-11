@@ -12,6 +12,7 @@ import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/inq
 import 'package:flutter_cas_app_main/src/features/installment_page/presentation/pages/installment_page.dart';
 import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/groups_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_enrollment_screen.dart';
+import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/pages/workshop_time_tracker.dart';
 
 Widget buildAdminFeatureCard(
   Map<String, dynamic> feature,
@@ -163,15 +164,15 @@ void _navigateToScreen(BuildContext context, int index) {
         break;
       case 10: // Leaves Approved
         print('Leaves Approved - Not implemented yet');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Leaves Approved feature coming soon!')),
-        );
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (context) => WorkshopTimeTracker()));
         break;
       case 11: // Update Group Data
         print('Update Group Data - Not implemented yet');
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (context) => CreateFeePlanPage()));
+        // Navigator.of(
+        //   context,
+        // ).push(MaterialPageRoute(builder: (context) => CreateFeePlanPage()));
         break;
       default:
         print('Invalid index: $index');
