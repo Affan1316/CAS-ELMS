@@ -38,7 +38,6 @@ class StudentEnrollmentForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Listen for success/failure to show snackbars / navigate
     return BlocListener<StudentFeatureBloc, StudentFeatureState>(
       listener: (context, state) {
         if (state is StudentEnrollmentSuccess) {
@@ -52,7 +51,7 @@ class StudentEnrollmentForm extends StatelessWidget {
               ),
             ),
           );
-          Navigator.of(context).pop(); // optional: close the screen on success
+          Navigator.of(context).pop();
         } else if (state is StudentEnrollmentFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -69,7 +68,6 @@ class StudentEnrollmentForm extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Hero (keeps look from CreateGroup)
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -125,7 +123,6 @@ class StudentEnrollmentForm extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          // Form card
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -291,7 +288,7 @@ class StudentEnrollmentForm extends StatelessWidget {
                       ),
 
                       const SizedBox(height: 18),
-                      // Gender selector (animated)
+
                       const Text(
                         'Gender',
                         style: TextStyle(
@@ -321,7 +318,6 @@ class StudentEnrollmentForm extends StatelessWidget {
                             elevation: 4,
                           ),
                           onPressed: () {
-                            // Validate that student ID is entered
                             if (studentIdController.text.trim().isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -359,7 +355,6 @@ class StudentEnrollmentForm extends StatelessWidget {
                       ),
                       SizedBox(height: 25),
 
-                      // Submit button (uses your bloc states/events)
                       BlocBuilder<StudentFeatureBloc, StudentFeatureState>(
                         builder: (context, state) {
                           final isLoading =
@@ -374,7 +369,6 @@ class StudentEnrollmentForm extends StatelessWidget {
                                       : () {
                                         if (formKey.currentState?.validate() ??
                                             false) {
-                                          // Use your exact event and fields
                                           context
                                               .read<StudentFeatureBloc>()
                                               .add(

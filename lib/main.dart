@@ -172,7 +172,6 @@ class _MyHomePageState extends State<MyHomePage> {
 // import 'package:flutter/material.dart';
 // import 'package:intl/intl.dart';
 
-// Data Models
 class Group {
   final String id;
   final String code;
@@ -240,7 +239,6 @@ class FeeInstallment {
   }
 }
 
-// Dummy Data Service
 class DataService {
   static final List<Group> groups = [
     Group(
@@ -356,7 +354,6 @@ class DataService {
   }
 }
 
-// UI Components
 class GradientBackground extends StatelessWidget {
   final Widget child;
   const GradientBackground({super.key, required this.child});
@@ -477,7 +474,6 @@ class ScreenHeader extends StatelessWidget {
   }
 }
 
-// Screens
 class GroupsLoadingScreen extends StatefulWidget {
   const GroupsLoadingScreen({super.key});
 

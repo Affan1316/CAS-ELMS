@@ -32,7 +32,7 @@ class _ShaderAvatarState extends State<ShaderAvatar>
 
   @override
   Widget build(BuildContext context) {
-    final isFile = widget.imagePath.startsWith('/'); // Detects local file path
+    final isFile = widget.imagePath.startsWith('/');
 
     return AnimatedBuilder(
       animation: _controller,
