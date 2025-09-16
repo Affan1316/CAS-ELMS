@@ -80,7 +80,7 @@ class InstallmentService {
         'id': studentId,
         'name': name,
         'groupId': groupId,
-        'totalFee': totalFee, // ✅ totalFee added
+        'totalFee': totalFee,
         'numberOfInstallments': numberOfInstallments,
         'amountPerMonth': amountPerMonth,
         'installments': installments,
@@ -97,7 +97,6 @@ class InstallmentService {
     }
   }
 
-  /// Fetch a student document
   Future<StudentFeeFeature?> getStudent(String studentId) async {
     try {
       final doc =
@@ -113,7 +112,7 @@ class InstallmentService {
         'id': data['id'] ?? studentId,
         'name': data['name'] ?? '',
         'groupId': data['groupId'] ?? '',
-        'totalFee': data['totalFee'] ?? 0, // ✅ also normalize totalFee
+        'totalFee': data['totalFee'] ?? 0,
         'installments':
             (data['installments'] as List<dynamic>? ?? [])
                 .map((e) => Map<String, dynamic>.from(e as Map))
@@ -126,7 +125,6 @@ class InstallmentService {
     }
   }
 
-  /// Update a specific installment (mark paid / update fields)
   Future<void> updateInstallmentPayment({
     required String studentId,
     required String installmentId,
@@ -161,7 +159,7 @@ class InstallmentService {
 
       await docRef.update({
         'installments': updatedInstallments,
-        'totalFee': data['totalFee'], // ✅ always keep totalFee in updates
+        'totalFee': data['totalFee'],
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {

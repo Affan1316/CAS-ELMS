@@ -34,10 +34,11 @@ class _AGroupPageState extends State<AGroupPage> {
   void _filterStudents(String query) {
     final searchLower = query.toLowerCase();
     setState(() {
-      filteredStudents = allStudents.where((student) {
-        return student.name.toLowerCase().contains(searchLower) ||
-            student.roll.toLowerCase().contains(searchLower);
-      }).toList();
+      filteredStudents =
+          allStudents.where((student) {
+            return student.name.toLowerCase().contains(searchLower) ||
+                student.roll.toLowerCase().contains(searchLower);
+          }).toList();
     });
   }
 
@@ -56,22 +57,27 @@ class _AGroupPageState extends State<AGroupPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F5F9),
       appBar: AppBar(
-        title: isSearching
-            ? TextField(
-                controller: searchController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Search students...',
-                  border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.white60),
+        title:
+            isSearching
+                ? TextField(
+                  controller: searchController,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Search students...',
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(color: Colors.white60),
+                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 18),
+                  onChanged: _filterStudents,
+                )
+                : const Text(
+                  "AI Group",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-                style: const TextStyle(color: Colors.white, fontSize: 18),
-                onChanged: _filterStudents,
-              )
-            : const Text(
-                "AI Group",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
-              ),
         centerTitle: true,
         backgroundColor: const Color(0xFF0097B2),
         elevation: 6,
@@ -81,9 +87,15 @@ class _AGroupPageState extends State<AGroupPage> {
         ),
         actions: [
           if (isSearching)
-            IconButton(icon: const Icon(Icons.close, color: Colors.white), onPressed: _stopSearch)
+            IconButton(
+              icon: const Icon(Icons.close, color: Colors.white),
+              onPressed: _stopSearch,
+            )
           else
-            IconButton(icon: const Icon(Icons.search, color: Colors.white), onPressed: _startSearch),
+            IconButton(
+              icon: const Icon(Icons.search, color: Colors.white),
+              onPressed: _startSearch,
+            ),
           const SizedBox(width: 4),
           const Icon(Icons.refresh, color: Colors.white),
           const SizedBox(width: 12),
