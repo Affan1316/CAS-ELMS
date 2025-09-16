@@ -96,7 +96,11 @@ class GroupStudentsScreen extends StatelessWidget {
               // Data  ready to reaad
               students =
                   snapshot.data!.docs
-                      .map((doc) => GroupStudentEntityClass.fromMap(doc.data()))
+                      .map(
+                        (doc) => StudentFeatureGroupStudentEntityClass.fromMap(
+                          doc.data(),
+                        ),
+                      )
                       .toList();
               print(students);
 

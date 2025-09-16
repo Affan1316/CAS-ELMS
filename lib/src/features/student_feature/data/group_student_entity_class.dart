@@ -1,14 +1,20 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-class GroupStudentEntityClass {
+class StudentFeatureGroupStudentEntityClass {
   final String name;
   final String rollNum;
 
-  const GroupStudentEntityClass({required this.name, required this.rollNum});
+  const StudentFeatureGroupStudentEntityClass({
+    required this.name,
+    required this.rollNum,
+  });
 
-  GroupStudentEntityClass copyWith({String? name, String? rollNum}) {
-    return GroupStudentEntityClass(
+  StudentFeatureGroupStudentEntityClass copyWith({
+    String? name,
+    String? rollNum,
+  }) {
+    return StudentFeatureGroupStudentEntityClass(
       name: name ?? this.name,
       rollNum: rollNum ?? this.rollNum,
     );
@@ -18,8 +24,10 @@ class GroupStudentEntityClass {
     return {'name': name, 'rollNum': rollNum};
   }
 
-  factory GroupStudentEntityClass.fromMap(Map<String, dynamic> map) {
-    return GroupStudentEntityClass(
+  factory StudentFeatureGroupStudentEntityClass.fromMap(
+    Map<String, dynamic> map,
+  ) {
+    return StudentFeatureGroupStudentEntityClass(
       name: map['name'] ?? '',
       rollNum: map['rollNum'] ?? '',
     );
@@ -27,8 +35,8 @@ class GroupStudentEntityClass {
 
   String toJson() => json.encode(toMap());
 
-  factory GroupStudentEntityClass.fromJson(String source) =>
-      GroupStudentEntityClass.fromMap(
+  factory StudentFeatureGroupStudentEntityClass.fromJson(String source) =>
+      StudentFeatureGroupStudentEntityClass.fromMap(
         json.decode(source) as Map<String, dynamic>,
       );
 
@@ -37,7 +45,7 @@ class GroupStudentEntityClass {
       'GroupStudentEntityClass(name: $name, rollNum: $rollNum)';
 
   @override
-  bool operator ==(covariant GroupStudentEntityClass other) {
+  bool operator ==(covariant StudentFeatureGroupStudentEntityClass other) {
     if (identical(this, other)) return true;
     return other.name == name && other.rollNum == rollNum;
   }
