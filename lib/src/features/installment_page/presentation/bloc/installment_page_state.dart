@@ -1,17 +1,32 @@
 part of 'installment_page_bloc.dart';
 
-@immutable
-abstract class InstallmentPageState {
+abstract class InstallmentPageState extends Equatable {
   const InstallmentPageState();
+
+  @override
+  List<Object> get props => [];
 }
 
-@immutable
-class InstallmentPageInitialState extends InstallmentPageState {
-  const InstallmentPageInitialState();
-}
+class InstallmentPageInitial extends InstallmentPageState {}
 
-@immutable
 class InstallmentPageintallmentCalculatedState extends InstallmentPageState {
   final double installment;
+
   const InstallmentPageintallmentCalculatedState({required this.installment});
+
+  @override
+  List<Object> get props => [installment];
+}
+
+class InstallmentCreatingState extends InstallmentPageState {}
+
+class InstallmentCreatedSuccessState extends InstallmentPageState {}
+
+class InstallmentCreatedFailureState extends InstallmentPageState {
+  final String error;
+
+  const InstallmentCreatedFailureState({required this.error});
+
+  @override
+  List<Object> get props => [error];
 }

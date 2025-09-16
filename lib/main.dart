@@ -8,6 +8,7 @@ import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/bloc/ch
 import 'package:flutter_cas_app_main/src/features/add_courses/presentation/bloc/add_course_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presentation/bloc/add_instructor_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/pages/admin_home_page.dart';
 import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/admin_login_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee%20history/data/local_fee_service.dart';
@@ -21,9 +22,9 @@ import 'package:flutter_cas_app_main/src/features/group/data/repositories/group_
 import 'package:flutter_cas_app_main/src/features/group/domain/usecases/add_group_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/usecases/update_group_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/bloc/group_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/group/presentation/pages/read_group_page.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/bloc/inquiry_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/installment_page/presentation/bloc/installment_page_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/installment_page/presentation/installment_service.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
 import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/group_detail_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
@@ -60,7 +61,10 @@ class MyApp extends StatelessWidget {
           BlocProvider<InquiryBloc>(create: (context) => sl<InquiryBloc>()),
           BlocProvider<AddCourseBloc>(create: (context) => sl<AddCourseBloc>()),
           BlocProvider<InstallmentPageBloc>(
-            create: (context) => InstallmentPageBloc(),
+            create:
+                (context) => InstallmentPageBloc(
+                  installmentService: InstallmentService(),
+                ),
           ),
 
           BlocProvider<AddInstructorBloc>(
@@ -90,7 +94,7 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.system,
-          home: GroupsListScreen(),
+          home: AdminHomePage(),
         ),
       ),
     );
