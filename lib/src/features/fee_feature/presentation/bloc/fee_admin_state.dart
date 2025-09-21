@@ -1,39 +1,134 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/entities/group_entity.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/student_fee_feature_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/group_student_entity_class.dart';
 
-abstract class FeeAdminState {}
+abstract class FeeAdminState extends Equatable {
+  const FeeAdminState();
 
-class FeeAdminInitialState extends FeeAdminState {}
+  @override
+  List<Object?> get props => [];
+}
 
-class FeeAdminGroupsLoadingState extends FeeAdminState {}
+class FeeAdminInitialState extends FeeAdminState {
+  const FeeAdminInitialState();
+}
+
+class FeeAdminGroupsLoadingState extends FeeAdminState {
+  const FeeAdminGroupsLoadingState();
+}
 
 class FeeAdminGroupsLoadedState extends FeeAdminState {
   final List<GroupEntity> groups;
-  FeeAdminGroupsLoadedState({required this.groups});
+
+  const FeeAdminGroupsLoadedState({required this.groups});
+
+  @override
+  List<Object?> get props => [groups];
 }
 
 class FeeAdminGroupDataFilteringCompleteState extends FeeAdminState {
   final List<GroupEntity> filteredDataList;
-  FeeAdminGroupDataFilteringCompleteState({required this.filteredDataList});
+
+  const FeeAdminGroupDataFilteringCompleteState({
+    required this.filteredDataList,
+  });
+
+  @override
+  List<Object?> get props => [filteredDataList];
 }
 
 class FeeAdminErrorState extends FeeAdminState {
   final String error;
 
-  FeeAdminErrorState({required this.error});
+  const FeeAdminErrorState({required this.error});
+
+  @override
+  List<Object?> get props => [error];
 
   @override
   String toString() => "FeeAdminErrorState: $error";
 }
 
-class FeeAdminGroupsStudentsLoadingState extends FeeAdminState {}
+class FeeAdminGroupsStudentsLoadingState extends FeeAdminState {
+  const FeeAdminGroupsStudentsLoadingState();
+}
 
 class FeeAdminGroupStudentsLoadedState extends FeeAdminState {
   final List<StudentFeatureGroupStudentEntityClass> dataList;
-  FeeAdminGroupStudentsLoadedState({required this.dataList});
+
+  const FeeAdminGroupStudentsLoadedState({required this.dataList});
+
+  @override
+  List<Object?> get props => [dataList];
 }
 
 class FeeAdminGroupStudentsFilteringCompleteState extends FeeAdminState {
   final List<StudentFeatureGroupStudentEntityClass> filteredDataList;
-  FeeAdminGroupStudentsFilteringCompleteState({required this.filteredDataList});
+
+  const FeeAdminGroupStudentsFilteringCompleteState({
+    required this.filteredDataList,
+  });
+
+  @override
+  List<Object?> get props => [filteredDataList];
+}
+
+/// ✅ Calculation result
+class InstallmentPageInstallmentCalculatedState extends FeeAdminState {
+  final double installment;
+
+  const InstallmentPageInstallmentCalculatedState({required this.installment});
+
+  @override
+  List<Object?> get props => [installment];
+}
+
+/// ✅ Student creation process
+class InstallmentCreatingState extends FeeAdminState {
+  const InstallmentCreatingState();
+}
+
+class InstallmentCreatedSuccessState extends FeeAdminState {
+  const InstallmentCreatedSuccessState();
+}
+
+class InstallmentCreatedFailureState extends FeeAdminState {
+  final String error;
+
+  const InstallmentCreatedFailureState({required this.error});
+
+  @override
+  List<Object?> get props => [error];
+}
+
+/// ✅ Student fetch process
+class StudentInstalmentLoadingState extends FeeAdminState {
+  const StudentInstalmentLoadingState();
+}
+
+class StudentLoadedState extends FeeAdminState {
+  final StudentFeeFeatureEntityClass student;
+
+  const StudentLoadedState(this.student);
+
+  @override
+  List<Object?> get props => [student];
+}
+
+class StudentLoadFailureState extends FeeAdminState {
+  final String error;
+
+  const StudentLoadFailureState(this.error);
+
+  @override
+  List<Object?> get props => [error];
+}
+
+class UpdateStudentInstalmentLoadingState extends FeeAdminState {
+  const UpdateStudentInstalmentLoadingState();
+}
+
+class UpdatedStudentInstalmentState extends FeeAdminState {
+  const UpdatedStudentInstalmentState();
 }

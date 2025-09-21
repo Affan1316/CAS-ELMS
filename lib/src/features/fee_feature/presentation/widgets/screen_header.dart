@@ -1,12 +1,31 @@
 // Data Models
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_text.dart';
 
 class ScreenHeader extends StatelessWidget {
   final String title;
   final Widget? trailing;
-  const ScreenHeader({super.key, required this.title, this.trailing});
+  // final BuildContext context;
+  // final String? studentId;
+  const ScreenHeader({
+    super.key,
+    required this.title,
+    this.trailing,
+    // required this.context,
+    // this.studentId,
+  });
+  // void _refreshData() {
+  //   if (studentId == null) {
+  //     AssertionError("You did not provide student id but you are trying to refresh student installment data ");
+  //   }
+  //   context.read<FeeAdminBloc>().add(
+  //     GetStudentInstalmentEvent(studentId: studentId!),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +43,7 @@ class ScreenHeader extends StatelessWidget {
             weight: FontWeight.bold,
           ),
         ),
+
         if (trailing != null) trailing!,
       ],
     );

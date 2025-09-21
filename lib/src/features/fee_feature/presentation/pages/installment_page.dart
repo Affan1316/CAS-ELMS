@@ -127,17 +127,28 @@
 // }
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/installment_page/presentation/bloc/installment_page_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/installment_page/presentation/bloc/installment_page_event.dart';
-import 'package:flutter_cas_app_main/src/features/installment_page/presentation/bloc/installment_page_state.dart';
-import 'package:flutter_cas_app_main/src/features/installment_page/presentation/pages/widgets/app_bar_tilte.dart';
-import 'package:flutter_cas_app_main/src/features/installment_page/presentation/pages/widgets/main_card.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_state.dart';
+// import 'package:flutter_cas_app_main/src/features/installment_page/presentation/bloc/installment_page_bloc.dart';
+// import 'package:flutter_cas_app_main/src/features/installment_page/presentation/bloc/installment_page_event.dart';
+// import 'package:flutter_cas_app_main/src/features/installment_page/presentation/bloc/installment_page_state.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/app_bar_tilte.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/main_card.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:flutter/material.dart';
 
 class CreateFeePlanPage extends StatefulWidget {
   final String studentId;
+  final String name;
+  final String groupId;
 
-  const CreateFeePlanPage({super.key, required this.studentId});
+  const CreateFeePlanPage({
+    super.key,
+    required this.studentId,
+    required this.groupId,
+    required this.name,
+  });
 
   @override
   State<CreateFeePlanPage> createState() => _CreateFeePlanPageState();
@@ -154,30 +165,25 @@ class _CreateFeePlanPageState extends State<CreateFeePlanPage> {
   );
   final TextEditingController installmentAmountController =
       TextEditingController();
-  double installmentAmount = 0;
-  late InstallmentPageBloc bloc;
+
+  late FeeAdminBloc bloc;
 
   @override
   void initState() {
     super.initState();
-    bloc = context.read<InstallmentPageBloc>();
+    bloc = context.read<FeeAdminBloc>();
 
-    totalFeeController.addListener(() {
-      bloc.add(
-        InstallmentPageCalculateInst(
-          installments: installmentsController.text,
-          totalFee: totalFeeController.text,
-        ),
-      );
-    });
-    installmentsController.addListener(() {
-      bloc.add(
-        InstallmentPageCalculateInst(
-          installments: installmentsController.text,
-          totalFee: totalFeeController.text,
-        ),
-      );
-    });
+    totalFeeController.addListener(_recalculate);
+    installmentsController.addListener(_recalculate);
+  }
+
+  void _recalculate() {
+    bloc.add(
+      InstallmentPageCalculateInst(
+        installments: installmentsController.text,
+        totalFee: totalFeeController.text,
+      ),
+    );
   }
 
   @override
@@ -205,50 +211,55 @@ class _CreateFeePlanPageState extends State<CreateFeePlanPage> {
         title: const AppBarTitle(),
       ),
       body: SafeArea(
-        child: BlocListener<InstallmentPageBloc, InstallmentPageState>(
-          listener: (context, state) {
-            if (state is InstallmentCreatedSuccessState) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Installment plan created successfully!'),
-                  backgroundColor: const Color(0xFF10B981),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(12),
+          child: BlocListener<FeeAdminBloc, FeeAdminState>(
+            listener: (context, state) {
+              if (state is InstallmentCreatedSuccessState) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text(
+                      'Installment plan created successfully!',
+                    ),
+                    backgroundColor: const Color(0xFF10B981),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-              );
-              Navigator.of(context).pop();
-            } else if (state is InstallmentCreatedFailureState) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.error),
-                  backgroundColor: const Color(0xFFEF4444),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                );
+                Navigator.of(context).pop();
+              } else if (state is InstallmentCreatedFailureState) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.error),
+                    backgroundColor: const Color(0xFFEF4444),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-              );
-            }
-          },
-          child: BlocBuilder<InstallmentPageBloc, InstallmentPageState>(
-            bloc: bloc,
-            builder: (context, state) {
-              return MainCard(
-                studentId: widget.studentId,
-                nameController: nameController,
-                groupIdController: groupIdController,
-                totalFeeController: totalFeeController,
-                installmentsController: installmentsController,
-                installmentAmountController: installmentAmountController,
-                installmentAmount:
-                    state is InstallmentPageInstallmentCalculatedState
-                        ? state.installment
-                        : 0,
-                isLoading: state is InstallmentCreatingState,
-              );
+                );
+              }
             },
+            child: BlocBuilder<FeeAdminBloc, FeeAdminState>(
+              bloc: bloc,
+              builder: (context, state) {
+                return MainCard(
+                  studentId: widget.studentId,
+                  groupId: widget.groupId,
+                  name: widget.name,
+                  totalFeeController: totalFeeController,
+                  installmentsController: installmentsController,
+                  installmentAmountController: installmentAmountController,
+                  installmentAmount:
+                      state is InstallmentPageInstallmentCalculatedState
+                          ? state.installment
+                          : 0,
+                  isLoading: state is InstallmentCreatingState,
+                );
+              },
+            ),
           ),
         ),
       ),

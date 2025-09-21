@@ -1,20 +1,304 @@
-// ............................................................................
-
+// file: enhanced_fee_history_screen.dart
 import 'package:flutter/material.dart';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/data/fee.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/data/payment_method.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/data/sort_option.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/bloc/fee_history_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/bloc/fee_history_event.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/bloc/fee_history_state.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/widget/fee_detail_row.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
-class FeeHistoryScreen extends StatelessWidget {
+/// ---------- Simple enums (replace with your existing ones if present) ----------
+enum PaymentMethod { jazzCash, easyPaisa, ubl, cashPayment }
+
+enum SortOption { dateDesc, dateAsc, amountDesc, amountAsc }
+
+extension SortOptionExt on SortOption {
+  String get title {
+    switch (this) {
+      case SortOption.dateDesc:
+        return 'Date: New → Old';
+      case SortOption.dateAsc:
+        return 'Date: Old → New';
+      case SortOption.amountDesc:
+        return 'Amount: High → Low';
+      case SortOption.amountAsc:
+        return 'Amount: Low → High';
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case SortOption.dateDesc:
+        return Icons.arrow_downward;
+      case SortOption.dateAsc:
+        return Icons.arrow_upward;
+      case SortOption.amountDesc:
+        return Icons.trending_down;
+      case SortOption.amountAsc:
+        return Icons.trending_up;
+    }
+  }
+}
+
+/// ---------- Model ----------
+class Fee {
+  final String id;
+  final DateTime date;
+  final double paidAmount;
+  final PaymentMethod paymentMethod;
+  final String status;
+
+  Fee({
+    required this.id,
+    required this.date,
+    required this.paidAmount,
+    required this.paymentMethod,
+    required this.status,
+  });
+
+  factory Fee.fromMap(Map<String, dynamic> map, {String? id}) {
+    final ts = map['createdAt'] as Timestamp?;
+    final date = ts?.toDate() ?? DateTime.now();
+    final paidAmount =
+        (num.parse(map['paidAmount']) as num?)?.toDouble() ?? 0.0;
+    final pmRaw = map['paymentMethod'];
+    final status = map['status'] as String? ?? 'Paid';
+    debugPrint("|||||||||||$paidAmount|||||||||||");
+    debugPrint("|||||||||||$pmRaw|||||||||||");
+
+    return Fee(
+      id: id ?? '',
+      date: date,
+      paidAmount: paidAmount,
+      paymentMethod: _parsePaymentMethod(pmRaw),
+      status: status,
+    );
+  }
+
+  static PaymentMethod _parsePaymentMethod(dynamic v) {
+    // if (v == null) return PaymentMethod.ubl;
+    final s = v.toString().toLowerCase();
+    if (s.contains('cashpayment')) return PaymentMethod.cashPayment;
+    if (s.contains('jazz') || s.contains('jazzcash')) {
+      return PaymentMethod.jazzCash;
+    }
+    if (s.contains('easy') || s.contains('easypaisa')) {
+      return PaymentMethod.easyPaisa;
+    }
+    return PaymentMethod.ubl;
+  }
+}
+
+/// ---------- Repository (Firestore queries by date) ----------
+class FeeHistoryRepository {
+  final FirebaseFirestore _firestore;
+  final String collectionPath;
+
+  FeeHistoryRepository({
+    FirebaseFirestore? firestore,
+    this.collectionPath = 'fee_history_daywise',
+  }) : _firestore = firestore ?? FirebaseFirestore.instance;
+
+  Future<List<Fee>> fetchFeesByDateRange(DateTime start, DateTime end) async {
+    final startTs = Timestamp.fromDate(
+      DateTime(start.year, start.month, start.day, 0, 0, 0),
+    );
+    final endTs = Timestamp.fromDate(
+      DateTime(end.year, end.month, end.day, 23, 59, 59, 999),
+    );
+
+    final snapshot =
+        await _firestore
+            .collection(collectionPath)
+            .where('createdAt', isGreaterThanOrEqualTo: startTs)
+            .where('createdAt', isLessThanOrEqualTo: endTs)
+            .orderBy('createdAt', descending: true)
+            .get();
+    var forPrint = snapshot.docs.toList();
+    for (var element in forPrint) {
+      debugPrint("||||||||||||${element.data()}|||||||||||||");
+    }
+    return snapshot.docs.map((d) => Fee.fromMap(d.data(), id: d.id)).toList();
+  }
+
+  Future<List<Fee>> fetchTodayFees() async {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day, 0, 0, 0);
+    final end = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+    return fetchFeesByDateRange(start, end);
+  }
+}
+
+/// ---------- Bloc: Events ----------
+abstract class FeeHistoryEvent {}
+
+class FetchFeesByDateRange extends FeeHistoryEvent {
+  final DateTime startDate;
+  final DateTime endDate;
+  FetchFeesByDateRange(this.startDate, this.endDate);
+}
+
+class FetchTodayFees extends FeeHistoryEvent {}
+
+class UpdateSelectedDate extends FeeHistoryEvent {
+  final DateTime? startDate;
+  final DateTime? endDate;
+  UpdateSelectedDate({this.startDate, this.endDate});
+}
+
+class SortFees extends FeeHistoryEvent {
+  final SortOption option;
+  SortFees(this.option);
+}
+
+/// ---------- Bloc: States ----------
+abstract class FeeHistoryState {}
+
+class FeeHistoryLoading extends FeeHistoryState {}
+
+class FeeHistoryError extends FeeHistoryState {
+  final String message;
+  FeeHistoryError(this.message);
+}
+
+class FeeHistoryLoaded extends FeeHistoryState {
+  final List<Fee> fees;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final SortOption sortOption;
+
+  FeeHistoryLoaded({
+    required this.fees,
+    this.startDate,
+    this.endDate,
+    required this.sortOption,
+  });
+
+  FeeHistoryLoaded copyWith({
+    List<Fee>? fees,
+    DateTime? startDate,
+    DateTime? endDate,
+    SortOption? sortOption,
+  }) {
+    return FeeHistoryLoaded(
+      fees: fees ?? this.fees,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      sortOption: sortOption ?? this.sortOption,
+    );
+  }
+
+  double get totalAmount => fees.fold(0, (sum, fee) => sum + fee.paidAmount);
+}
+
+/// ---------- Bloc Implementation ----------
+class FeeHistoryBloc extends Bloc<FeeHistoryEvent, FeeHistoryState> {
+  final FeeHistoryRepository repository;
+
+  FeeHistoryBloc({required this.repository}) : super(FeeHistoryLoading()) {
+    on<FetchFeesByDateRange>(_onFetchFeesByDateRange);
+    on<FetchTodayFees>(_onFetchTodayFees);
+    on<UpdateSelectedDate>(_onUpdateSelectedDate);
+    on<SortFees>(_onSortFees);
+  }
+
+  Future<void> _onFetchFeesByDateRange(
+    FetchFeesByDateRange event,
+    Emitter<FeeHistoryState> emit,
+  ) async {
+    emit(FeeHistoryLoading());
+    try {
+      final fees = await repository.fetchFeesByDateRange(
+        event.startDate,
+        event.endDate,
+      );
+      emit(
+        FeeHistoryLoaded(
+          fees: fees,
+          startDate: event.startDate,
+          endDate: event.endDate,
+          sortOption: SortOption.dateDesc,
+        ),
+      );
+    } catch (e) {
+      emit(FeeHistoryError(e.toString()));
+    }
+  }
+
+  Future<void> _onFetchTodayFees(
+    FetchTodayFees event,
+    Emitter<FeeHistoryState> emit,
+  ) async {
+    emit(FeeHistoryLoading());
+    try {
+      final fees = await repository.fetchTodayFees();
+      emit(
+        FeeHistoryLoaded(
+          fees: fees,
+          startDate: null,
+          endDate: null,
+          sortOption: SortOption.dateDesc,
+        ),
+      );
+    } catch (e) {
+      emit(FeeHistoryError(e.toString()));
+    }
+  }
+
+  void _onUpdateSelectedDate(
+    UpdateSelectedDate event,
+    Emitter<FeeHistoryState> emit,
+  ) {
+    if (state is FeeHistoryLoaded) {
+      final s = state as FeeHistoryLoaded;
+      emit(s.copyWith(startDate: event.startDate, endDate: event.endDate));
+    } else {
+      emit(
+        FeeHistoryLoaded(
+          fees: [],
+          startDate: event.startDate,
+          endDate: event.endDate,
+          sortOption: SortOption.dateDesc,
+        ),
+      );
+    }
+  }
+
+  void _onSortFees(SortFees event, Emitter<FeeHistoryState> emit) {
+    if (state is FeeHistoryLoaded) {
+      final s = state as FeeHistoryLoaded;
+      final newList = List<Fee>.from(s.fees);
+      switch (event.option) {
+        case SortOption.dateDesc:
+          newList.sort((a, b) => b.date.compareTo(a.date));
+          break;
+        case SortOption.dateAsc:
+          newList.sort((a, b) => a.date.compareTo(b.date));
+          break;
+        case SortOption.amountDesc:
+          newList.sort((a, b) => b.paidAmount.compareTo(a.paidAmount));
+          break;
+        case SortOption.amountAsc:
+          newList.sort((a, b) => a.paidAmount.compareTo(b.paidAmount));
+          break;
+      }
+      emit(s.copyWith(fees: newList, sortOption: event.option));
+    }
+  }
+}
+
+/// Enhanced FeeHistoryScreen with modern UI/UX
+class FeeHistoryScreen extends StatefulWidget {
   const FeeHistoryScreen({super.key});
-  static const List<String> monthNames = const [
+
+  @override
+  State<FeeHistoryScreen> createState() => _FeeHistoryScreenState();
+}
+
+class _FeeHistoryScreenState extends State<FeeHistoryScreen>
+    with TickerProviderStateMixin {
+  late final AnimationController _slideController;
+  late final Animation<Offset> _slideAnimation;
+  bool _isFilterExpanded = false;
+
+  static const List<String> monthNames = [
     "January",
     "February",
     "March",
@@ -28,363 +312,1004 @@ class FeeHistoryScreen extends StatelessWidget {
     "November",
     "December",
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, -1),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+    );
+  }
+
+  @override
+  void dispose() {
+    _slideController.dispose();
+    super.dispose();
+  }
+
+  void _toggleFilter() {
+    setState(() {
+      _isFilterExpanded = !_isFilterExpanded;
+      if (_isFilterExpanded) {
+        _slideController.forward();
+      } else {
+        _slideController.reverse();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Fee History"),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => context.read<FeeHistoryBloc>().add(ResetFilters()),
-            tooltip: "Reset Filters",
-          ),
-        ],
-      ),
+      backgroundColor: Colors.grey[50],
+      appBar: _buildAppBar(context),
       body: BlocBuilder<FeeHistoryBloc, FeeHistoryState>(
         builder: (context, state) {
           if (state is FeeHistoryLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return _buildLoadingState();
           } else if (state is FeeHistoryError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red[400],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "Error loading data",
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    state.message,
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed:
-                        () => context.read<FeeHistoryBloc>().add(LoadFees()),
-                    icon: const Icon(Icons.refresh),
-                    label: const Text("Retry"),
-                  ),
-                ],
-              ),
-            );
+            return _buildErrorState(context, state.message);
           } else if (state is FeeHistoryLoaded) {
             return _buildLoadedState(context, state);
+          } else {
+            return const SizedBox.shrink();
           }
-          return const SizedBox.shrink();
         },
+      ),
+      floatingActionButton: _buildFloatingActionButton(context),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
+      elevation: 0,
+      backgroundColor: Colors.lightBlue.shade100,
+      surfaceTintColor: Colors.transparent,
+      title: const Text(
+        'Fee History',
+        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 22),
+      ),
+      centerTitle: false,
+      actions: [
+        IconButton(
+          icon: AnimatedRotation(
+            turns: _isFilterExpanded ? 0.5 : 0.0,
+            duration: const Duration(milliseconds: 300),
+            child: const Icon(Icons.tune),
+          ),
+          onPressed: _toggleFilter,
+          tooltip: 'Filters',
+        ),
+        IconButton(
+          icon: const Icon(Icons.refresh_rounded),
+          onPressed: () => _refreshData(context),
+          tooltip: 'Refresh',
+        ),
+        const SizedBox(width: 8),
+      ],
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(height: 16),
+          Text(
+            'Loading fee records...',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context, String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.red[50],
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: Colors.red[400],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Something went wrong',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed:
+                  () => context.read<FeeHistoryBloc>().add(FetchTodayFees()),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Try Again'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildLoadedState(BuildContext context, FeeHistoryLoaded state) {
-    return Column(
-      children: [
-        // Date Filter Section
-        Container(
-          color: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
+    return RefreshIndicator(
+      onRefresh: () async => _refreshData(context),
+      child: CustomScrollView(
+        slivers: [
+          // Animated Filter Section
+          SliverToBoxAdapter(
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              child:
+                  _isFilterExpanded
+                      ? SlideTransition(
+                        position: _slideAnimation,
+                        child: _buildFilterSection(context, state),
+                      )
+                      : const SizedBox.shrink(),
+            ),
+          ),
+
+          // Summary Stats
+          SliverToBoxAdapter(child: _buildSummarySection(context, state)),
+
+          // Content Header
+          SliverToBoxAdapter(child: _buildContentHeader(context, state)),
+
+          // Fee List
+          state.fees.isEmpty
+              ? SliverFillRemaining(child: _buildEmptyState(context))
+              : SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final fee = state.fees[index];
+                    return AnimatedContainer(
+                      duration: Duration(milliseconds: 100 * index),
+                      child: _buildFeeCard(context, fee, index),
+                    );
+                  }, childCount: state.fees.length),
+                ),
+              ),
+
+          // Bottom padding
+          const SliverToBoxAdapter(child: SizedBox(height: 100)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterSection(BuildContext context, FeeHistoryLoaded state) {
+    final bloc = context.read<FeeHistoryBloc>();
+    final canSearch =
+        state.startDate != null &&
+        state.endDate != null &&
+        !state.endDate!.isBefore(state.startDate!);
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              Icon(
+                Icons.filter_alt_rounded,
+                color: Theme.of(context).colorScheme.primary,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Filter by Date Range',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // --- Date Inputs ---
+          Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _openDatePicker(context, true, state),
-                  icon: const Icon(Icons.calendar_today, size: 18),
-                  label: Text(
-                    state.startDate != null
-                        ? _formatDate(state.startDate)
-                        : "Start Date",
-                    style: TextStyle(
-                      color:
-                          state.startDate != null
-                              ? Theme.of(context).primaryColor
-                              : null,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color:
-                          state.startDate != null
-                              ? Theme.of(context).primaryColor
-                              : Colors.grey,
-                    ),
+                child: _buildDateInput(
+                  context,
+                  'Start Date',
+                  state.startDate,
+                  Icons.calendar_today_outlined,
+                  () => _openDatePicker(context, true, state),
+                  state.startDate != null
+                      ? () => bloc.add(
+                        UpdateSelectedDate(
+                          startDate: null,
+                          endDate: state.endDate,
+                        ),
+                      )
+                      : null,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildDateInput(
+                  context,
+                  'End Date',
+                  state.endDate,
+                  Icons.event_outlined,
+                  () => _openDatePicker(context, false, state),
+                  state.endDate != null
+                      ? () => bloc.add(
+                        UpdateSelectedDate(
+                          startDate: state.startDate,
+                          endDate: null,
+                        ),
+                      )
+                      : null,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+          Divider(color: Colors.grey.shade300),
+          const SizedBox(height: 16),
+
+          // --- Quick Filters ---
+          Text(
+            'Quick Ranges',
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _buildQuickFilterChip('Today', Icons.today, () {
+                bloc.add(FetchTodayFees());
+              }),
+              _buildQuickFilterChip('Last 7 days', Icons.date_range, () {
+                _applyQuickRange(context, 7);
+              }),
+              _buildQuickFilterChip('Last 30 days', Icons.calendar_month, () {
+                _applyQuickRange(context, 30);
+              }),
+              _buildQuickFilterChip(
+                'This Month',
+                Icons.calendar_view_month,
+                () {
+                  final now = DateTime.now();
+                  final start = DateTime(now.year, now.month, 1);
+                  final end = DateTime(now.year, now.month + 1, 0);
+                  _applyDateRange(context, start, end);
+                },
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+          Divider(color: Colors.grey.shade300),
+          const SizedBox(height: 16),
+
+          // --- Action Buttons ---
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed:
+                      canSearch
+                          ? () => bloc.add(
+                            FetchFeesByDateRange(
+                              state.startDate!,
+                              state.endDate!,
+                            ),
+                          )
+                          : null,
+                  icon: const Icon(Icons.search),
+                  label: const Text('Search'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => _openDatePicker(context, false, state),
-                  icon: const Icon(Icons.calendar_today, size: 18),
-                  label: Text(
-                    state.endDate != null
-                        ? _formatDate(state.endDate)
-                        : "End Date",
-                    style: TextStyle(
-                      color:
-                          state.endDate != null
-                              ? Theme.of(context).primaryColor
-                              : null,
-                    ),
-                  ),
+                  onPressed: () {
+                    bloc.add(
+                      UpdateSelectedDate(startDate: null, endDate: null),
+                    );
+                    bloc.add(FetchTodayFees());
+                  },
+                  icon: const Icon(Icons.clear),
+                  label: const Text('Clear'),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color:
-                          state.endDate != null
-                              ? Theme.of(context).primaryColor
-                              : Colors.grey,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
             ],
           ),
+
+          // --- Validation Message ---
+          if (!canSearch && (state.startDate != null || state.endDate != null))
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, size: 18, color: Colors.orange[700]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      state.startDate != null &&
+                              state.endDate != null &&
+                              state.endDate!.isBefore(state.startDate!)
+                          ? 'End date must be after start date'
+                          : 'Select both dates to search',
+                      style: TextStyle(
+                        color: Colors.orange[700],
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Modern quick filter chip
+  Widget _buildQuickFilterChip(
+    String label,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
+    return ActionChip(
+      avatar: Icon(icon, size: 18),
+      label: Text(label),
+      onPressed: onTap,
+      backgroundColor: Colors.grey.shade100,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      labelStyle: const TextStyle(fontWeight: FontWeight.w500),
+    );
+  }
+
+  Widget _buildDateInput(
+    BuildContext context,
+    String label,
+    DateTime? value,
+    IconData icon,
+    VoidCallback onTap,
+    VoidCallback? onClear,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(12),
         ),
-        // Filter Info and Sort Button
-        if (state.startDate != null || state.endDate != null)
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Expanded(
-                  child: Text(
-                    "Showing ${state.filteredFees.length} of ${state.allFees.length} records",
-                    style: const TextStyle(fontStyle: FontStyle.italic),
+                Icon(icon, size: 18, color: Colors.grey[600]),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                TextButton.icon(
-                  onPressed:
-                      () => context.read<FeeHistoryBloc>().add(
-                        FilterByDate(startDate: null, endDate: null),
-                      ),
-                  icon: const Icon(Icons.filter_alt_off, size: 18),
-                  label: const Text("Clear Filters"),
-                  style: TextButton.styleFrom(foregroundColor: Colors.red[400]),
+                if (onClear != null) ...[
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: onClear,
+                    child: Icon(Icons.close, size: 16, color: Colors.grey[400]),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value != null ? _formatDate(value) : 'Select date',
+              style: TextStyle(
+                fontSize: 16,
+                color: value != null ? Colors.black87 : Colors.grey[500],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickFilter(String label, IconData icon, VoidCallback onTap) {
+    return ActionChip(
+      avatar: Icon(icon, size: 18),
+      label: Text(label),
+      onPressed: onTap,
+      backgroundColor: Colors.blue[50],
+      labelStyle: TextStyle(color: Colors.blue[700]),
+      side: BorderSide(color: Colors.blue[200]!),
+    );
+  }
+
+  Widget _buildSummarySection(BuildContext context, FeeHistoryLoaded state) {
+    if (state.fees.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.blue[600]!, Colors.blue[700]!],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Total Amount',
+                  style: TextStyle(
+                    color: Colors.blue[100],
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Rs ${state.totalAmount.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
           ),
-        // Sort Button
-        Container(
-          color: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          Container(
+            height: 40,
+            width: 1,
+            color: Colors.blue[300],
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              TextButton.icon(
-                onPressed: () => _showSortOptions(context, state),
-                icon: const Icon(Icons.sort, size: 18),
-                label: Text("Sort: ${state.sortOption.title}"),
-                style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(context).primaryColor,
+              Text(
+                'Records',
+                style: TextStyle(
+                  color: Colors.blue[100],
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${state.fees.length}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-        ),
-        const Divider(height: 1),
-        // Fee Table
-        Expanded(
-          child:
-              state.filteredFees.isEmpty
-                  ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.search_off,
-                            size: 64,
-                            color: Colors.grey[400],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          "No fees found",
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "Try adjusting your date filters",
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton.icon(
-                          onPressed:
-                              () => context.read<FeeHistoryBloc>().add(
-                                ResetFilters(),
-                              ),
-                          icon: const Icon(Icons.refresh),
-                          label: const Text("Reset Filters"),
-                        ),
-                      ],
-                    ),
-                  )
-                  : SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minWidth: MediaQuery.of(context).size.width,
-                      ),
-                      child: DataTable(
-                        columnSpacing: 12,
-                        horizontalMargin: 16,
-                        columns: const [
-                          DataColumn(label: Text('Date')),
-                          // Removed Fee ID column
-                          // Removed Description column
-                          DataColumn(label: Text('Amount'), numeric: true),
-                          DataColumn(
-                            label: Text('Payment Method'),
-                          ), // Added Payment Method column
-                          DataColumn(label: Text('Status')),
-                          DataColumn(label: Text('Actions')),
-                        ],
-                        rows:
-                            state.filteredFees.map((fee) {
-                              return DataRow(
-                                cells: [
-                                  DataCell(
-                                    Text(
-                                      DateFormat(
-                                        'dd MMM yyyy',
-                                      ).format(fee.date),
-                                    ),
-                                  ),
-                                  // Removed Fee ID cell
-                                  // Removed Description cell
-                                  DataCell(
-                                    Text(
-                                      "₹${fee.amount.toStringAsFixed(2)}",
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  // Added Payment Method cell
-                                  DataCell(
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: _getPaymentMethodColor(
-                                          fee.paymentMethod,
-                                        ),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        _getPaymentMethodText(
-                                          fee.paymentMethod,
-                                        ),
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  DataCell(
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.green[100],
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        fee.status,
-                                        style: TextStyle(
-                                          color: Colors.green[800],
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  DataCell(
-                                    TextButton(
-                                      onPressed:
-                                          () => _showFeeDetails(context, fee),
-                                      child: const Text("View Details"),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            }).toList(),
-                      ),
-                    ),
-                  ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  // Helper method to get payment method text
-  String _getPaymentMethodText(PaymentMethod method) {
-    switch (method) {
-      case PaymentMethod.jazzCash:
-        return "JazzCash";
-      case PaymentMethod.easyPaisa:
-        return "EasyPaisa";
-      case PaymentMethod.ubl:
-        return "UBL";
-    }
+  Widget _buildContentHeader(BuildContext context, FeeHistoryLoaded state) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      child: Row(
+        children: [
+          Text(
+            'Recent Transactions',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const Spacer(),
+          TextButton.icon(
+            onPressed: () => _showSortDialog(context, state),
+            icon: Icon(state.sortOption.icon, size: 18),
+            label: Text('Sort'),
+            style: TextButton.styleFrom(foregroundColor: Colors.blue[600]),
+          ),
+        ],
+      ),
+    );
   }
 
-  // Helper method to get payment method color
+  Widget _buildFeeCard(BuildContext context, Fee fee, int index) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        elevation: 1,
+        shadowColor: Colors.black12,
+        child: InkWell(
+          onTap: () => _showFeeDetails(context, fee),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                // Payment method icon
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: _getPaymentMethodColor(
+                      fee.paymentMethod,
+                    ).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    _getPaymentMethodIcon(fee.paymentMethod),
+                    color: _getPaymentMethodColor(fee.paymentMethod),
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+
+                // Fee details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _getPaymentMethodLabel(fee.paymentMethod),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormat('dd MMM yyyy, hh:mm a').format(fee.date),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      ),
+                      const SizedBox(height: 4),
+                      _buildStatusChip(fee.status),
+                    ],
+                  ),
+                ),
+
+                // Amount
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Rs ${fee.paidAmount.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: Colors.grey[400],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusChip(String status) {
+    Color backgroundColor;
+    Color textColor;
+    IconData icon;
+
+    final lower = status.toLowerCase();
+    if (lower.contains('pending')) {
+      backgroundColor = Colors.orange[100]!;
+      textColor = Colors.orange[800]!;
+      icon = Icons.pending;
+    } else if (lower.contains('failed') || lower.contains('error')) {
+      backgroundColor = Colors.red[100]!;
+      textColor = Colors.red[800]!;
+      icon = Icons.error_outline;
+    } else {
+      backgroundColor = Colors.green[100]!;
+      textColor = Colors.green[800]!;
+      icon = Icons.check_circle_outline;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: textColor),
+          const SizedBox(width: 4),
+          Text(
+            status,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(60),
+              ),
+              child: Icon(
+                Icons.receipt_long_outlined,
+                size: 64,
+                color: Colors.grey[400],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'No transactions found',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Try adjusting your date range or check back later.',
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            FilledButton.tonalIcon(
+              onPressed:
+                  () => context.read<FeeHistoryBloc>().add(FetchTodayFees()),
+              icon: const Icon(Icons.today),
+              label: const Text('Show Today'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFloatingActionButton(BuildContext context) {
+    return FloatingActionButton.extended(
+      onPressed: () => context.read<FeeHistoryBloc>().add(FetchTodayFees()),
+      icon: const Icon(Icons.today),
+      label: const Text('Today'),
+      backgroundColor: Colors.blue[600],
+      foregroundColor: Colors.white,
+    );
+  }
+
+  // Helper methods
   Color _getPaymentMethodColor(PaymentMethod method) {
     switch (method) {
       case PaymentMethod.jazzCash:
-        return Colors.red[400]!;
+        return Colors.red[600]!;
       case PaymentMethod.easyPaisa:
-        return Colors.green[400]!;
+        return Colors.green[600]!;
       case PaymentMethod.ubl:
-        return Colors.blue[400]!;
+        return Colors.blue[600]!;
+      case PaymentMethod.cashPayment:
+        return Colors.greenAccent;
     }
   }
 
+  IconData _getPaymentMethodIcon(PaymentMethod method) {
+    switch (method) {
+      case PaymentMethod.jazzCash:
+        return Icons.phone_android;
+      case PaymentMethod.easyPaisa:
+        return Icons.account_balance_wallet;
+      case PaymentMethod.ubl:
+        return Icons.account_balance;
+      case PaymentMethod.cashPayment:
+        return Icons.account_balance_wallet_outlined;
+    }
+  }
+
+  String _getPaymentMethodLabel(PaymentMethod method) {
+    switch (method) {
+      case PaymentMethod.jazzCash:
+        return 'JazzCash';
+      case PaymentMethod.easyPaisa:
+        return 'EasyPaisa';
+      case PaymentMethod.ubl:
+        return 'UBL Bank';
+      case PaymentMethod.cashPayment:
+        return 'Cash';
+    }
+  }
+
+  void _refreshData(BuildContext context) {
+    final bloc = context.read<FeeHistoryBloc>();
+    final state = bloc.state;
+    if (state is FeeHistoryLoaded) {
+      if (state.startDate != null && state.endDate != null) {
+        bloc.add(FetchFeesByDateRange(state.startDate!, state.endDate!));
+      } else {
+        bloc.add(FetchTodayFees());
+      }
+    } else {
+      bloc.add(FetchTodayFees());
+    }
+  }
+
+  void _applyQuickRange(BuildContext context, int days) {
+    final now = DateTime.now();
+    final start = now.subtract(Duration(days: days - 1));
+    _applyDateRange(context, start, now);
+  }
+
+  void _applyDateRange(BuildContext context, DateTime start, DateTime end) {
+    final bloc = context.read<FeeHistoryBloc>();
+    bloc.add(
+      UpdateSelectedDate(
+        startDate: DateTime(start.year, start.month, start.day),
+        endDate: DateTime(end.year, end.month, end.day),
+      ),
+    );
+    bloc.add(
+      FetchFeesByDateRange(
+        DateTime(start.year, start.month, start.day),
+        DateTime(end.year, end.month, end.day),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat('dd MMM yyyy').format(date);
+  }
+
+  void _showSortDialog(BuildContext context, FeeHistoryLoaded state) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Sort Options',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ...SortOption.values.map(
+                        (option) => ListTile(
+                          leading: Icon(option.icon),
+                          title: Text(option.title),
+                          trailing:
+                              state.sortOption == option
+                                  ? Icon(Icons.check, color: Colors.blue[600])
+                                  : null,
+                          onTap: () {
+                            context.read<FeeHistoryBloc>().add(
+                              SortFees(option),
+                            );
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+    );
+  }
+
+  void _showFeeDetails(BuildContext context, Fee fee) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Row(
+              children: [
+                Icon(
+                  _getPaymentMethodIcon(fee.paymentMethod),
+                  color: _getPaymentMethodColor(fee.paymentMethod),
+                ),
+                const SizedBox(width: 8),
+                const Text('Transaction Details'),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDetailRow(
+                  'Amount',
+                  'Rs ${fee.paidAmount.toStringAsFixed(2)}',
+                ),
+                _buildDetailRow(
+                  'Payment Method',
+                  _getPaymentMethodLabel(fee.paymentMethod),
+                ),
+                _buildDetailRow('Status', fee.status),
+                _buildDetailRow(
+                  'Date',
+                  DateFormat('dd MMM yyyy, hh:mm a').format(fee.date),
+                ),
+                _buildDetailRow(
+                  'Transaction ID',
+                  fee.id.isEmpty ? 'N/A' : fee.id,
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Date picker implementation
   void _openDatePicker(
     BuildContext context,
     bool isStart,
     FeeHistoryLoaded state,
   ) {
-    // Get reference to the BLoC before showing the modal
     final bloc = context.read<FeeHistoryBloc>();
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       isScrollControlled: true,
-      builder: (_) {
+      backgroundColor: Colors.transparent,
+      builder: (context) {
         DateTime selected =
             isStart
                 ? (state.startDate ?? DateTime.now())
@@ -392,279 +1317,129 @@ class FeeHistoryScreen extends StatelessWidget {
         int selectedDay = selected.day;
         int selectedMonth = selected.month;
         int selectedYear = selected.year;
-        int daysInMonth = _getDaysInMonth(selectedYear, selectedMonth);
+        int daysInMonth = _daysInMonth(selectedYear, selectedMonth);
+
         return StatefulBuilder(
           builder: (context, setState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.6,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
-              child: Container(
-                height: 350,
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Text(
-                      isStart ? "Select Start Date" : "Select End Date",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
+              child: Column(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                    const Divider(),
-                    Expanded(
-                      child: Row(
-                        children: [
-                          // Day Picker
-                          Expanded(
-                            child: ListWheelScrollView.useDelegate(
-                              controller: FixedExtentScrollController(
-                                initialItem: (selectedDay - 1).clamp(
-                                  0,
-                                  daysInMonth - 1,
-                                ),
-                              ),
-                              itemExtent: 40,
-                              diameterRatio: 1.2,
-                              onSelectedItemChanged: (value) {
-                                setState(() {
-                                  selectedDay = value + 1;
-                                });
-                              },
-                              childDelegate: ListWheelChildBuilderDelegate(
-                                childCount: daysInMonth,
-                                builder: (context, index) {
-                                  bool isSelected = (index + 1) == selectedDay;
-                                  return Center(
-                                    child: Container(
-                                      decoration:
-                                          isSelected
-                                              ? BoxDecoration(
-                                                color: Colors.blue.withOpacity(
-                                                  0.2,
-                                                ),
-                                                shape: BoxShape.circle,
-                                              )
-                                              : null,
-                                      padding: const EdgeInsets.all(8),
-                                      child: Text(
-                                        "${index + 1}",
-                                        style: TextStyle(
-                                          fontSize: isSelected ? 22 : 18,
-                                          fontWeight:
-                                              isSelected
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal,
-                                          color:
-                                              isSelected
-                                                  ? Theme.of(
-                                                    context,
-                                                  ).primaryColor
-                                                  : Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        Icon(
+                          isStart ? Icons.calendar_today : Icons.event,
+                          color: Colors.blue[600],
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          isStart ? 'Select Start Date' : 'Select End Date',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
                           ),
-                          // Month Picker
-                          Expanded(
-                            child: ListWheelScrollView.useDelegate(
-                              controller: FixedExtentScrollController(
-                                initialItem: (selectedMonth - 1).clamp(0, 11),
-                              ),
-                              itemExtent: 40,
-                              diameterRatio: 1.2,
-                              onSelectedItemChanged: (value) {
-                                setState(() {
-                                  selectedMonth = value + 1;
-                                  daysInMonth = _getDaysInMonth(
-                                    selectedYear,
-                                    selectedMonth,
-                                  );
-                                  if (selectedDay > daysInMonth) {
-                                    selectedDay = daysInMonth;
-                                  }
-                                });
-                              },
-                              childDelegate: ListWheelChildBuilderDelegate(
-                                childCount: 12,
-                                builder: (context, index) {
-                                  bool isSelected =
-                                      (index + 1) == selectedMonth;
-                                  return Center(
-                                    child: Container(
-                                      decoration:
-                                          isSelected
-                                              ? BoxDecoration(
-                                                color: Colors.blue.withOpacity(
-                                                  0.2,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                              )
-                                              : null,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      child: Text(
-                                        monthNames[index],
-                                        style: TextStyle(
-                                          fontSize: isSelected ? 22 : 18,
-                                          fontWeight:
-                                              isSelected
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal,
-                                          color:
-                                              isSelected
-                                                  ? Theme.of(
-                                                    context,
-                                                  ).primaryColor
-                                                  : Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          // Year Picker
-                          Expanded(
-                            child: ListWheelScrollView.useDelegate(
-                              controller: FixedExtentScrollController(
-                                initialItem: (selectedYear - 2020).clamp(0, 19),
-                              ),
-                              itemExtent: 40,
-                              diameterRatio: 1.2,
-                              onSelectedItemChanged: (value) {
-                                setState(() {
-                                  selectedYear = 2020 + value;
-                                  daysInMonth = _getDaysInMonth(
-                                    selectedYear,
-                                    selectedMonth,
-                                  );
-                                  if (selectedDay > daysInMonth) {
-                                    selectedDay = daysInMonth;
-                                  }
-                                });
-                              },
-                              childDelegate: ListWheelChildBuilderDelegate(
-                                childCount: 20,
-                                builder: (context, index) {
-                                  bool isSelected =
-                                      (2020 + index) == selectedYear;
-                                  return Center(
-                                    child: Container(
-                                      decoration:
-                                          isSelected
-                                              ? BoxDecoration(
-                                                color: Colors.blue.withOpacity(
-                                                  0.2,
-                                                ),
-                                                shape: BoxShape.circle,
-                                              )
-                                              : null,
-                                      padding: const EdgeInsets.all(8),
-                                      child: Text(
-                                        "${2020 + index}",
-                                        style: TextStyle(
-                                          fontSize: isSelected ? 22 : 18,
-                                          fontWeight:
-                                              isSelected
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal,
-                                          color:
-                                              isSelected
-                                                  ? Theme.of(
-                                                    context,
-                                                  ).primaryColor
-                                                  : Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 8.0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          TextButton(
+                  ),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        _buildDateWheel(
+                          context,
+                          'Day',
+                          daysInMonth,
+                          selectedDay - 1,
+                          (value) => setState(() {
+                            selectedDay = value + 1;
+                          }),
+                          (index) => '${index + 1}',
+                        ),
+                        _buildDateWheel(
+                          context,
+                          'Month',
+                          12,
+                          selectedMonth - 1,
+                          (value) => setState(() {
+                            selectedMonth = value + 1;
+                            daysInMonth = _daysInMonth(
+                              selectedYear,
+                              selectedMonth,
+                            );
+                            if (selectedDay > daysInMonth)
+                              selectedDay = daysInMonth;
+                          }),
+                          (index) => monthNames[index],
+                        ),
+                        _buildDateWheel(
+                          context,
+                          'Year',
+                          20,
+                          selectedYear - 2020,
+                          (value) => setState(() {
+                            selectedYear = 2020 + value;
+                            daysInMonth = _daysInMonth(
+                              selectedYear,
+                              selectedMonth,
+                            );
+                            if (selectedDay > daysInMonth)
+                              selectedDay = daysInMonth;
+                          }),
+                          (index) => '${2020 + index}',
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
                             onPressed: () => Navigator.pop(context),
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.grey[700],
-                            ),
-                            child: const Text("Cancel"),
+                            child: const Text('Cancel'),
                           ),
-                          ElevatedButton(
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: FilledButton(
                             onPressed: () {
-                              int maxDay = _getDaysInMonth(
+                              final picked = DateTime(
                                 selectedYear,
                                 selectedMonth,
+                                selectedDay,
                               );
-                              int validDay = selectedDay.clamp(1, maxDay);
-                              final pickedDate = DateTime(
-                                selectedYear,
-                                selectedMonth.clamp(1, 12),
-                                validDay,
+                              bloc.add(
+                                UpdateSelectedDate(
+                                  startDate: isStart ? picked : state.startDate,
+                                  endDate: isStart ? state.endDate : picked,
+                                ),
                               );
-                              if (isStart) {
-                                bloc.add(
-                                  FilterByDate(
-                                    startDate: pickedDate,
-                                    endDate: state.endDate,
-                                  ),
-                                );
-                              } else {
-                                if (state.startDate != null &&
-                                    pickedDate.isBefore(state.startDate!)) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: const Text(
-                                        "End date cannot be before start date.",
-                                      ),
-                                      backgroundColor: Colors.red[400],
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                  );
-                                  return;
-                                }
-                                bloc.add(
-                                  FilterByDate(
-                                    startDate: state.startDate,
-                                    endDate: pickedDate,
-                                  ),
-                                );
-                              }
                               Navigator.pop(context);
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).primaryColor,
-                              foregroundColor: Colors.white,
-                            ),
-                            child: const Text("Select"),
+                            child: const Text('Select'),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           },
@@ -673,151 +1448,75 @@ class FeeHistoryScreen extends StatelessWidget {
     );
   }
 
-  void _showSortOptions(BuildContext context, FeeHistoryLoaded state) {
-    // Get reference to the BLoC before showing the modal
-    final bloc = context.read<FeeHistoryBloc>();
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Sort By",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  Widget _buildDateWheel(
+    BuildContext context,
+    String label,
+    int itemCount,
+    int selectedIndex,
+    ValueChanged<int> onChanged,
+    String Function(int) itemBuilder,
+  ) {
+    return Expanded(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[700],
               ),
-              const Divider(),
-              ...SortOption.values.map((option) {
-                return RadioListTile<SortOption>(
-                  title: Text(option.title),
-                  value: option,
-                  groupValue: state.sortOption,
-                  onChanged: (value) {
-                    if (value != null) {
-                      bloc.add(SortFees(value));
-                    }
-                    Navigator.pop(context);
-                  },
-                  activeColor: Theme.of(context).primaryColor,
-                );
-              }).toList(),
-              const SizedBox(height: 16),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _showFeeDetails(BuildContext context, Fee fee) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Fee Details",
-                        style: Theme.of(context).textTheme.titleLarge,
+          ),
+          Expanded(
+            child: ListWheelScrollView.useDelegate(
+              controller: FixedExtentScrollController(
+                initialItem: selectedIndex,
+              ),
+              itemExtent: 50,
+              diameterRatio: 1.5,
+              onSelectedItemChanged: onChanged,
+              childDelegate: ListWheelChildBuilderDelegate(
+                childCount: itemCount,
+                builder: (context, index) {
+                  final isSelected = index == selectedIndex;
+                  return Container(
+                    alignment: Alignment.center,
+                    decoration:
+                        isSelected
+                            ? BoxDecoration(
+                              color: Colors.blue[50],
+                              borderRadius: BorderRadius.circular(8),
+                            )
+                            : null,
+                    child: Text(
+                      itemBuilder(index),
+                      style: TextStyle(
+                        fontSize: isSelected ? 18 : 16,
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.normal,
+                        color: isSelected ? Colors.blue[700] : Colors.grey[700],
                       ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 16),
-                  FeeDetailRow(
-                    icon: Icons.receipt_long,
-                    label: "Fee ID",
-                    value: fee.id, // Still showing in details
-                  ),
-                  const SizedBox(height: 12),
-                  FeeDetailRow(
-                    icon: Icons.calendar_today,
-                    label: "Date",
-                    value: _formatDate(fee.date),
-                  ),
-                  const SizedBox(height: 12),
-                  FeeDetailRow(
-                    icon: Icons.description,
-                    label: "Description",
-                    value: fee.description, // Still showing in details
-                  ),
-                  const SizedBox(height: 12),
-                  FeeDetailRow(
-                    icon: Icons.currency_rupee,
-                    label: "Amount",
-                    value: "₹${fee.amount.toStringAsFixed(2)}",
-                    isAmount: true,
-                  ),
-                  const SizedBox(height: 12),
-                  FeeDetailRow(
-                    icon: Icons.payment,
-                    label: "Payment Method",
-                    value: _getPaymentMethodText(fee.paymentMethod),
-                    isPaymentMethod: true,
-                    paymentMethod: fee.paymentMethod,
-                  ),
-                  const SizedBox(height: 12),
-                  FeeDetailRow(
-                    icon: Icons.check_circle,
-                    label: "Payment Status",
-                    value: fee.status,
-                    isStatus: true,
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: const Text("Close"),
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ),
+        ],
+      ),
     );
   }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return "";
-    return DateFormat('dd MMM yyyy').format(date);
-  }
-
-  int _getDaysInMonth(int year, int month) {
+  int _daysInMonth(int year, int month) {
     if (month == 2) {
       return ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0)
           ? 29
           : 28;
-    } else if (month == 4 || month == 6 || month == 9 || month == 11) {
+    } else if ([4, 6, 9, 11].contains(month)) {
       return 30;
-    } else {
-      return 31;
     }
+    return 31;
   }
 }

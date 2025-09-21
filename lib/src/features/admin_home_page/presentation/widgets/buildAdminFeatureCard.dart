@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/add_courses/presentation/pages/add_course_page.dart';
 import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presentation/pages/AddInstructorScreen.dart';
 import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/page/fee_history_screen.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/groups_list_screen.dart';
 import 'package:flutter_cas_app_main/src/features/feedefaulters/presentation/pages/fee_defaulters.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/create_group_page.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/read_group_page.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/add_inquiry_page.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/inquiry_detail_page.dart';
-import 'package:flutter_cas_app_main/src/features/installment_page/presentation/pages/installment_page.dart';
-import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/groups_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_enrollment_screen.dart';
 import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/pages/workshop_time_tracker.dart';
 
@@ -103,7 +102,7 @@ void _navigateToScreen(BuildContext context, int index) {
         print('Navigating to Pay Fee');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => GroupsPage()),
+          MaterialPageRoute(builder: (_) => GroupsListScreen()),
         );
         break;
       case 2: // Fee Defaulter
@@ -143,10 +142,19 @@ void _navigateToScreen(BuildContext context, int index) {
         break;
       case 7: // Fee History (but you're using AddInquiryScreen)
         print('Navigating to Add Inquiry');
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => FeeHistoryScreen()),
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder:
+                (_) => BlocProvider(
+                  create:
+                      (_) =>
+                          FeeHistoryBloc(repository: FeeHistoryRepository())
+                            ..add(FetchTodayFees()),
+                  child: const FeeHistoryScreen(),
+                ),
+          ),
         );
+
         break;
       case 8: // Add Inquiry
         print('Add Course - Not implemented yet');

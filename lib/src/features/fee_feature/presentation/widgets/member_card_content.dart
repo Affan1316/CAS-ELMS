@@ -1,6 +1,9 @@
 // Data Models
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_details_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_text.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/group_student_entity_class.dart';
@@ -64,11 +67,15 @@ class MemberCardContent extends StatelessWidget {
             ),
           ),
           onPressed: () {
+            // context.read<FeeAdminBloc>().add(ResetFeeAdminStateEvent());
+            context.read<FeeAdminBloc>().add(
+              GetStudentInstalmentEvent(studentId: student.rollNum),
+            );
             Navigator.push(
               context,
               MaterialPageRoute(
                 // student.rollNum
-                builder: (_) => FeeDetailsScreen(studentId: "s1"),
+                builder: (_) => FeeDetailsScreen(studentId: student.rollNum),
               ),
             );
           },
