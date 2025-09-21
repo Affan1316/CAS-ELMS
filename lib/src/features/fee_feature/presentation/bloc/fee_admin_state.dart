@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_entity_class.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/enums/sort_option_enum.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/entities/group_entity.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/student_fee_feature_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/group_student_entity_class.dart';
@@ -131,4 +133,41 @@ class UpdateStudentInstalmentLoadingState extends FeeAdminState {
 
 class UpdatedStudentInstalmentState extends FeeAdminState {
   const UpdatedStudentInstalmentState();
+}
+
+class FeeHistoryLoading extends FeeAdminState {}
+
+class FeeHistoryError extends FeeAdminState {
+  final String message;
+  const FeeHistoryError(this.message);
+}
+
+class FeeHistoryLoaded extends FeeAdminState {
+  final List<FeeEntityClass> fees;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final SortOptionEnum sortOption;
+
+  FeeHistoryLoaded({
+    required this.fees,
+    this.startDate,
+    this.endDate,
+    required this.sortOption,
+  });
+
+  FeeHistoryLoaded copyWith({
+    List<FeeEntityClass>? fees,
+    DateTime? startDate,
+    DateTime? endDate,
+    SortOptionEnum? sortOption,
+  }) {
+    return FeeHistoryLoaded(
+      fees: fees ?? this.fees,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      sortOption: sortOption ?? this.sortOption,
+    );
+  }
+
+  double get totalAmount => fees.fold(0, (sum, fee) => sum + fee.paidAmount);
 }

@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/add_courses/presentation/pages/add_course_page.dart';
 import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presentation/pages/AddInstructorScreen.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/page/fee_history_screen.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/groups_list_screen.dart';
 import 'package:flutter_cas_app_main/src/features/feedefaulters/presentation/pages/fee_defaulters.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/create_group_page.dart';
@@ -142,18 +144,27 @@ void _navigateToScreen(BuildContext context, int index) {
         break;
       case 7: // Fee History (but you're using AddInquiryScreen)
         print('Navigating to Add Inquiry');
-        Navigator.of(context).push(
+        context.read<FeeAdminBloc>().add(FetchTodayFees());
+        Navigator.push(
+          context,
           MaterialPageRoute(
-            builder:
-                (_) => BlocProvider(
-                  create:
-                      (_) =>
-                          FeeHistoryBloc(repository: FeeHistoryRepository())
-                            ..add(FetchTodayFees()),
-                  child: const FeeHistoryScreen(),
-                ),
+            builder: (context) {
+              return const FeeHistoryScreen();
+            },
           ),
         );
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(
+        //     builder:
+        //         (_) => BlocProvider(
+        //           create:
+        //               (_) =>
+        //                   FeeHistoryBloc(repository: FeeHistoryRepository())
+        //                     ..add(FetchTodayFees()),
+        //           child: const FeeHistoryScreen(),
+        //         ),
+        //   ),
+        // );
 
         break;
       case 8: // Add Inquiry

@@ -1,7 +1,7 @@
 // Data Models
 
 import 'package:flutter/material.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/page/fee_history_screen.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/neu_card.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_text.dart';
 import 'package:intl/intl.dart';

@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/enums/sort_option_enum.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/entities/group_entity.dart';
 
 abstract class FeeAdminEvent {
@@ -81,4 +83,51 @@ class UpdateStudentInstalmentEvent extends FeeAdminEvent {
     required this.paidDate,
     required this.paymentMethod,
   });
+}
+
+class FetchFeesByDateRange extends FeeAdminEvent {
+  final DateTime startDate;
+  final DateTime endDate;
+  FetchFeesByDateRange(this.startDate, this.endDate);
+}
+
+class FetchTodayFees extends FeeAdminEvent {}
+
+class UpdateSelectedDate extends FeeAdminEvent {
+  final DateTime? startDate;
+  final DateTime? endDate;
+  UpdateSelectedDate({this.startDate, this.endDate});
+}
+
+class SortFees extends FeeAdminEvent {
+  final SortOptionEnum option;
+  SortFees(this.option);
+}
+
+extension SortOptionExt on SortOptionEnum {
+  String get title {
+    switch (this) {
+      case SortOptionEnum.dateDesc:
+        return 'Date: New → Old';
+      case SortOptionEnum.dateAsc:
+        return 'Date: Old → New';
+      case SortOptionEnum.amountDesc:
+        return 'Amount: High → Low';
+      case SortOptionEnum.amountAsc:
+        return 'Amount: Low → High';
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case SortOptionEnum.dateDesc:
+        return Icons.arrow_downward;
+      case SortOptionEnum.dateAsc:
+        return Icons.arrow_upward;
+      case SortOptionEnum.amountDesc:
+        return Icons.trending_down;
+      case SortOptionEnum.amountAsc:
+        return Icons.trending_up;
+    }
+  }
 }

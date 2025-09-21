@@ -42,6 +42,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_installment_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/student_fee_feature_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/abstract_repo/abstract_implemetation_installment_repo.dart';
@@ -256,5 +257,41 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
     // }
 
     // }
+  }
+
+  @override
+  Future<List<FeeEntityClass>> fetchFeesByDateRange(
+    DateTime start,
+    DateTime end,
+  ) async {
+    final startTs = Timestamp.fromDate(
+      DateTime(start.year, start.month, start.day, 0, 0, 0),
+    );
+    final endTs = Timestamp.fromDate(
+      DateTime(end.year, end.month, end.day, 23, 59, 59, 999),
+    );
+
+    final snapshot =
+        await _firestore
+            .collection("fee_history_daywise")
+            .where('createdAt', isGreaterThanOrEqualTo: startTs)
+            .where('createdAt', isLessThanOrEqualTo: endTs)
+            .orderBy('createdAt', descending: true)
+            .get();
+    var forPrint = snapshot.docs.toList();
+    for (var element in forPrint) {
+      debugPrint("||||||||||||${element.data()}|||||||||||||");
+    }
+    return snapshot.docs
+        .map((d) => FeeEntityClass.fromMap(d.data(), id: d.id))
+        .toList();
+  }
+
+  @override
+  Future<List<FeeEntityClass>> fetchTodayFees() {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day, 0, 0, 0);
+    final end = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+    return fetchFeesByDateRange(start, end);
   }
 }

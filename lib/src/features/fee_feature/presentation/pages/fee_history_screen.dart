@@ -1,290 +1,13 @@
-// file: enhanced_fee_history_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_entity_class.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/enums/payment_method_enum.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/enums/sort_option_enum.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_state.dart';
 import 'package:intl/intl.dart';
 
-/// ---------- Simple enums (replace with your existing ones if present) ----------
-enum PaymentMethod { jazzCash, easyPaisa, ubl, cashPayment }
-
-enum SortOption { dateDesc, dateAsc, amountDesc, amountAsc }
-
-extension SortOptionExt on SortOption {
-  String get title {
-    switch (this) {
-      case SortOption.dateDesc:
-        return 'Date: New → Old';
-      case SortOption.dateAsc:
-        return 'Date: Old → New';
-      case SortOption.amountDesc:
-        return 'Amount: High → Low';
-      case SortOption.amountAsc:
-        return 'Amount: Low → High';
-    }
-  }
-
-  IconData get icon {
-    switch (this) {
-      case SortOption.dateDesc:
-        return Icons.arrow_downward;
-      case SortOption.dateAsc:
-        return Icons.arrow_upward;
-      case SortOption.amountDesc:
-        return Icons.trending_down;
-      case SortOption.amountAsc:
-        return Icons.trending_up;
-    }
-  }
-}
-
-/// ---------- Model ----------
-class Fee {
-  final String id;
-  final DateTime date;
-  final double paidAmount;
-  final PaymentMethod paymentMethod;
-  final String status;
-
-  Fee({
-    required this.id,
-    required this.date,
-    required this.paidAmount,
-    required this.paymentMethod,
-    required this.status,
-  });
-
-  factory Fee.fromMap(Map<String, dynamic> map, {String? id}) {
-    final ts = map['createdAt'] as Timestamp?;
-    final date = ts?.toDate() ?? DateTime.now();
-    final paidAmount =
-        (num.parse(map['paidAmount']) as num?)?.toDouble() ?? 0.0;
-    final pmRaw = map['paymentMethod'];
-    final status = map['status'] as String? ?? 'Paid';
-    debugPrint("|||||||||||$paidAmount|||||||||||");
-    debugPrint("|||||||||||$pmRaw|||||||||||");
-
-    return Fee(
-      id: id ?? '',
-      date: date,
-      paidAmount: paidAmount,
-      paymentMethod: _parsePaymentMethod(pmRaw),
-      status: status,
-    );
-  }
-
-  static PaymentMethod _parsePaymentMethod(dynamic v) {
-    // if (v == null) return PaymentMethod.ubl;
-    final s = v.toString().toLowerCase();
-    if (s.contains('cashpayment')) return PaymentMethod.cashPayment;
-    if (s.contains('jazz') || s.contains('jazzcash')) {
-      return PaymentMethod.jazzCash;
-    }
-    if (s.contains('easy') || s.contains('easypaisa')) {
-      return PaymentMethod.easyPaisa;
-    }
-    return PaymentMethod.ubl;
-  }
-}
-
-/// ---------- Repository (Firestore queries by date) ----------
-class FeeHistoryRepository {
-  final FirebaseFirestore _firestore;
-  final String collectionPath;
-
-  FeeHistoryRepository({
-    FirebaseFirestore? firestore,
-    this.collectionPath = 'fee_history_daywise',
-  }) : _firestore = firestore ?? FirebaseFirestore.instance;
-
-  Future<List<Fee>> fetchFeesByDateRange(DateTime start, DateTime end) async {
-    final startTs = Timestamp.fromDate(
-      DateTime(start.year, start.month, start.day, 0, 0, 0),
-    );
-    final endTs = Timestamp.fromDate(
-      DateTime(end.year, end.month, end.day, 23, 59, 59, 999),
-    );
-
-    final snapshot =
-        await _firestore
-            .collection(collectionPath)
-            .where('createdAt', isGreaterThanOrEqualTo: startTs)
-            .where('createdAt', isLessThanOrEqualTo: endTs)
-            .orderBy('createdAt', descending: true)
-            .get();
-    var forPrint = snapshot.docs.toList();
-    for (var element in forPrint) {
-      debugPrint("||||||||||||${element.data()}|||||||||||||");
-    }
-    return snapshot.docs.map((d) => Fee.fromMap(d.data(), id: d.id)).toList();
-  }
-
-  Future<List<Fee>> fetchTodayFees() async {
-    final now = DateTime.now();
-    final start = DateTime(now.year, now.month, now.day, 0, 0, 0);
-    final end = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
-    return fetchFeesByDateRange(start, end);
-  }
-}
-
-/// ---------- Bloc: Events ----------
-abstract class FeeHistoryEvent {}
-
-class FetchFeesByDateRange extends FeeHistoryEvent {
-  final DateTime startDate;
-  final DateTime endDate;
-  FetchFeesByDateRange(this.startDate, this.endDate);
-}
-
-class FetchTodayFees extends FeeHistoryEvent {}
-
-class UpdateSelectedDate extends FeeHistoryEvent {
-  final DateTime? startDate;
-  final DateTime? endDate;
-  UpdateSelectedDate({this.startDate, this.endDate});
-}
-
-class SortFees extends FeeHistoryEvent {
-  final SortOption option;
-  SortFees(this.option);
-}
-
-/// ---------- Bloc: States ----------
-abstract class FeeHistoryState {}
-
-class FeeHistoryLoading extends FeeHistoryState {}
-
-class FeeHistoryError extends FeeHistoryState {
-  final String message;
-  FeeHistoryError(this.message);
-}
-
-class FeeHistoryLoaded extends FeeHistoryState {
-  final List<Fee> fees;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final SortOption sortOption;
-
-  FeeHistoryLoaded({
-    required this.fees,
-    this.startDate,
-    this.endDate,
-    required this.sortOption,
-  });
-
-  FeeHistoryLoaded copyWith({
-    List<Fee>? fees,
-    DateTime? startDate,
-    DateTime? endDate,
-    SortOption? sortOption,
-  }) {
-    return FeeHistoryLoaded(
-      fees: fees ?? this.fees,
-      startDate: startDate ?? this.startDate,
-      endDate: endDate ?? this.endDate,
-      sortOption: sortOption ?? this.sortOption,
-    );
-  }
-
-  double get totalAmount => fees.fold(0, (sum, fee) => sum + fee.paidAmount);
-}
-
-/// ---------- Bloc Implementation ----------
-class FeeHistoryBloc extends Bloc<FeeHistoryEvent, FeeHistoryState> {
-  final FeeHistoryRepository repository;
-
-  FeeHistoryBloc({required this.repository}) : super(FeeHistoryLoading()) {
-    on<FetchFeesByDateRange>(_onFetchFeesByDateRange);
-    on<FetchTodayFees>(_onFetchTodayFees);
-    on<UpdateSelectedDate>(_onUpdateSelectedDate);
-    on<SortFees>(_onSortFees);
-  }
-
-  Future<void> _onFetchFeesByDateRange(
-    FetchFeesByDateRange event,
-    Emitter<FeeHistoryState> emit,
-  ) async {
-    emit(FeeHistoryLoading());
-    try {
-      final fees = await repository.fetchFeesByDateRange(
-        event.startDate,
-        event.endDate,
-      );
-      emit(
-        FeeHistoryLoaded(
-          fees: fees,
-          startDate: event.startDate,
-          endDate: event.endDate,
-          sortOption: SortOption.dateDesc,
-        ),
-      );
-    } catch (e) {
-      emit(FeeHistoryError(e.toString()));
-    }
-  }
-
-  Future<void> _onFetchTodayFees(
-    FetchTodayFees event,
-    Emitter<FeeHistoryState> emit,
-  ) async {
-    emit(FeeHistoryLoading());
-    try {
-      final fees = await repository.fetchTodayFees();
-      emit(
-        FeeHistoryLoaded(
-          fees: fees,
-          startDate: null,
-          endDate: null,
-          sortOption: SortOption.dateDesc,
-        ),
-      );
-    } catch (e) {
-      emit(FeeHistoryError(e.toString()));
-    }
-  }
-
-  void _onUpdateSelectedDate(
-    UpdateSelectedDate event,
-    Emitter<FeeHistoryState> emit,
-  ) {
-    if (state is FeeHistoryLoaded) {
-      final s = state as FeeHistoryLoaded;
-      emit(s.copyWith(startDate: event.startDate, endDate: event.endDate));
-    } else {
-      emit(
-        FeeHistoryLoaded(
-          fees: [],
-          startDate: event.startDate,
-          endDate: event.endDate,
-          sortOption: SortOption.dateDesc,
-        ),
-      );
-    }
-  }
-
-  void _onSortFees(SortFees event, Emitter<FeeHistoryState> emit) {
-    if (state is FeeHistoryLoaded) {
-      final s = state as FeeHistoryLoaded;
-      final newList = List<Fee>.from(s.fees);
-      switch (event.option) {
-        case SortOption.dateDesc:
-          newList.sort((a, b) => b.date.compareTo(a.date));
-          break;
-        case SortOption.dateAsc:
-          newList.sort((a, b) => a.date.compareTo(b.date));
-          break;
-        case SortOption.amountDesc:
-          newList.sort((a, b) => b.paidAmount.compareTo(a.paidAmount));
-          break;
-        case SortOption.amountAsc:
-          newList.sort((a, b) => a.paidAmount.compareTo(b.paidAmount));
-          break;
-      }
-      emit(s.copyWith(fees: newList, sortOption: event.option));
-    }
-  }
-}
-
-/// Enhanced FeeHistoryScreen with modern UI/UX
 class FeeHistoryScreen extends StatefulWidget {
   const FeeHistoryScreen({super.key});
 
@@ -347,17 +70,18 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
 
   @override
   Widget build(BuildContext context) {
+    final Color background = const Color(0xFFEAF3FB); // light blue/grey
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: _buildAppBar(context),
-      body: BlocBuilder<FeeHistoryBloc, FeeHistoryState>(
+      backgroundColor: background,
+      appBar: _buildAppBar(context, Colors.deepPurple),
+      body: BlocBuilder<FeeAdminBloc, FeeAdminState>(
         builder: (context, state) {
           if (state is FeeHistoryLoading) {
             return _buildLoadingState();
           } else if (state is FeeHistoryError) {
             return _buildErrorState(context, state.message);
           } else if (state is FeeHistoryLoaded) {
-            return _buildLoadedState(context, state);
+            return _buildLoadedState(context, state, background);
           } else {
             return const SizedBox.shrink();
           }
@@ -367,10 +91,10 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
+  PreferredSizeWidget _buildAppBar(BuildContext context, Color background) {
     return AppBar(
       elevation: 0,
-      backgroundColor: Colors.lightBlue.shade100,
+      backgroundColor: background,
       surfaceTintColor: Colors.transparent,
       title: const Text(
         'Fee History',
@@ -422,10 +146,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
           children: [
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.red[50],
-                borderRadius: BorderRadius.circular(50),
-              ),
+              decoration: _neoDecoration(radius: 50),
               child: Icon(
                 Icons.error_outline_rounded,
                 size: 48,
@@ -448,7 +169,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed:
-                  () => context.read<FeeHistoryBloc>().add(FetchTodayFees()),
+                  () => context.read<FeeAdminBloc>().add(FetchTodayFees()),
               icon: const Icon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
@@ -464,7 +185,11 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
     );
   }
 
-  Widget _buildLoadedState(BuildContext context, FeeHistoryLoaded state) {
+  Widget _buildLoadedState(
+    BuildContext context,
+    FeeHistoryLoaded state,
+    Color background,
+  ) {
     return RefreshIndicator(
       onRefresh: () async => _refreshData(context),
       child: CustomScrollView(
@@ -478,21 +203,25 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
                   _isFilterExpanded
                       ? SlideTransition(
                         position: _slideAnimation,
-                        child: _buildFilterSection(context, state),
+                        child: _buildFilterSection(context, state, background),
                       )
                       : const SizedBox.shrink(),
             ),
           ),
 
           // Summary Stats
-          SliverToBoxAdapter(child: _buildSummarySection(context, state)),
+          SliverToBoxAdapter(
+            child: _buildSummarySection(context, state, background),
+          ),
 
           // Content Header
           SliverToBoxAdapter(child: _buildContentHeader(context, state)),
 
           // Fee List
           state.fees.isEmpty
-              ? SliverFillRemaining(child: _buildEmptyState(context))
+              ? SliverFillRemaining(
+                child: _buildEmptyState(context, background),
+              )
               : SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 sliver: SliverList(
@@ -500,7 +229,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
                     final fee = state.fees[index];
                     return AnimatedContainer(
                       duration: Duration(milliseconds: 100 * index),
-                      child: _buildFeeCard(context, fee, index),
+                      child: _buildFeeCard(context, fee, index, background),
                     );
                   }, childCount: state.fees.length),
                 ),
@@ -513,8 +242,12 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
     );
   }
 
-  Widget _buildFilterSection(BuildContext context, FeeHistoryLoaded state) {
-    final bloc = context.read<FeeHistoryBloc>();
+  Widget _buildFilterSection(
+    BuildContext context,
+    FeeHistoryLoaded state,
+    Color background,
+  ) {
+    final bloc = context.read<FeeAdminBloc>();
     final canSearch =
         state.startDate != null &&
         state.endDate != null &&
@@ -523,17 +256,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: _neoDecoration(radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -574,6 +297,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
                         ),
                       )
                       : null,
+                  background,
                 ),
               ),
               const SizedBox(width: 16),
@@ -592,6 +316,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
                         ),
                       )
                       : null,
+                  background,
                 ),
               ),
             ],
@@ -711,7 +436,6 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
     );
   }
 
-  /// Modern quick filter chip
   Widget _buildQuickFilterChip(
     String label,
     IconData icon,
@@ -734,16 +458,14 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
     IconData icon,
     VoidCallback onTap,
     VoidCallback? onClear,
+    Color background,
   ) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey[300]!),
-          borderRadius: BorderRadius.circular(12),
-        ),
+        decoration: _neoDecoration(radius: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -783,38 +505,17 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
     );
   }
 
-  Widget _buildQuickFilter(String label, IconData icon, VoidCallback onTap) {
-    return ActionChip(
-      avatar: Icon(icon, size: 18),
-      label: Text(label),
-      onPressed: onTap,
-      backgroundColor: Colors.blue[50],
-      labelStyle: TextStyle(color: Colors.blue[700]),
-      side: BorderSide(color: Colors.blue[200]!),
-    );
-  }
-
-  Widget _buildSummarySection(BuildContext context, FeeHistoryLoaded state) {
+  Widget _buildSummarySection(
+    BuildContext context,
+    FeeHistoryLoaded state,
+    Color background,
+  ) {
     if (state.fees.isEmpty) return const SizedBox.shrink();
 
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.blue[600]!, Colors.blue[700]!],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: _neoDecoration(radius: 20),
       child: Row(
         children: [
           Expanded(
@@ -824,7 +525,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
                 Text(
                   'Total Amount',
                   style: TextStyle(
-                    color: Colors.blue[100],
+                    color: Colors.blue[700],
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -833,7 +534,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
                 Text(
                   'Rs ${state.totalAmount.toStringAsFixed(2)}',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Colors.blueAccent,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -853,7 +554,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
               Text(
                 'Records',
                 style: TextStyle(
-                  color: Colors.blue[100],
+                  color: Colors.blue[700],
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -862,7 +563,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
               Text(
                 '${state.fees.length}',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Colors.blueAccent,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -897,84 +598,84 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
     );
   }
 
-  Widget _buildFeeCard(BuildContext context, Fee fee, int index) {
+  Widget _buildFeeCard(
+    BuildContext context,
+    FeeEntityClass fee,
+    int index,
+    Color background,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: Colors.white,
+      decoration: _neoDecoration(radius: 16),
+      child: InkWell(
+        onTap: () => _showFeeDetails(context, fee),
         borderRadius: BorderRadius.circular(16),
-        elevation: 1,
-        shadowColor: Colors.black12,
-        child: InkWell(
-          onTap: () => _showFeeDetails(context, fee),
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                // Payment method icon
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: _getPaymentMethodColor(
-                      fee.paymentMethod,
-                    ).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    _getPaymentMethodIcon(fee.paymentMethod),
-                    color: _getPaymentMethodColor(fee.paymentMethod),
-                    size: 24,
-                  ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              // Payment method icon
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: _getPaymentMethodColor(
+                    fee.paymentMethod,
+                  ).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(width: 16),
-
-                // Fee details
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _getPaymentMethodLabel(fee.paymentMethod),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        DateFormat('dd MMM yyyy, hh:mm a').format(fee.date),
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                      ),
-                      const SizedBox(height: 4),
-                      _buildStatusChip(fee.status),
-                    ],
-                  ),
+                child: Icon(
+                  _getPaymentMethodIcon(fee.paymentMethod),
+                  color: _getPaymentMethodColor(fee.paymentMethod),
+                  size: 24,
                 ),
+              ),
+              const SizedBox(width: 16),
 
-                // Amount
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+              // Fee details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Rs ${fee.paidAmount.toStringAsFixed(2)}',
+                      _getPaymentMethodLabel(fee.paymentMethod),
                       style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
-                      color: Colors.grey[400],
+                    const SizedBox(height: 4),
+                    Text(
+                      DateFormat('dd MMM yyyy, hh:mm a').format(fee.date),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
+                    const SizedBox(height: 4),
+                    _buildStatusChip(fee.status),
                   ],
                 ),
-              ],
-            ),
+              ),
+
+              // Amount
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Rs ${fee.paidAmount.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Colors.grey[400],
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -1025,7 +726,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, Color background) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -1034,10 +735,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
           children: [
             Container(
               padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(60),
-              ),
+              decoration: _neoDecoration(radius: 60),
               child: Icon(
                 Icons.receipt_long_outlined,
                 size: 64,
@@ -1060,7 +758,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
             const SizedBox(height: 24),
             FilledButton.tonalIcon(
               onPressed:
-                  () => context.read<FeeHistoryBloc>().add(FetchTodayFees()),
+                  () => context.read<FeeAdminBloc>().add(FetchTodayFees()),
               icon: const Icon(Icons.today),
               label: const Text('Show Today'),
             ),
@@ -1072,7 +770,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
 
   Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton.extended(
-      onPressed: () => context.read<FeeHistoryBloc>().add(FetchTodayFees()),
+      onPressed: () => context.read<FeeAdminBloc>().add(FetchTodayFees()),
       icon: const Icon(Icons.today),
       label: const Text('Today'),
       backgroundColor: Colors.blue[600],
@@ -1081,47 +779,48 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
   }
 
   // Helper methods
-  Color _getPaymentMethodColor(PaymentMethod method) {
+
+  Color _getPaymentMethodColor(PaymentMethodEnum method) {
     switch (method) {
-      case PaymentMethod.jazzCash:
+      case PaymentMethodEnum.jazzCash:
         return Colors.red[600]!;
-      case PaymentMethod.easyPaisa:
+      case PaymentMethodEnum.easyPaisa:
         return Colors.green[600]!;
-      case PaymentMethod.ubl:
+      case PaymentMethodEnum.ubl:
         return Colors.blue[600]!;
-      case PaymentMethod.cashPayment:
+      case PaymentMethodEnum.cashPayment:
         return Colors.greenAccent;
     }
   }
 
-  IconData _getPaymentMethodIcon(PaymentMethod method) {
+  IconData _getPaymentMethodIcon(PaymentMethodEnum method) {
     switch (method) {
-      case PaymentMethod.jazzCash:
+      case PaymentMethodEnum.jazzCash:
         return Icons.phone_android;
-      case PaymentMethod.easyPaisa:
+      case PaymentMethodEnum.easyPaisa:
         return Icons.account_balance_wallet;
-      case PaymentMethod.ubl:
+      case PaymentMethodEnum.ubl:
         return Icons.account_balance;
-      case PaymentMethod.cashPayment:
+      case PaymentMethodEnum.cashPayment:
         return Icons.account_balance_wallet_outlined;
     }
   }
 
-  String _getPaymentMethodLabel(PaymentMethod method) {
+  String _getPaymentMethodLabel(PaymentMethodEnum method) {
     switch (method) {
-      case PaymentMethod.jazzCash:
+      case PaymentMethodEnum.jazzCash:
         return 'JazzCash';
-      case PaymentMethod.easyPaisa:
+      case PaymentMethodEnum.easyPaisa:
         return 'EasyPaisa';
-      case PaymentMethod.ubl:
+      case PaymentMethodEnum.ubl:
         return 'UBL Bank';
-      case PaymentMethod.cashPayment:
+      case PaymentMethodEnum.cashPayment:
         return 'Cash';
     }
   }
 
   void _refreshData(BuildContext context) {
-    final bloc = context.read<FeeHistoryBloc>();
+    final bloc = context.read<FeeAdminBloc>();
     final state = bloc.state;
     if (state is FeeHistoryLoaded) {
       if (state.startDate != null && state.endDate != null) {
@@ -1141,7 +840,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
   }
 
   void _applyDateRange(BuildContext context, DateTime start, DateTime end) {
-    final bloc = context.read<FeeHistoryBloc>();
+    final bloc = context.read<FeeAdminBloc>();
     bloc.add(
       UpdateSelectedDate(
         startDate: DateTime(start.year, start.month, start.day),
@@ -1194,7 +893,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
                         ),
                       ),
                       const SizedBox(height: 16),
-                      ...SortOption.values.map(
+                      ...SortOptionEnum.values.map(
                         (option) => ListTile(
                           leading: Icon(option.icon),
                           title: Text(option.title),
@@ -1203,9 +902,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
                                   ? Icon(Icons.check, color: Colors.blue[600])
                                   : null,
                           onTap: () {
-                            context.read<FeeHistoryBloc>().add(
-                              SortFees(option),
-                            );
+                            context.read<FeeAdminBloc>().add(SortFees(option));
                             Navigator.pop(context);
                           },
                         ),
@@ -1220,7 +917,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
     );
   }
 
-  void _showFeeDetails(BuildContext context, Fee fee) {
+  void _showFeeDetails(BuildContext context, FeeEntityClass fee) {
     showDialog(
       context: context,
       builder:
@@ -1298,13 +995,12 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
     );
   }
 
-  // Date picker implementation
   void _openDatePicker(
     BuildContext context,
     bool isStart,
     FeeHistoryLoaded state,
   ) {
-    final bloc = context.read<FeeHistoryBloc>();
+    final bloc = context.read<FeeAdminBloc>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1323,9 +1019,11 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
           builder: (context, setState) {
             return Container(
               height: MediaQuery.of(context).size.height * 0.6,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
               ),
               child: Column(
                 children: [
@@ -1376,15 +1074,17 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
                           'Month',
                           12,
                           selectedMonth - 1,
-                          (value) => setState(() {
-                            selectedMonth = value + 1;
-                            daysInMonth = _daysInMonth(
-                              selectedYear,
-                              selectedMonth,
-                            );
-                            if (selectedDay > daysInMonth)
-                              selectedDay = daysInMonth;
-                          }),
+                          (value) {
+                            setState(() {
+                              selectedMonth = value + 1;
+                              daysInMonth = _daysInMonth(
+                                selectedYear,
+                                selectedMonth,
+                              );
+                              if (selectedDay > daysInMonth)
+                                selectedDay = daysInMonth;
+                            });
+                          },
                           (index) => monthNames[index],
                         ),
                         _buildDateWheel(
@@ -1392,15 +1092,17 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
                           'Year',
                           20,
                           selectedYear - 2020,
-                          (value) => setState(() {
-                            selectedYear = 2020 + value;
-                            daysInMonth = _daysInMonth(
-                              selectedYear,
-                              selectedMonth,
-                            );
-                            if (selectedDay > daysInMonth)
-                              selectedDay = daysInMonth;
-                          }),
+                          (value) {
+                            setState(() {
+                              selectedYear = 2020 + value;
+                              daysInMonth = _daysInMonth(
+                                selectedYear,
+                                selectedMonth,
+                              );
+                              if (selectedDay > daysInMonth)
+                                selectedDay = daysInMonth;
+                            });
+                          },
                           (index) => '${2020 + index}',
                         ),
                       ],
@@ -1518,5 +1220,25 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
       return 30;
     }
     return 31;
+  }
+
+  /// Neomorphic decoration helper
+  BoxDecoration _neoDecoration({double radius = 20}) {
+    return BoxDecoration(
+      color: const Color(0xFFEAF3FB),
+      borderRadius: BorderRadius.circular(radius),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0xFFB0D4F1), // soft light-blue shadow
+          offset: Offset(4, 4),
+          blurRadius: 8,
+        ),
+        BoxShadow(
+          color: Colors.white, // highlight
+          offset: Offset(-4, -4),
+          blurRadius: 8,
+        ),
+      ],
+    );
   }
 }

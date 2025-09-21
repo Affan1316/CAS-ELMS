@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_entity_class.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/enums/sort_option_enum.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_group_Usecase_fee.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_group_students_for_fee_use_case.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_student_installment_usecase_fee.dart';
@@ -35,6 +37,10 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     on<CreateStudentInstallmentEvent>(_onCreateStudentInstallment);
     on<GetStudentInstalmentEvent>(_onGetStudent);
     on<UpdateStudentInstalmentEvent>(_handleUpdatingStudentInstalment);
+    on<FetchFeesByDateRange>(_onFetchFeesByDateRange);
+    on<FetchTodayFees>(_onFetchTodayFees);
+    on<UpdateSelectedDate>(_onUpdateSelectedDate);
+    on<SortFees>(_onSortFees);
   }
 
   Future<void> _handleFetchGroups(
@@ -280,5 +286,87 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
       studentId: event.studentId,
     );
     emit(UpdatedStudentInstalmentState());
+  }
+
+  Future<void> _onFetchFeesByDateRange(
+    FetchFeesByDateRange event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    emit(FeeHistoryLoading());
+    try {
+      final fees = await actualImplemetationInstallmentRepo
+          .fetchFeesByDateRange(event.startDate, event.endDate);
+      emit(
+        FeeHistoryLoaded(
+          fees: fees,
+          startDate: event.startDate,
+          endDate: event.endDate,
+          sortOption: SortOptionEnum.dateDesc,
+        ),
+      );
+    } catch (e) {
+      emit(FeeHistoryError(e.toString()));
+    }
+  }
+
+  Future<void> _onFetchTodayFees(
+    FetchTodayFees event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    emit(FeeHistoryLoading());
+    try {
+      final fees = await actualImplemetationInstallmentRepo.fetchTodayFees();
+      emit(
+        FeeHistoryLoaded(
+          fees: fees,
+          startDate: null,
+          endDate: null,
+          sortOption: SortOptionEnum.dateDesc,
+        ),
+      );
+    } catch (e) {
+      emit(FeeHistoryError(e.toString()));
+    }
+  }
+
+  void _onUpdateSelectedDate(
+    UpdateSelectedDate event,
+    Emitter<FeeAdminState> emit,
+  ) {
+    if (state is FeeHistoryLoaded) {
+      final s = state as FeeHistoryLoaded;
+      emit(s.copyWith(startDate: event.startDate, endDate: event.endDate));
+    } else {
+      emit(
+        FeeHistoryLoaded(
+          fees: [],
+          startDate: event.startDate,
+          endDate: event.endDate,
+          sortOption: SortOptionEnum.dateDesc,
+        ),
+      );
+    }
+  }
+
+  void _onSortFees(SortFees event, Emitter<FeeAdminState> emit) {
+    if (state is FeeHistoryLoaded) {
+      final s = state as FeeHistoryLoaded;
+      final newList = List<FeeEntityClass>.from(s.fees);
+      switch (event.option) {
+        case SortOptionEnum.dateDesc:
+          newList.sort((a, b) => b.date.compareTo(a.date));
+          break;
+        case SortOptionEnum.dateAsc:
+          newList.sort((a, b) => a.date.compareTo(b.date));
+          break;
+        case SortOptionEnum.amountDesc:
+          newList.sort((a, b) => b.paidAmount.compareTo(a.paidAmount));
+          break;
+        case SortOptionEnum.amountAsc:
+          newList.sort((a, b) => a.paidAmount.compareTo(b.paidAmount));
+          break;
+      }
+      emit(s.copyWith(fees: newList, sortOption: event.option));
+    }
   }
 }

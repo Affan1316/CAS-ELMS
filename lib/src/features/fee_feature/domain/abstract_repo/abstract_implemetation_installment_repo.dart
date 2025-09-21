@@ -1,3 +1,4 @@
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/student_fee_feature_entity_class.dart';
 
 abstract class AbstractInstallmentRepo {
@@ -17,4 +18,9 @@ abstract class AbstractInstallmentRepo {
     required DateTime paidDate,
     required String paymentMethod,
   });
+  Future<List<FeeEntityClass>> fetchFeesByDateRange(
+    DateTime start,
+    DateTime end,
+  );
+  Future<List<FeeEntityClass>> fetchTodayFees();
 }
