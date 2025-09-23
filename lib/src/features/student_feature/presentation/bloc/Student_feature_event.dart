@@ -33,3 +33,5 @@ class FetchGroupStudentsEvent extends StudentFeatureEvent {
   final String id;
   FetchGroupStudentsEvent({required this.id});
 }
+
+class FetchGroupNamesEvent extends StudentFeatureEvent {}

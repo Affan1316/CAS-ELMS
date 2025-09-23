@@ -148,7 +148,7 @@ class FeeHistoryLoaded extends FeeAdminState {
   final DateTime? endDate;
   final SortOptionEnum sortOption;
 
-  FeeHistoryLoaded({
+  const FeeHistoryLoaded({
     required this.fees,
     this.startDate,
     this.endDate,

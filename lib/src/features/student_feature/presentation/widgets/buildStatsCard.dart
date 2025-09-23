@@ -42,7 +42,7 @@ Widget buildStatsCard() {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Current Semester',
+                'group',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,

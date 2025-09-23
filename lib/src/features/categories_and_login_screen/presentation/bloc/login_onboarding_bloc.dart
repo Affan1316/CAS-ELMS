@@ -83,7 +83,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
         );
 
         // Wait for animation to complete
-        await Future.delayed(const Duration(milliseconds: 500));
+        // await Future.delayed(const Duration(milliseconds: 500));
 
         // Reset shake after animation - only if emitter is still active
         if (!emit.isDone) {
@@ -116,6 +116,6 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     var a = await readStudentDataUsecase.readStudentUseCase
         .readStudentDataUsingId(event.id);
     print("$a");
-    emit(ReadingStudentNameCompleted(name: a.name));
+    emit(ReadingStudentNameCompleted(studentEntityClass: a));
   }
 }
