@@ -75,6 +75,7 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
     final Size(:width, :height) = size;
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Colors.white,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -370,7 +370,7 @@ class _UserIdInputScreenState extends State<UserIdInputScreen>
       child: TextField(
         controller: controller,
         obscureText: isPassword,
-        style: TextStyle(fontSize: fontSize),
+        style: TextStyle(fontSize: fontSize, color: Colors.black),
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: TextStyle(color: Colors.grey, fontSize: fontSize),

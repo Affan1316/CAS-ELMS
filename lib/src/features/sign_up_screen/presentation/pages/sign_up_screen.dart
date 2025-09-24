@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
 import '../widgets/signup_email_field.dart';
@@ -65,6 +66,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
         setState(() => _isLoading = false);
 
         if (result.success) {
+          // ✅ Update Firestore student record with the entered email
+          await FirebaseFirestore.instance
+              .collection('students') // change to your actual collection name
+              .doc(
+                widget.id,
+              ) // assuming admin saved student with id as documentId
+              .update({'email': _emailController.text.trim()});
+
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -74,10 +83,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
           );
 
-          // Navigate to home screen or sign in screen
           Navigator.of(context).pop();
-          // Or if you want to navigate to sign in:
-          // Navigator.of(context).pop();
         } else {
           // Show error message
           ScaffoldMessenger.of(context).showSnackBar(

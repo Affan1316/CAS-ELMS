@@ -17,6 +17,7 @@ class SignUpConfirmPasswordField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      style: TextStyle(color: Colors.black),
       controller: controller,
       obscureText: !isPasswordVisible,
       validator: validator,

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
@@ -7,7 +8,6 @@ import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/pr
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/SlideInWidget.dart';
 import 'package:flutter_cas_app_main/src/features/forget_password_screen/presentation/page/forget_password_screen.dart';
 import 'package:flutter_cas_app_main/src/features/sign_up_screen/presentation/pages/sign_up_screen.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_home_page.dart';
 
 class StudentLoginScreen extends StatefulWidget {
@@ -62,6 +62,29 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
     setState(() => _isLoading = true);
 
     try {
+      // 1. Fetch student record from Firestore using the given student ID
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('students')
+              .doc(widget.studentid) // assuming ID is docId
+              .get();
+
+      if (!doc.exists) {
+        setState(() => _isLoading = false);
+        _showErrorMessage("Invalid student ID");
+        return;
+      }
+
+      final firestoreEmail = doc['email'];
+
+      // 2. Check if entered email matches Firestore email
+      if (firestoreEmail != email) {
+        setState(() => _isLoading = false);
+        _showErrorMessage("Email does not match this student ID");
+        return;
+      }
+
+      // 3. Proceed with FirebaseAuth login
       final result = await _authService.signInWithEmailAndPassword(
         email: email,
         password: password,
@@ -75,7 +98,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
         context.read<OnboardingBloc>().add(
           ReadStudentNameFromFireBaseEvent(id: widget.studentid),
         );
-        // Show success message
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result.message),
@@ -88,12 +111,11 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
           ),
         );
       } else {
-        // Show Firebase error message
         _showErrorMessage(result.message);
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      _showErrorMessage('An unexpected error occurred. Please try again.');
+      _showErrorMessage("Something went wrong. Please try again.");
     }
   }
 
@@ -531,7 +553,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
             errorMessage.value = '';
           }
         },
-        style: TextStyle(fontSize: fontSize),
+        style: TextStyle(fontSize: fontSize, color: Colors.black),
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: TextStyle(color: Colors.grey, fontSize: fontSize),
