@@ -6,6 +6,7 @@ class InputField extends StatelessWidget {
     required this.hint,
     required this.controller,
     this.readOnly = false,
+    required TextInputType keyboardType,
   });
   final String hint;
   final TextEditingController controller;
@@ -22,7 +23,7 @@ class InputField extends StatelessWidget {
       child: TextField(
         controller: controller,
         readOnly: readOnly,
-        keyboardType: TextInputType.number,
+        keyboardType: TextInputType.name,
         decoration: InputDecoration(border: InputBorder.none, hintText: hint),
       ),
     );

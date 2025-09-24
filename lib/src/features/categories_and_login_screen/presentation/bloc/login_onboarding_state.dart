@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
 
 sealed class OnboardingState extends Equatable {
   const OnboardingState();
@@ -32,6 +33,6 @@ class OnboardingInitial extends OnboardingState {
 class ReadingStudentName extends OnboardingState {}
 
 class ReadingStudentNameCompleted extends OnboardingState {
-  final String name;
-  const ReadingStudentNameCompleted({required this.name});
+  final StudentEntityClass studentEntityClass;
+  const ReadingStudentNameCompleted({required this.studentEntityClass});
 }

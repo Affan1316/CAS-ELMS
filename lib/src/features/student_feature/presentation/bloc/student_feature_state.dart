@@ -41,3 +41,10 @@ class GroupStudentsDatafetched extends StudentFeatureState {
     required this.group,
   });
 }
+
+class GroupNamesfetching extends StudentFeatureState {}
+
+class GroupNamesfetchingCompleted extends StudentFeatureState {
+  final List<String> listOfGroupNames;
+  GroupNamesfetchingCompleted({required this.listOfGroupNames});
+}

@@ -8,6 +8,8 @@ import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/pr
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/SlideInWidget.dart';
 import 'package:flutter_cas_app_main/src/features/forget_password_screen/presentation/page/forget_password_screen.dart';
 import 'package:flutter_cas_app_main/src/features/sign_up_screen/presentation/pages/sign_up_screen.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_home_page.dart';
 
 class StudentLoginScreen extends StatefulWidget {
@@ -99,6 +101,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
           ReadStudentNameFromFireBaseEvent(id: widget.studentid),
         );
 
+        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result.message),
@@ -180,14 +183,33 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
         listener: (context, state) {
           print(state);
           if (state is ReadingStudentNameCompleted) {
-            // Navigate to home screen
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder:
-                    (context) =>
-                        StudentHomePage(id: widget.studentid, name: state.name),
-              ),
+            debugPrint("$state^^^^^^^^^^^^^^^^^^");
+            StudentEntityClass studentEntityClass = StudentEntityClass(
+              id: state.studentEntityClass.id,
+              name: state.studentEntityClass.name,
+              email: state.studentEntityClass.email,
+              cnic: state.studentEntityClass.cnic,
+              phone: state.studentEntityClass.phone,
+              address: state.studentEntityClass.address,
+              gender: state.studentEntityClass.gender,
+              fatherName: state.studentEntityClass.fatherName,
+              fatherOccupation: state.studentEntityClass.fatherOccupation,
+              group: state.studentEntityClass.group,
             );
+            try {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder:
+                      (context) => StudentHomePage(
+                        id: widget.studentid,
+                        studentEntityClass: studentEntityClass,
+                      ),
+                ),
+              );
+            } catch (e) {
+              debugPrint("navigation failed due to $e  ");
+            }
+            // Navigate to home screen
           }
         },
         child: SingleChildScrollView(

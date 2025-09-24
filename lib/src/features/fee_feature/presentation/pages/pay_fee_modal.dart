@@ -1,6 +1,7 @@
 // Data Models
 
 import 'package:flutter/material.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/neu_card.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_text.dart';
 import 'package:intl/intl.dart';
@@ -17,6 +18,8 @@ class PayFeeModal extends StatefulWidget {
 
 class _PayFeeModalState extends State<PayFeeModal> {
   final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
+
   DateTime? _selectedDate;
   String _paymentMethod = "Cash";
 
@@ -25,11 +28,13 @@ class _PayFeeModalState extends State<PayFeeModal> {
     super.initState();
     _selectedDate = DateTime.now();
     _amountController.text = widget.totalFee.toStringAsFixed(2);
+    _dateController.text = DateFormat('MMM dd, yyyy').format(_selectedDate!);
   }
 
   @override
   void dispose() {
     _amountController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
@@ -37,12 +42,15 @@ class _PayFeeModalState extends State<PayFeeModal> {
     final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
-      initialDate: now,
+      initialDate: _selectedDate ?? now,
       firstDate: DateTime(now.year - 1),
       lastDate: DateTime(now.year + 1),
     );
     if (picked != null) {
-      setState(() => _selectedDate = picked);
+      setState(() {
+        _selectedDate = picked;
+        _dateController.text = DateFormat('MMM dd, yyyy').format(picked);
+      });
     }
   }
 
@@ -87,15 +95,10 @@ class _PayFeeModalState extends State<PayFeeModal> {
                 onTap: _pickDate,
                 child: IgnorePointer(
                   child: TextField(
+                    controller: _dateController,
                     readOnly: true,
                     decoration: InputDecoration(
                       labelText: "Select Date",
-                      hintText:
-                          _selectedDate != null
-                              ? DateFormat(
-                                'MMM dd, yyyy',
-                              ).format(_selectedDate!)
-                              : "Choose a date",
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -108,7 +111,7 @@ class _PayFeeModalState extends State<PayFeeModal> {
 
               Column(
                 children: [
-                  _buildRadio("Cash"),
+                  _buildRadio("cashPayment"),
                   _buildRadio("UBL"),
                   _buildRadio("JazzCash"),
                   _buildRadio("EasyPaisa"),

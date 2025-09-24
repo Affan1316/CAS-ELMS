@@ -18,6 +18,7 @@ class StudentFeatureBloc
   StudentFeatureBloc() : super(StudentEnrollmentInitial()) {
     on<SubmitEnrollmentFormEvent>(_handleEnrollmentSubmission);
     on<FetchGroupStudentsEvent>(_handleGroupDataLoading);
+    on<FetchGroupNamesEvent>(_handleGroupNamesLoading);
   }
   final FirestoreRepositry _firestoreRepositry =
       ActualImplementationFirebaseRepo();
@@ -107,5 +108,14 @@ class StudentFeatureBloc
         group: studentData.group,
       ),
     );
+  }
+
+  Future<void> _handleGroupNamesLoading(
+    FetchGroupNamesEvent event,
+    Emitter<StudentFeatureState> emit,
+  ) async {
+    emit(GroupNamesfetching());
+    var groupsNamesList = await _firestoreRepositry.getGroupsNames();
+    emit(GroupNamesfetchingCompleted(listOfGroupNames: groupsNamesList));
   }
 }

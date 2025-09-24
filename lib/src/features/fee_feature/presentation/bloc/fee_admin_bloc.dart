@@ -1,17 +1,29 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_entity_class.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/enums/sort_option_enum.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_group_Usecase_fee.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_group_students_for_fee_use_case.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_student_installment_usecase_fee.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/update_student_installment_usecase_fee.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_state.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/entities/group_entity.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/FeeAdminReadInstalmentUsecase.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/data_source/actual_implemetation_installment_repo.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/group_student_entity_class.dart';
 
 class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
   final ReadGroupUsecaseFee _readGroupUsecaseFee = ReadGroupUsecaseFee();
   final ReadgroupstudentsforfeeUseCase _readgroupstudentsforfeeUseCase =
       ReadgroupstudentsforfeeUseCase();
+  final ActualImplemetationInstallmentRepo actualImplemetationInstallmentRepo =
+      ActualImplemetationInstallmentRepo();
+  final Feeadminreadinstalmentusecase feeadminreadinstalmentusecase =
+      Feeadminreadinstalmentusecase();
+  final UpdateStudentInstallmentUsecaseFee updateStudentInstallmentUsecaseFee =
+      UpdateStudentInstallmentUsecaseFee();
   List<GroupEntity> _allGroups = [];
   final List<StudentFeatureGroupStudentEntityClass> _allStudentsOfThisGroup =
       [];
@@ -21,6 +33,14 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     on<FeeAdminGroupDataFilteringEvent>(_handleGroupDataFiltering);
     on<FeeAdminFetchGroupsStudentEvent>(_handleGroupStudentReading);
     on<FeeAdminGroupStudentsFilteringEvent>(_handleGroupStudentFiltering);
+    on<InstallmentPageCalculateInst>(_onCalculateInstallment);
+    on<CreateStudentInstallmentEvent>(_onCreateStudentInstallment);
+    on<GetStudentInstalmentEvent>(_onGetStudent);
+    on<UpdateStudentInstalmentEvent>(_handleUpdatingStudentInstalment);
+    on<FetchFeesByDateRange>(_onFetchFeesByDateRange);
+    on<FetchTodayFees>(_onFetchTodayFees);
+    on<UpdateSelectedDate>(_onUpdateSelectedDate);
+    on<SortFees>(_onSortFees);
   }
 
   Future<void> _handleFetchGroups(
@@ -121,6 +141,7 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     FeeAdminFetchGroupsStudentEvent event,
     Emitter<FeeAdminState> emit,
   ) async {
+    debugPrint("@@@@@@@_handleGroupStudentReading called@@@@@@@@@@@@@");
     emit(FeeAdminGroupsStudentsLoadingState());
     _allStudentsOfThisGroup.clear();
     var a = await _readgroupstudentsforfeeUseCase.read(event.groupTitle).first;
@@ -180,5 +201,172 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     //   '[FeeAdminBloc] _filterGroups -> matched ${result.length} items for "$query"',
     // );
     return result;
+  }
+
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  /// ✅ Handle fee calculation
+  void _onCalculateInstallment(
+    InstallmentPageCalculateInst event,
+    Emitter<FeeAdminState> emit,
+  ) {
+    final totalFee = double.tryParse(event.totalFee);
+    final installments = int.tryParse(event.installments);
+
+    if (totalFee != null && installments != null && installments > 0) {
+      final installmentAmount = totalFee / installments;
+      emit(
+        InstallmentPageInstallmentCalculatedState(
+          installment: installmentAmount,
+        ),
+      );
+    } else {
+      emit(InstallmentPageInstallmentCalculatedState(installment: 0));
+    }
+  }
+
+  /// ✅ Create a student with installments
+  Future<void> _onCreateStudentInstallment(
+    CreateStudentInstallmentEvent event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    emit(InstallmentCreatingState());
+
+    try {
+      await actualImplemetationInstallmentRepo.createStudentWithInstallments(
+        studentId: event.studentId,
+        name: event.name,
+        groupId: event.groupId,
+        totalFee: event.totalFee,
+        paidAmount: event.paidAmount,
+        numberOfInstallments: event.numberOfInstallments,
+      );
+
+      emit(InstallmentCreatedSuccessState());
+    } catch (e) {
+      emit(InstallmentCreatedFailureState(error: e.toString()));
+    }
+  }
+
+  /// ✅ Fetch a student from Firestore
+  Future<void> _onGetStudent(
+    GetStudentInstalmentEvent event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    debugPrint(
+      "<<<<<<<<Inside Block and intiating StudentLoadingState>>>>>>>>>> ",
+    );
+    emit(StudentInstalmentLoadingState());
+
+    try {
+      debugPrint("student id which reult in no document ${event.studentId}");
+      final student = await feeadminreadinstalmentusecase.getStudent(
+        event.studentId,
+      );
+
+      if (student != null) {
+        emit(StudentLoadedState(student));
+      } else {
+        emit(StudentLoadFailureState("Student not found"));
+      }
+    } catch (e) {
+      emit(StudentLoadFailureState(e.toString()));
+    }
+  }
+
+  Future<void> _handleUpdatingStudentInstalment(
+    UpdateStudentInstalmentEvent event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    emit(UpdateStudentInstalmentLoadingState());
+    var a = await updateStudentInstallmentUsecaseFee.update(
+      installmentId: event.installmentId,
+      paidAmount: event.paidAmount,
+      paidDate: event.paidDate,
+      paymentMethod: event.paymentMethod,
+      studentId: event.studentId,
+    );
+    emit(UpdatedStudentInstalmentState());
+  }
+
+  Future<void> _onFetchFeesByDateRange(
+    FetchFeesByDateRange event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    emit(FeeHistoryLoading());
+    try {
+      final fees = await actualImplemetationInstallmentRepo
+          .fetchFeesByDateRange(event.startDate, event.endDate);
+      emit(
+        FeeHistoryLoaded(
+          fees: fees,
+          startDate: event.startDate,
+          endDate: event.endDate,
+          sortOption: SortOptionEnum.dateDesc,
+        ),
+      );
+    } catch (e) {
+      emit(FeeHistoryError(e.toString()));
+    }
+  }
+
+  Future<void> _onFetchTodayFees(
+    FetchTodayFees event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    emit(FeeHistoryLoading());
+    try {
+      final fees = await actualImplemetationInstallmentRepo.fetchTodayFees();
+      emit(
+        FeeHistoryLoaded(
+          fees: fees,
+          startDate: null,
+          endDate: null,
+          sortOption: SortOptionEnum.dateDesc,
+        ),
+      );
+    } catch (e) {
+      emit(FeeHistoryError(e.toString()));
+    }
+  }
+
+  void _onUpdateSelectedDate(
+    UpdateSelectedDate event,
+    Emitter<FeeAdminState> emit,
+  ) {
+    if (state is FeeHistoryLoaded) {
+      final s = state as FeeHistoryLoaded;
+      emit(s.copyWith(startDate: event.startDate, endDate: event.endDate));
+    } else {
+      emit(
+        FeeHistoryLoaded(
+          fees: [],
+          startDate: event.startDate,
+          endDate: event.endDate,
+          sortOption: SortOptionEnum.dateDesc,
+        ),
+      );
+    }
+  }
+
+  void _onSortFees(SortFees event, Emitter<FeeAdminState> emit) {
+    if (state is FeeHistoryLoaded) {
+      final s = state as FeeHistoryLoaded;
+      final newList = List<FeeEntityClass>.from(s.fees);
+      switch (event.option) {
+        case SortOptionEnum.dateDesc:
+          newList.sort((a, b) => b.date.compareTo(a.date));
+          break;
+        case SortOptionEnum.dateAsc:
+          newList.sort((a, b) => a.date.compareTo(b.date));
+          break;
+        case SortOptionEnum.amountDesc:
+          newList.sort((a, b) => b.paidAmount.compareTo(a.paidAmount));
+          break;
+        case SortOptionEnum.amountAsc:
+          newList.sort((a, b) => a.paidAmount.compareTo(b.paidAmount));
+          break;
+      }
+      emit(s.copyWith(fees: newList, sortOption: event.option));
+    }
   }
 }

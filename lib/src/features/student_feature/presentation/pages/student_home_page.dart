@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildHeader.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildPopularTeachersSection.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildQuickActions.dart';
@@ -7,11 +8,21 @@ import 'package:flutter_cas_app_main/src/features/student_feature/presentation/w
 
 class StudentHomePage extends StatefulWidget {
   final String id;
-  final String name;
-  const StudentHomePage({super.key, required this.id, required this.name});
+  final StudentEntityClass studentEntityClass;
+  const StudentHomePage({
+    super.key,
+    required this.id,
+    required this.studentEntityClass,
+  });
 
   @override
-  State<StudentHomePage> createState() => _StudentHomePageState();
+  State<StudentHomePage> createState() {
+    // if (studentEntityClass == null) {
+    //   //   AssertionError("student is null");
+    //   throw AssertionError('student is null');
+    // }
+    return _StudentHomePageState();
+  }
 }
 
 class _StudentHomePageState extends State<StudentHomePage>
@@ -91,6 +102,7 @@ class _StudentHomePageState extends State<StudentHomePage>
   @override
   void initState() {
     super.initState();
+    debugPrint("${widget.studentEntityClass.name}");
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
@@ -117,6 +129,8 @@ class _StudentHomePageState extends State<StudentHomePage>
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("Build get callled");
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: Container(
@@ -136,7 +150,11 @@ class _StudentHomePageState extends State<StudentHomePage>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    buildHeader(widget.name, context, widget.id),
+                    buildHeader(
+                      widget.studentEntityClass.name,
+                      context,
+                      widget.id,
+                    ),
                     buildStatsCard(),
                     buildQuickActions(widget.id),
                     buildPopularTeachersSection(),

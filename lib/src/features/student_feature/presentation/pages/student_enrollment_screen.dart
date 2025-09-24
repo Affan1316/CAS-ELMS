@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/student_enrollment_form.dart';
@@ -14,7 +15,7 @@ class StudentEnrollmentScreen extends StatefulWidget {
 
 class _StudentEnrollmentScreenState extends State<StudentEnrollmentScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
+  List<String> listOfGroupNamesForDropDownMenue = [];
   final _idController = TextEditingController();
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -26,6 +27,12 @@ class _StudentEnrollmentScreenState extends State<StudentEnrollmentScreen> {
   final _groupController = TextEditingController();
 
   String _selectedGender = 'Male';
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    context.read<StudentFeatureBloc>().add(FetchGroupNamesEvent());
+  }
 
   @override
   void dispose() {
@@ -52,6 +59,10 @@ class _StudentEnrollmentScreenState extends State<StudentEnrollmentScreen> {
       ),
       body: BlocConsumer<StudentFeatureBloc, StudentFeatureState>(
         listener: (context, state) {
+          if (state is GroupNamesfetchingCompleted) {
+            // debugPrint("${state.listOfGroupNames}");
+            listOfGroupNamesForDropDownMenue = state.listOfGroupNames;
+          }
           if (state is StudentEnrollmentSuccess) {
             // ScaffoldMessenger.of(context).showSnackBar(
             //   const SnackBar(
@@ -83,11 +94,16 @@ class _StudentEnrollmentScreenState extends State<StudentEnrollmentScreen> {
           }
         },
         builder: (context, state) {
+          if (state is GroupNamesfetching) {
+            return CircularProgressIndicator();
+          }
+
           return Stack(
             children: [
               SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: StudentEnrollmentForm(
+                  listOfGroupsNames: listOfGroupNamesForDropDownMenue,
                   formKey: _formKey,
                   studentIdController: _idController,
                   nameController: _fullNameController,

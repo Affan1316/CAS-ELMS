@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,10 +12,8 @@ import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/b
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/pages/admin_home_page.dart';
 import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/admin_login_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/data/local_fee_service.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/bloc/fee_history_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/bloc/fee_history_event.dart';
-import 'package:flutter_cas_app_main/src/features/fee%20history/presentation/page/fee_history_screen.dart';
+
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/groups_list_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/groups_loading_screen.dart';
@@ -23,8 +22,7 @@ import 'package:flutter_cas_app_main/src/features/group/domain/usecases/add_grou
 import 'package:flutter_cas_app_main/src/features/group/domain/usecases/update_group_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/bloc/group_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/bloc/inquiry_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/installment_page/presentation/bloc/installment_page_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/installment_page/presentation/installment_service.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/data_source/actual_implemetation_installment_repo.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
 import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/group_detail_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
@@ -60,22 +58,32 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<InquiryBloc>(create: (context) => sl<InquiryBloc>()),
           BlocProvider<AddCourseBloc>(create: (context) => sl<AddCourseBloc>()),
-          BlocProvider<InstallmentPageBloc>(
-            create:
-                (context) => InstallmentPageBloc(
-                  installmentService: InstallmentService(),
-                ),
-          ),
 
+          // BlocProvider<InstallmentPageBloc>(
+          //   create:
+          //       (context) => InstallmentPageBloc(
+          //         installmentService: ActualImplemetationInstallmentRepo(),
+          //       ),
+          // ),
           BlocProvider<AddInstructorBloc>(
             create: (context) => AddInstructorBloc(),
           ),
           BlocProvider<AdminLoginBloc>(create: (context) => AdminLoginBloc()),
-          BlocProvider<FeeHistoryBloc>(
-            create:
-                (context) => FeeHistoryBloc(LocalFeeService())..add(LoadFees()),
-            child: FeeHistoryScreen(),
-          ),
+          // BlocProvider<FeeHistoryBloc>(
+          //   create:
+          //       (context) => FeeHistoryBloc(LocalFeeService())..add(LoadFees()),
+          //   child: FeeHistoryScreen(),
+          // ),
+          // BlocProvider(
+          //   create: (_) {
+          //     return FeeHistoryBloc(
+          //       repository: FeeHistoryRepository(
+          //         firestore: FirebaseFirestore.instance,
+          //       ),
+          //     ); // ✅ presentation layer
+          //   },
+          //   child: const FeeHistoryScreen(),
+          // ),
           BlocProvider<AddGroupBloc>(
             create:
                 (context) => AddGroupBloc(

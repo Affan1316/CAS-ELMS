@@ -62,7 +62,29 @@ class ActualImplementationFirebaseRepo implements FirestoreRepositry {
     var a = firestore.collection("$groupTitle students").snapshots();
     return a;
   }
+
+  Future<List<String>> getGroupsNames() async {
+    List<String> list = [];
+    try {
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('groups').get();
+
+      for (var doc in querySnapshot.docs) {
+        list.add(doc.id);
+        // print('Document ID: ${doc.id}');
+        // print('Document data: ${doc.data()}'); // Access all fields
+        // // You can also access specific fields like:
+        // // print('User Name: ${doc.data()['name']}');
+      }
+    } catch (e) {
+      list.add(e.toString());
+      print("Error getting documents: $e");
+    }
+    return list;
+  }
 }
+
+
 // .map((event) {
 //       var a = event.docs;
 //       var b;

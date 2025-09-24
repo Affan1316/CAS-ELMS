@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/installment_page/presentation/pages/installment_page.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/installment_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';
@@ -16,12 +16,14 @@ class StudentEnrollmentForm extends StatelessWidget {
   final TextEditingController phoneController;
   final TextEditingController addressController;
   final TextEditingController groupController;
+  final List<String> listOfGroupsNames;
 
   final String selectedGender;
   final ValueChanged<String> onGenderChanged;
 
   const StudentEnrollmentForm({
     super.key,
+    required this.listOfGroupsNames,
     required this.formKey,
     required this.studentIdController,
     required this.nameController,
@@ -273,15 +275,91 @@ class StudentEnrollmentForm extends StatelessWidget {
                           ),
                           SizedBox(
                             width: fieldWidth,
-                            child: _buildTextField(
-                              controller: groupController,
-                              label: "Group",
-                              icon: Icons.group,
-                              validator:
-                                  (v) =>
-                                      (v == null || v.isEmpty)
-                                          ? 'Required'
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Group',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                FormField<String>(
+                                  initialValue:
+                                      groupController.text.isNotEmpty
+                                          ? groupController.text
                                           : null,
+                                  validator:
+                                      (value) =>
+                                          (value == null || value.isEmpty)
+                                              ? 'Required'
+                                              : null,
+                                  builder: (FormFieldState<String> field) {
+                                    return InputDecorator(
+                                      decoration: InputDecoration(
+                                        prefixIcon: const Icon(
+                                          Icons.group,
+                                          color: Color(0xFF6B7280),
+                                          size: 20,
+                                        ),
+                                        hintText: 'Select Group',
+                                        filled: true,
+                                        fillColor: const Color(0xFFF9FAFB),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          borderSide: const BorderSide(
+                                            color: Color(0xFFE5E7EB),
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          borderSide: const BorderSide(
+                                            color: Color(0xFF3B82F6),
+                                            width: 2,
+                                          ),
+                                        ),
+                                        errorText: field.errorText,
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 14,
+                                              vertical: 12,
+                                            ),
+                                      ),
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton<String>(
+                                          value: field.value,
+                                          isDense: true,
+                                          isExpanded: true,
+                                          icon: const Icon(
+                                            Icons.arrow_drop_down,
+                                            color: Color(0xFF6B7280),
+                                          ),
+                                          onChanged: (newValue) {
+                                            field.didChange(newValue);
+                                            groupController.text =
+                                                newValue ?? '';
+                                          },
+                                          items:
+                                              listOfGroupsNames.map((
+                                                String value,
+                                              ) {
+                                                return DropdownMenuItem<String>(
+                                                  value: value,
+                                                  child: Text(value),
+                                                );
+                                              }).toList(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -333,13 +411,44 @@ class StudentEnrollmentForm extends StatelessWidget {
                               );
                               return;
                             }
-
+                            if (nameController.text.trim().isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text(
+                                    'Please enter Student name first',
+                                  ),
+                                  backgroundColor: const Color(0xFFEF4444),
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+                            if (groupController.text.trim().isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text(
+                                    'Please enter group  first',
+                                  ),
+                                  backgroundColor: const Color(0xFFEF4444),
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder:
                                     (context) => CreateFeePlanPage(
                                       studentId:
                                           studentIdController.text.trim(),
+                                      groupId: groupController.text.trim(),
+                                      name: nameController.text.trim(),
                                     ),
                               ),
                             );

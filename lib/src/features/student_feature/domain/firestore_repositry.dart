@@ -10,4 +10,5 @@ abstract class FirestoreRepositry {
   Stream<QuerySnapshot<Map<String, dynamic>>> readWholeGroupStudentsList(
     String groupTitle,
   );
+  Future<List<String>> getGroupsNames();
 }
