@@ -1,0 +1,498 @@
+import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:flutter/material.dart';
+
+class SuperAdminDashboard extends StatelessWidget {
+  const SuperAdminDashboard({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return NeumorphicTheme(
+      themeMode: ThemeMode.light,
+      theme: const NeumorphicThemeData(
+        baseColor: Color(0xFFE6E8F0),
+        lightSource: LightSource.topLeft,
+        depth: 8,
+        intensity: 0.65,
+      ),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFE6E8F0),
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Padding(
+                    padding: EdgeInsets.all(
+                      _getResponsivePadding(constraints.maxWidth),
+                    ),
+                    child: Column(
+                      children: [
+                        // Header Section
+                        _buildHeader(constraints.maxWidth),
+                        SizedBox(
+                          height: _getResponsiveSpacing(constraints.maxWidth),
+                        ),
+
+                        // Dashboard Items Grid
+                        _buildDashboardGrid(context, constraints.maxWidth),
+                        SizedBox(
+                          height: _getResponsivePadding(constraints.maxWidth),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Responsive helper methods
+  double _getResponsivePadding(double screenWidth) {
+    if (screenWidth > 1200) return 40.0; // Desktop
+    if (screenWidth > 800) return 30.0; // Tablet
+    if (screenWidth > 600) return 25.0; // Large Mobile
+    return 20.0; // Mobile
+  }
+
+  double _getResponsiveSpacing(double screenWidth) {
+    if (screenWidth > 1200) return 40.0; // Desktop
+    if (screenWidth > 800) return 35.0; // Tablet
+    if (screenWidth > 600) return 30.0; // Large Mobile
+    return 25.0; // Mobile
+  }
+
+  int _getGridCrossAxisCount(double screenWidth) {
+    if (screenWidth > 1200) return 4; // Desktop - 4 columns
+    if (screenWidth > 900) return 3; // Large Tablet - 3 columns
+    if (screenWidth > 600) return 2; // Tablet/Large Mobile - 2 columns
+    return 2; // Mobile - 2 columns
+  }
+
+  double _getGridChildAspectRatio(double screenWidth) {
+    if (screenWidth > 1200) return 1.2; // Desktop
+    if (screenWidth > 900) return 1.15; // Large Tablet
+    if (screenWidth > 600) return 1.1; // Tablet
+    return 1.0; // Mobile - more square
+  }
+
+  double _getHeaderFontSize(double screenWidth, {bool isTitle = false}) {
+    if (isTitle) {
+      if (screenWidth > 1200) return 36.0; // Desktop
+      if (screenWidth > 800) return 32.0; // Tablet
+      if (screenWidth > 600) return 28.0; // Large Mobile
+      return 24.0; // Mobile
+    } else {
+      if (screenWidth > 1200) return 18.0; // Desktop
+      if (screenWidth > 800) return 16.0; // Tablet
+      if (screenWidth > 600) return 15.0; // Large Mobile
+      return 14.0; // Mobile
+    }
+  }
+
+  double _getCardIconSize(double screenWidth) {
+    if (screenWidth > 1200) return 32.0; // Desktop
+    if (screenWidth > 800) return 30.0; // Tablet
+    if (screenWidth > 600) return 28.0; // Large Mobile
+    return 26.0; // Mobile
+  }
+
+  double _getCardTitleSize(double screenWidth) {
+    if (screenWidth > 1200) return 18.0; // Desktop
+    if (screenWidth > 800) return 16.0; // Tablet
+    if (screenWidth > 600) return 15.0; // Large Mobile
+    return 14.0; // Mobile
+  }
+
+  Widget _buildHeader(double screenWidth) {
+    final bool isDesktop = screenWidth > 1200;
+    final bool isTablet = screenWidth > 800;
+    final bool isMobile = screenWidth <= 600;
+
+    return Neumorphic(
+      style: NeumorphicStyle(
+        depth: -5,
+        boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(20)),
+        lightSource: LightSource.topLeft,
+      ),
+      padding: EdgeInsets.all(
+        isDesktop
+            ? 25
+            : isTablet
+            ? 20
+            : 15,
+      ),
+      child:
+          isMobile
+              ? _buildMobileHeader(screenWidth)
+              : _buildDesktopTabletHeader(screenWidth),
+    );
+  }
+
+  Widget _buildMobileHeader(double screenWidth) {
+    return Column(
+      children: [
+        // Top row with logo and profile
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [_buildLogo(screenWidth)],
+        ),
+        const SizedBox(height: 15),
+
+        // Company info centered
+        Column(
+          children: [
+            NeumorphicText(
+              "CAS",
+              style: NeumorphicStyle(depth: 4, color: const Color(0xFF2D3748)),
+              textStyle: NeumorphicTextStyle(
+                fontSize: _getHeaderFontSize(screenWidth, isTitle: true),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Center of Advance Solution",
+              style: TextStyle(
+                fontSize: _getHeaderFontSize(screenWidth),
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 5),
+            Text(
+              "Super Admin Dashboard",
+              style: TextStyle(
+                fontSize: _getHeaderFontSize(screenWidth) - 2,
+                color: Colors.grey[500],
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopTabletHeader(double screenWidth) {
+    return Row(
+      children: [
+        // Company Logo
+        _buildLogo(screenWidth),
+        SizedBox(width: screenWidth > 1200 ? 25 : 20),
+
+        // Company Name and Title
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              NeumorphicText(
+                "CAS",
+                style: NeumorphicStyle(
+                  depth: 4,
+                  color: const Color(0xFF2D3748),
+                ),
+                textStyle: NeumorphicTextStyle(
+                  fontSize: _getHeaderFontSize(screenWidth, isTitle: true),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Center of Advance Solution",
+                style: TextStyle(
+                  fontSize: _getHeaderFontSize(screenWidth),
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                "Super Admin Dashboard",
+                style: TextStyle(
+                  fontSize: _getHeaderFontSize(screenWidth) - 2,
+                  color: Colors.grey[500],
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Profile Avatar
+        _buildProfileAvatar(screenWidth),
+      ],
+    );
+  }
+
+  Widget _buildLogo(double screenWidth) {
+    final double logoSize =
+        screenWidth > 1200
+            ? 70
+            : screenWidth > 800
+            ? 65
+            : 55;
+    final double iconSize =
+        screenWidth > 1200
+            ? 35
+            : screenWidth > 800
+            ? 32
+            : 28;
+
+    return Neumorphic(
+      style: NeumorphicStyle(depth: 8, boxShape: NeumorphicBoxShape.circle()),
+      child: Container(
+        width: logoSize,
+        height: logoSize,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+          ),
+        ),
+        child: Icon(Icons.business, color: Colors.white, size: iconSize),
+      ),
+    );
+  }
+
+  Widget _buildProfileAvatar(double screenWidth) {
+    final double avatarSize =
+        screenWidth > 1200
+            ? 60
+            : screenWidth > 800
+            ? 55
+            : 45;
+    final double iconSize =
+        screenWidth > 1200
+            ? 30
+            : screenWidth > 800
+            ? 27
+            : 22;
+
+    return NeumorphicButton(
+      onPressed: () {},
+      style: NeumorphicStyle(depth: 6, boxShape: NeumorphicBoxShape.circle()),
+      child: Container(
+        width: avatarSize,
+        height: avatarSize,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            colors: [Color(0xFFff9a9e), Color(0xFFfecfef)],
+          ),
+        ),
+        child: Icon(Icons.person, color: Colors.white, size: iconSize),
+      ),
+    );
+  }
+
+  Widget _buildDashboardGrid(BuildContext context, double screenWidth) {
+    final List<DashboardItem> items = [
+      DashboardItem(
+        title: "Fee History",
+        icon: Icons.history,
+        color: const Color(0xFF667eea),
+        onTap: () => _navigateToScreen(context, "Fee History"),
+      ),
+      DashboardItem(
+        title: "Fee Defaulter",
+        icon: Icons.warning_amber_rounded,
+        color: const Color(0xFFf093fb),
+        onTap: () => _navigateToScreen(context, "Fee Defaulter"),
+      ),
+      DashboardItem(
+        title: "Inquiry",
+        icon: Icons.help_outline,
+        color: const Color(0xFF4facfe),
+        onTap: () => _navigateToScreen(context, "Inquiry"),
+      ),
+      DashboardItem(
+        title: "Student Management",
+        icon: Icons.school,
+        color: const Color(0xFF43e97b),
+        onTap: () => _navigateToScreen(context, "Student Management"),
+      ),
+      DashboardItem(
+        title: "Course Management",
+        icon: Icons.book,
+        color: const Color(0xFFfa709a),
+        onTap: () => _navigateToScreen(context, "Course Management"),
+      ),
+      DashboardItem(
+        title: "Reports",
+        icon: Icons.assessment,
+        color: const Color(0xFFffecd2),
+        onTap: () => _navigateToScreen(context, "Reports"),
+      ),
+      DashboardItem(
+        title: "Settings",
+        icon: Icons.settings,
+        color: const Color(0xFFa8edea),
+        onTap: () => _navigateToScreen(context, "Settings"),
+      ),
+      DashboardItem(
+        title: "Analytics",
+        icon: Icons.analytics,
+        color: const Color(0xFFd299c2),
+        onTap: () => _navigateToScreen(context, "Analytics"),
+      ),
+      DashboardItem(
+        title: "Notifications",
+        icon: Icons.notifications,
+        color: const Color(0xFFfed6e3),
+        onTap: () => _navigateToScreen(context, "Notifications"),
+      ),
+    ];
+
+    final crossAxisCount = _getGridCrossAxisCount(screenWidth);
+    final childAspectRatio = _getGridChildAspectRatio(screenWidth);
+    final crossAxisSpacing =
+        screenWidth > 1200
+            ? 25.0
+            : screenWidth > 800
+            ? 22.0
+            : 18.0;
+    final mainAxisSpacing =
+        screenWidth > 1200
+            ? 25.0
+            : screenWidth > 800
+            ? 22.0
+            : 18.0;
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: crossAxisSpacing,
+        mainAxisSpacing: mainAxisSpacing,
+        childAspectRatio: childAspectRatio,
+      ),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        return _buildDashboardCard(items[index], screenWidth);
+      },
+    );
+  }
+
+  Widget _buildDashboardCard(DashboardItem item, double screenWidth) {
+    final double cardPadding =
+        screenWidth > 1200
+            ? 25
+            : screenWidth > 800
+            ? 20
+            : 15;
+    final double iconContainerSize =
+        screenWidth > 1200
+            ? 70
+            : screenWidth > 800
+            ? 65
+            : 55;
+    final double spacingBetween =
+        screenWidth > 1200
+            ? 18
+            : screenWidth > 800
+            ? 15
+            : 12;
+
+    return NeumorphicButton(
+      onPressed: item.onTap,
+      style: NeumorphicStyle(
+        depth: 8,
+        intensity: 0.65,
+        boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(20)),
+        lightSource: LightSource.topLeft,
+      ),
+      child: Container(
+        padding: EdgeInsets.all(cardPadding),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Icon Container
+            Neumorphic(
+              style: NeumorphicStyle(
+                depth: -4,
+                boxShape: NeumorphicBoxShape.circle(),
+                lightSource: LightSource.topLeft,
+              ),
+              child: Container(
+                width: iconContainerSize,
+                height: iconContainerSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [item.color, item.color.withOpacity(0.7)],
+                  ),
+                ),
+                child: Icon(
+                  item.icon,
+                  color: Colors.white,
+                  size: _getCardIconSize(screenWidth),
+                ),
+              ),
+            ),
+            SizedBox(height: spacingBetween),
+
+            // Title
+            Flexible(
+              child: NeumorphicText(
+                item.title,
+                style: NeumorphicStyle(
+                  depth: 2,
+                  color: const Color(0xFF2D3748),
+                ),
+                textStyle: NeumorphicTextStyle(
+                  fontSize: _getCardTitleSize(screenWidth),
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+                // maxLines: 2,
+                // overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _navigateToScreen(BuildContext context, String screenName) {
+    // Show a snackbar for demonstration
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Navigating to $screenName"),
+        backgroundColor: const Color(0xFF667eea),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: EdgeInsets.all(
+          _getResponsivePadding(MediaQuery.of(context).size.width),
+        ),
+      ),
+    );
+
+    // Here you would implement actual navigation
+    // Navigator.push(context, MaterialPageRoute(builder: (context) => YourScreen()));
+  }
+}
+
+class DashboardItem {
+  final String title;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  DashboardItem({
+    required this.title,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+}

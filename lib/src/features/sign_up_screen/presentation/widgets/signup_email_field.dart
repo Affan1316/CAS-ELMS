@@ -13,6 +13,7 @@ class SignUpEmailField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      style: TextStyle(color: Colors.black),
       controller: controller,
       keyboardType: TextInputType.emailAddress,
       validator: validator,

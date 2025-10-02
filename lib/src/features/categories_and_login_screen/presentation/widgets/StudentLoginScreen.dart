@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
@@ -63,6 +64,29 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
     setState(() => _isLoading = true);
 
     try {
+      // 1. Fetch student record from Firestore using the given student ID
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('students')
+              .doc(widget.studentid) // assuming ID is docId
+              .get();
+
+      if (!doc.exists) {
+        setState(() => _isLoading = false);
+        _showErrorMessage("Invalid student ID");
+        return;
+      }
+
+      final firestoreEmail = doc['email'];
+
+      // 2. Check if entered email matches Firestore email
+      if (firestoreEmail != email) {
+        setState(() => _isLoading = false);
+        _showErrorMessage("Email does not match this student ID");
+        return;
+      }
+
+      // 3. Proceed with FirebaseAuth login
       final result = await _authService.signInWithEmailAndPassword(
         email: email,
         password: password,
@@ -90,12 +114,11 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
           ),
         );
       } else {
-        // Show Firebase error message
         _showErrorMessage(result.message);
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      _showErrorMessage('An unexpected error occurred. Please try again.');
+      _showErrorMessage("Something went wrong. Please try again.");
     }
   }
 
@@ -552,7 +575,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
             errorMessage.value = '';
           }
         },
-        style: TextStyle(fontSize: fontSize),
+        style: TextStyle(fontSize: fontSize, color: Colors.black),
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: TextStyle(color: Colors.grey, fontSize: fontSize),
