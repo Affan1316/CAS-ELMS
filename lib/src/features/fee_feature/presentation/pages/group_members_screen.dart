@@ -1,7 +1,4 @@
-// Data Models
-
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/data_source/data_service_fee_feature.dart';
@@ -17,6 +14,7 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widge
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/screen_header.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/search_field.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/group_student_entity_class.dart';
+import 'fee_details_screen.dart';
 
 class GroupMembersScreen extends StatefulWidget {
   final String groupId;
@@ -31,7 +29,9 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
   List<StudentFeatureGroupStudentEntityClass> _filteredStudents = [];
   List<StudentFeatureGroupStudentEntityClass> _nonfilteredStudents = [];
   Timer? _afterThisTimeFilterAgain;
-  // late GroupFeeFeature group;
+
+  // Track currently selected student for navigation
+  StudentFeatureGroupStudentEntityClass? _selectedStudent;
 
   @override
   void initState() {
@@ -50,7 +50,7 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
     if (_afterThisTimeFilterAgain?.isActive ?? false) {
       _afterThisTimeFilterAgain!.cancel();
     }
-    _afterThisTimeFilterAgain = Timer(Duration(milliseconds: 500), () {
+    _afterThisTimeFilterAgain = Timer(const Duration(milliseconds: 500), () {
       context.read<FeeAdminBloc>().add(
         FeeAdminGroupStudentsFilteringEvent(query: _searchController.text),
       );
@@ -89,60 +89,113 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
                 SearchField(
                   controller: _searchController,
                   hintText: "Search students by name or ID...",
-                  // onChanged: _filterStudents,
                 ),
                 const SizedBox(height: 20),
-                BlocBuilder<FeeAdminBloc, FeeAdminState>(
-                  builder: (context, state) {
-                    if (state is FeeAdminGroupStudentsLoadedState) {
-                      _filteredStudents = state.dataList;
-                      _nonfilteredStudents = state.dataList;
-                    }
-                    if (state is FeeAdminGroupStudentsFilteringCompleteState) {
-                      _filteredStudents = state.filteredDataList;
-                    }
-                    debugPrint("state is############### $state");
-                    return Expanded(
-                      child:
-                          _filteredStudents.isEmpty
-                              ? const Center(
-                                child: ResponsiveText(
-                                  text: "No students found",
-                                  phoneSize: 16,
-                                  tabletSize: 20,
-                                  color: Colors.grey,
-                                ),
-                              )
-                              : isTablet
-                              ? GridView.builder(
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing: 20,
-                                      mainAxisSpacing: 20,
-                                      childAspectRatio: 3.5,
-                                    ),
-                                itemCount: _filteredStudents.length,
-                                itemBuilder: (context, index) {
-                                  final student = _filteredStudents[index];
-                                  return NeuCard(
-                                    child: MemberCardContent(student: student),
-                                  );
-                                },
-                              )
-                              : ListView.separated(
-                                itemCount: _filteredStudents.length,
-                                separatorBuilder:
-                                    (_, __) => const SizedBox(height: 16),
-                                itemBuilder: (context, index) {
-                                  final student = _filteredStudents[index];
-                                  return NeuCard(
-                                    child: MemberCardContent(student: student),
-                                  );
-                                },
+
+                /// ✅ Single BlocListener for navigation
+                BlocListener<FeeAdminBloc, FeeAdminState>(
+                  listenWhen:
+                      (_, curr) => curr is CheckingingFeeDefaulterCompleteState,
+                  listener: (context, state) {
+                    if (state is CheckingingFeeDefaulterCompleteState &&
+                        _selectedStudent != null) {
+                      context.read<FeeAdminBloc>().add(
+                        GetStudentInstalmentEvent(
+                          studentId: _selectedStudent!.rollNum,
+                          groupId: widget.groupId,
+                        ),
+                      );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (_) => FeeDetailsScreen(
+                                key: ValueKey(_selectedStudent!.rollNum),
+                                studentId: _selectedStudent!.rollNum,
+                                groupId: widget.groupId,
+                                isDefaulter: state.isDefaulter,
                               ),
-                    );
+                        ),
+                      );
+                    }
                   },
+                  child: BlocBuilder<FeeAdminBloc, FeeAdminState>(
+                    builder: (context, state) {
+                      if (state is FeeAdminGroupStudentsLoadedState) {
+                        _filteredStudents = state.dataList;
+                        _nonfilteredStudents = state.dataList;
+                      }
+                      if (state
+                          is FeeAdminGroupStudentsFilteringCompleteState) {
+                        _filteredStudents = state.filteredDataList;
+                      }
+
+                      return Expanded(
+                        child:
+                            _filteredStudents.isEmpty
+                                ? const Center(
+                                  child: ResponsiveText(
+                                    text: "No students found",
+                                    phoneSize: 16,
+                                    tabletSize: 20,
+                                    color: Colors.grey,
+                                  ),
+                                )
+                                : isTablet
+                                ? GridView.builder(
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 2,
+                                        crossAxisSpacing: 20,
+                                        mainAxisSpacing: 20,
+                                        childAspectRatio: 3.5,
+                                      ),
+                                  itemCount: _filteredStudents.length,
+                                  itemBuilder: (context, index) {
+                                    final student = _filteredStudents[index];
+                                    return NeuCard(
+                                      child: MemberCardContent(
+                                        student: student,
+                                        groupId: widget.groupId,
+                                        onViewFee: (s) {
+                                          _selectedStudent = s;
+                                          context.read<FeeAdminBloc>().add(
+                                            CheckFeeDefaulterEvent(
+                                              groupId: widget.groupId,
+                                              studentId: s.rollNum,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
+                                )
+                                : ListView.separated(
+                                  itemCount: _filteredStudents.length,
+                                  separatorBuilder:
+                                      (_, __) => const SizedBox(height: 16),
+                                  itemBuilder: (context, index) {
+                                    final student = _filteredStudents[index];
+                                    return NeuCard(
+                                      child: MemberCardContent(
+                                        student: student,
+                                        groupId: widget.groupId,
+                                        onViewFee: (s) {
+                                          _selectedStudent = s;
+                                          context.read<FeeAdminBloc>().add(
+                                            CheckFeeDefaulterEvent(
+                                              groupId: widget.groupId,
+                                              studentId: s.rollNum,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),

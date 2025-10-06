@@ -34,6 +34,23 @@ class StudentFeeFeatureEntityClass {
               .toList(),
     );
   }
+  StudentFeeFeatureEntityClass copyWith({
+    String? id,
+    String? name,
+    String? groupId,
+    double? totalFee,
+    double? paidAmount,
+    List<FeeInstallmentEntityClass>? installments,
+  }) {
+    return StudentFeeFeatureEntityClass(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      groupId: groupId ?? this.groupId,
+      totalFee: totalFee ?? this.totalFee,
+      paidAmount: paidAmount ?? this.paidAmount,
+      installments: installments ?? this.installments,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {

@@ -9,6 +9,8 @@ class UpdateStudentInstallmentUsecaseFee {
     required double paidAmount,
     required String paymentMethod,
     required DateTime paidDate,
+    required String groupId,
+    required double totalReaminingFeeForThisStudent,
   }) {
     var a = repo.updateInstallmentPayment(
       studentId: studentId,
@@ -16,6 +18,8 @@ class UpdateStudentInstallmentUsecaseFee {
       paidAmount: paidAmount,
       paymentMethod: paymentMethod,
       paidDate: paidDate,
+      groupId: groupId,
+      totalReaminingFeeForThisStudent: totalReaminingFeeForThisStudent,
     );
   }
 }

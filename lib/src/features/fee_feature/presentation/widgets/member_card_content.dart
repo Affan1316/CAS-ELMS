@@ -1,21 +1,25 @@
-// Data Models
-
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_details_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_text.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/group_student_entity_class.dart';
-import 'package:intl/intl.dart';
 
 class MemberCardContent extends StatelessWidget {
   final StudentFeatureGroupStudentEntityClass student;
-  const MemberCardContent({super.key, required this.student});
+  final String groupId;
+
+  /// Callback to trigger fee check/navigation
+  final void Function(StudentFeatureGroupStudentEntityClass) onViewFee;
+
+  const MemberCardContent({
+    super.key,
+    required this.student,
+    required this.groupId,
+    required this.onViewFee,
+  });
 
   @override
   Widget build(BuildContext context) {
     final isTablet = MediaQuery.of(context).size.width > 600;
+
     return Row(
       children: [
         CircleAvatar(
@@ -46,16 +50,6 @@ class MemberCardContent extends StatelessWidget {
                 tabletSize: 15,
                 color: Colors.grey,
               ),
-              // ResponsiveText(
-              //   text:
-              //       "Remaining: ${NumberFormat.currency(locale: 'en_US', symbol: '').format(student.remainingAmount)}",
-              //   phoneSize: 12,
-              //   tabletSize: 14,
-              //   color:
-              //       student.remainingAmount > 0
-              //           ? Colors.redAccent
-              //           : Colors.green,
-              // ),
             ],
           ),
         ),
@@ -66,19 +60,7 @@ class MemberCardContent extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          onPressed: () {
-            // context.read<FeeAdminBloc>().add(ResetFeeAdminStateEvent());
-            context.read<FeeAdminBloc>().add(
-              GetStudentInstalmentEvent(studentId: student.rollNum),
-            );
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                // student.rollNum
-                builder: (_) => FeeDetailsScreen(studentId: student.rollNum),
-              ),
-            );
-          },
+          onPressed: () => onViewFee(student),
           child: const ResponsiveText(
             text: "View Fee",
             phoneSize: 13,

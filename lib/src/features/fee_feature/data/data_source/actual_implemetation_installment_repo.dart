@@ -42,10 +42,13 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulter_entity.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulters_collective.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_installment_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/student_fee_feature_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/abstract_repo/abstract_implemetation_installment_repo.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
 import 'package:uuid/uuid.dart';
 
 class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
@@ -142,13 +145,14 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
   }
 
   @override
-  @override
   Future<void> updateInstallmentPayment({
     required String studentId,
     required String installmentId,
     required double paidAmount,
     required DateTime paidDate,
     required String paymentMethod,
+    required String groupId,
+    required double totalReaminingFeeForThisStudent,
   }) async {
     try {
       final docRef = _firestore
@@ -182,10 +186,12 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
 
               // Update status based on payment
               if (newPaid >= installmentTotal) {
-                m['status'] = 'Paid';
-              } else if (newPaid > 0 && newPaid < installmentTotal) {
-                m['status'] = 'Partial';
-              } else {
+                m['status'] = 'pending';
+              }
+              //  else if (newPaid > 0 && newPaid < installmentTotal) {
+              //   m['status'] = 'Partial';
+              // }
+              else {
                 m['status'] = 'Unpaid';
               }
             }
@@ -260,6 +266,88 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
   }
 
   @override
+  removeFromDefaulter(
+    String groupId,
+    String studentId,
+    double paidAmount,
+    double totalReaminingFeeForThisStudent,
+  ) async {
+    try {
+      // Get a reference to the document
+      DocumentReference documentRef = _firestore
+          .collection("$groupId defaulter students")
+          .doc(studentId);
+
+      // Call the delete() method
+      await documentRef.delete();
+
+      print(
+        'Document with ID "$studentId" successfully deleted from collection "$groupId defaulter students"!',
+      );
+    } on FirebaseException catch (e) {
+      // Handle any Firestore-specific errors, e.g., permission denied
+      print('Error deleting document: ${e.code} - ${e.message}');
+    } catch (e) {
+      // Handle any other unexpected errors
+      print('An unexpected error occurred: $e');
+    }
+    // updating fee defaulters collective now
+    DocumentSnapshot<Map<String, dynamic>> documentOfCurrentGroup =
+        await _firestore
+            .collection("fee_defaulters_collective_data")
+            .doc(groupId)
+            .get();
+    // var newRemaingFee;
+    Map<String, dynamic>? mapOfData = documentOfCurrentGroup.data();
+    var previousRemaingFee = (mapOfData!["remaingFee"] as num).toDouble();
+    var previousTotal = (mapOfData["total"] as num).toDouble();
+    print("Hello!!!!!!!!!!!!!paidAmount is  :$paidAmount ");
+    // newRemaingFee =  totalReaminingFeeForGroup;
+    previousTotal = previousTotal - 1;
+    print("previousRemaingFee :$previousRemaingFee");
+    print("totalReaminingFeeForThisStudent: $totalReaminingFeeForThisStudent");
+    print("paidAmount:$paidAmount");
+    print(
+      "after calculation totalReaminingFeeForThisStudent - paidAmount = ${totalReaminingFeeForThisStudent - paidAmount}",
+    );
+    print(
+      "after calculation previousRemaingFee - (totalReaminingFeeForThisStudent - paidAmount) = ${previousRemaingFee - (totalReaminingFeeForThisStudent - paidAmount)}",
+    );
+    if ((previousRemaingFee - totalReaminingFeeForThisStudent) == 0) {
+      print("!!!!!!!!!!!!!!!!zero so delete this document");
+      try {
+        // Get a reference to the document
+        DocumentReference documentRef = _firestore
+            .collection("fee_defaulters_collective_data")
+            .doc(groupId);
+
+        // Call the delete() method
+        await documentRef.delete();
+
+        print(
+          'Document with ID "$groupId" successfully deleted from collection "fee_defaulters_collective_data"!',
+        );
+      } on FirebaseException catch (e) {
+        // Handle any Firestore-specific errors, e.g., permission denied
+        print('Error deleting document: ${e.code} - ${e.message}');
+      } catch (e) {
+        // Handle any other unexpected errors
+        print('An unexpected error occurred: $e');
+      }
+    } else {
+      debugPrint("!!!!!!!!!!! not zero so not deleted");
+      mapOfData["remaingFee"] =
+          (previousRemaingFee - totalReaminingFeeForThisStudent) - paidAmount;
+      mapOfData["total"] = previousTotal;
+      // refrenceOfCollection.doc(group).set(mapOfData);
+      await _firestore
+          .collection("fee_defaulters_collective_data")
+          .doc(groupId)
+          .set(mapOfData);
+    }
+  }
+
+  @override
   Future<List<FeeEntityClass>> fetchFeesByDateRange(
     DateTime start,
     DateTime end,
@@ -293,5 +381,286 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
     final start = DateTime(now.year, now.month, now.day, 0, 0, 0);
     final end = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
     return fetchFeesByDateRange(start, end);
+  }
+
+  @override
+  Future<void> addToFeeDefaulters({
+    required String studentId,
+    required String name,
+    required double remaingFee,
+    required String groupId,
+  }) async {
+    Map<String, dynamic> data = {
+      "name": name,
+      "rollnum": studentId,
+      "remaingFee": remaingFee,
+      "createdAt": DateTime.now(),
+    };
+
+    return await _firestore
+        .collection("$groupId defaulter students")
+        .doc(studentId)
+        .set(data);
+  }
+
+  @override
+  Future<bool> UpdateCollectiveFeeDefaultersDataGroupwise(
+    double remaingFee,
+    String group,
+  ) async {
+    debugPrint(
+      "&&&&&&&&& Checking for 'fee_defaulters_collective_data' collection existence &&&&&&&&&&&&&&&",
+    );
+
+    var refrenceOfCollection = _firestore.collection(
+      "fee_defaulters_collective_data",
+    );
+    DocumentSnapshot<Map<String, dynamic>> documentRefrence =
+        await refrenceOfCollection.doc(group).get();
+
+    if (!documentRefrence.exists) {
+      debugPrint("this document doesnot exist");
+      Map<String, dynamic> dataMap = {"remaingFee": remaingFee, "total": 1};
+      refrenceOfCollection.doc(group).set(dataMap);
+    } else {
+      debugPrint("this document exist so we need to update it ");
+      if (documentRefrence.data() != null) {
+        Map<String, dynamic>? mapOfData = documentRefrence.data();
+        var previousRemaingFee = (mapOfData!["remaingFee"] as num).toDouble();
+        var previousTotal = (mapOfData["total"] as num).toDouble();
+        remaingFee = remaingFee + previousRemaingFee;
+        previousTotal = previousTotal + 1;
+        mapOfData["remaingFee"] = remaingFee;
+        mapOfData["total"] = previousTotal;
+        refrenceOfCollection.doc(group).set(mapOfData);
+      } else {
+        debugPrint("map is null we can not update it ");
+      }
+    }
+    return true;
+
+    // try {
+    //   var refrenceOfCollection = _firestore.collection(
+    //     "fee_defaulters_collective_data",
+    //   );
+
+    //   var querySnapshot = await refrenceOfCollection.limit(1).get();
+    //   DocumentSnapshot<Map<String, dynamic>> documentRefrence =
+    //       await refrenceOfCollection.doc(group).get();
+    //   // If querySnapshot.docs is not empty, it means there's at least one document in the collection.
+    //   if (querySnapshot.docs.isNotEmpty) {
+    //     debugPrint(
+    //       "Collection 'fee_defaulters_collective_data' HAS documents.",
+    //     );
+
+    //     if (!documentRefrence.exists) {
+    //       debugPrint("this document doesnot exist");
+    //       Map<String, dynamic> dataMap = {"remaingFee": remaingFee, "total": 0};
+    //       refrenceOfCollection.doc(group).set(dataMap);
+    //     } else {
+    //       debugPrint("this document exist so we need to update it ");
+    //       if (documentRefrence.data() != null) {
+    //         Map<String, dynamic>? mapOfData = documentRefrence.data();
+    //         var previousRemaingFee =
+    //             (mapOfData!["remaingFee"] as num).toDouble();
+    //         var previousTotal = (mapOfData["total"] as num).toDouble();
+    //         remaingFee = remaingFee + previousRemaingFee;
+    //         previousTotal = previousTotal + 1;
+    //       } else {
+    //         debugPrint("map is null we can not update it ");
+    //       }
+    //     }
+
+    //     return true;
+    //   } else {
+    //     debugPrint(
+    //       "Collection 'fee_defaulters_collective_data' does NOT have any documents.",
+    //     );
+
+    //     return false;
+    //   }
+    // } catch (e) {
+    //   debugPrint("Error checking collection existence: $e");
+    //   return false; // In case of an error, assume it doesn't exist or isn't accessible.
+    // }
+  }
+
+  @override
+  Future<List<FeeDefaulterEntity>> readFeeDefultersDataBasedOnGroup(
+    String groupId,
+  ) async {
+    debugPrint("readFeeDefultersDataBasedOnGroup called");
+    QuerySnapshot<Map<String, dynamic>> allDocsRef =
+        await _firestore.collection("$groupId defaulter students").get();
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs = allDocsRef.docs;
+    List<FeeDefaulterEntity> listOfData = [];
+    for (var doc in allDocs) {
+      listOfData.add(FeeDefaulterEntity.fromMap(doc.data()));
+    }
+    debugPrint("listOfData:$listOfData");
+    return listOfData;
+  }
+
+  /// Repository method to fetch the fee defaulters collective data for a given group ID.
+  ///
+  /// Throws a [FirebaseException] if the Firestore operation fails.
+  /// Returns `null` if the document does not exist.
+  ///
+  /// [groupId]: The ID of the group to query.
+  @override
+  Future<FeeDefaultersCollective?> readFeeDefultersCollectiveDataBasedOnGroup(
+    String groupId,
+  ) async {
+    // Input validation
+    if (groupId.isEmpty) {
+      throw ArgumentError('groupId cannot be empty');
+    }
+
+    const collectionName =
+        'fee_defaulters_collective_data'; // Extract to constant or config
+
+    try {
+      debugPrint('Fetching FeeDefaultersCollective for groupId: $groupId');
+
+      final DocumentSnapshot<Map<String, dynamic>> docRef = await _firestore
+          .collection(collectionName)
+          .doc(groupId)
+          .get(
+            const GetOptions(source: Source.serverAndCache),
+          ); // Prefer server+cache for fresh data
+
+      debugPrint(
+        'Document reference fetched for groupId: $groupId, exists: ${docRef.exists}',
+      );
+
+      if (!docRef.exists) {
+        debugPrint('Document not found for groupId: $groupId');
+        return null;
+      }
+
+      final Map<String, dynamic>? data = docRef.data();
+      if (data == null) {
+        debugPrint('Document data is null for groupId: $groupId');
+        return null;
+      }
+
+      debugPrint('Deserializing data for groupId: $groupId');
+
+      final FeeDefaultersCollective collective =
+          FeeDefaultersCollective.fromMap(data);
+
+      debugPrint(
+        'Successfully loaded FeeDefaultersCollective for groupId: $groupId',
+      );
+      return collective;
+    } on FirebaseException catch (e) {
+      debugPrint(
+        'Firebase error while fetching FeeDefaultersCollective for groupId: $groupId: ${e.message}',
+      );
+      rethrow; // Or wrap in custom exception
+    } catch (e) {
+      debugPrint(
+        'Unexpected error while fetching FeeDefaultersCollective for groupId: $groupId: $e',
+      );
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<String>> readFeeDefaulterGroopNames() async {
+    var collectionRef =
+        await _firestore.collection("fee_defaulters_collective_data").get();
+    var docsList = collectionRef.docs;
+    List<String> listOfGroupNames = [];
+    for (var doc in docsList) {
+      listOfGroupNames.add(doc.id);
+    }
+    debugPrint("$listOfGroupNames");
+    return listOfGroupNames;
+  }
+
+  @override
+  Future<bool> checkIfStudentIsDefaulter(
+    String groupId,
+    String studentId,
+  ) async {
+    try {
+      // Get an instance of the Firestore database
+      final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+      // Construct the full path to the document
+      final DocumentReference documentRef = firestore
+          .collection("$groupId defaulter students")
+          .doc(studentId);
+
+      // Fetch the document snapshot
+      final DocumentSnapshot documentSnapshot = await documentRef.get();
+
+      // The 'exists' property of the DocumentSnapshot tells us if it's there
+      return documentSnapshot.exists;
+    } catch (e) {
+      // If any error occurs during the process (e.g., network issues, permissions),
+      // we'll log it and assume the document doesn't exist to be safe.
+      print("Error checking document existence: $e");
+      return false;
+    }
+  }
+
+  @override
+  addToSuperAdminApprovalList(
+    // FeeInstallmentEntityClass installment,
+    StudentFeeFeatureEntityClass student,
+    int index,
+  ) async {
+    try {
+      StudentFeeFeatureEntityClass? updatedStudent = await getStudent(
+        student.id,
+      );
+
+      await _firestore
+          .collection("not_approved_fee_installments")
+          .doc(student.id)
+          .set(updatedStudent!.toMap());
+    } catch (e) {
+      print("addinsg ToSuperAdminApprovalList failed due to this error $e");
+    }
+
+    // DocumentReference<Map<String, dynamic>> documentReference = _firestore
+    //         .collection("not_approved_fee_installments")
+    //         .doc(student.id);
+    // DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
+    //     await documentReference.get();
+
+    //   FeeInstallmentEntityClass? updatedFeeInstallment = updatedStudent
+    //       ?.installments
+    //       .elementAt(index);
+
+    //   Map<String, dynamic> map = updatedFeeInstallment!.toMap();
+
+    //   DocumentReference<Map<String, dynamic>> documentReference = _firestore
+    //       .collection("not_approved_fee_installments")
+    //       .doc(student.id);
+    //   DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
+    //       await documentReference.get();
+
+    //   if (!documentSnapshot.exists) {
+    //     map.addAll({"studentId": student.id, "groupId": student.groupId});
+    //     List<Map> list = [];
+    //     list.add(map);
+    //     await _firestore
+    //         .collection("not_approved_fee_installments")
+    //         .doc(student.id)
+    //         .set({"installments": list});
+    //   } else {
+    //     await _firestore
+    //         .collection("not_approved_fee_installments")
+    //         .doc(student.id)
+    //         .set({"installments": list});
+    //   //   Map<String, dynamic>? mapOfNonapprovedInstallmentList =
+    //   //       documentSnapshot.data();
+    //   //   List<FeeInstallmentEntityClass> listOfInstallments =
+    //   //       mapOfNonapprovedInstallmentList?["installments"];
+
+    //   // }
   }
 }
