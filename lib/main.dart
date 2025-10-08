@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/firebase_options.dart';
@@ -9,15 +12,12 @@ import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/bloc/ch
 import 'package:flutter_cas_app_main/src/features/add_courses/presentation/bloc/add_course_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presentation/bloc/add_instructor_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/pages/admin_home_page.dart';
 import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/admin_login_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/groups_list_screen.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/groups_loading_screen.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
+import 'package:flutter_cas_app_main/src/features/geofencing/data/datasource/geofence_service_impl.dart';
 import 'package:flutter_cas_app_main/src/features/group/data/repositories/group_repository_implementation.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/usecases/add_group_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/usecases/update_group_usecase.dart';
@@ -25,18 +25,21 @@ import 'package:flutter_cas_app_main/src/features/group/presentation/bloc/group_
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/bloc/inquiry_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/data_source/actual_implemetation_installment_repo.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
-import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/group_detail_page.dart';
+import 'package:flutter_cas_app_main/src/features/student_attendance/data/datasource/attendance_remote_datasource.dart';
+import 'package:flutter_cas_app_main/src/features/student_attendance/data/repositories/attendance_repository_impl.dart';
+import 'package:flutter_cas_app_main/src/features/student_attendance/domain/usecases/get_attendance_usecase.dart';
+import 'package:flutter_cas_app_main/src/features/student_attendance/presentation/bloc/student_attendance_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/student_attendance/presentation/infrastructure/background/background_fetch_handler.dart'
+    hide callbackDispatcher;
+import 'package:flutter_cas_app_main/src/features/student_attendance/presentation/pages/student_attendance_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/data/SuperAdminFeeRepositoryImpl.dart';
-import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/confirm_super_admin_fee_payment_use_case.dart';
-import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/get_super_admin_fee_notifications.dart';
-import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/get_super_admin_fee_notifications_usecase.dart';
-import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/super_admin_fee_notifications_screen.dart';
-import 'package:intl/intl.dart';
+import 'package:geofence_foreground_service/geofence_foreground_service.dart';
+import 'package:geofence_foreground_service/models/notification_icon_data.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart' hide PermissionStatus;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
-import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-
+import 'package:workmanager/workmanager.dart';
 // import 'package:flutter_cas_app_main/src/features/course_catalog/presentation/pages/course_catalog_screen_state.dart';
 
 // void main() {
@@ -44,10 +47,60 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 // }
 
 // add that
+Future<bool> ensureLocationAlwaysOn() async {
+  Location location = Location();
+  bool serviceEnabled = await location.serviceEnabled();
+
+  // Keep looping until location is turned ON
+  while (!serviceEnabled) {
+    serviceEnabled = await location.requestService();
+
+    // Wait a bit before checking again
+    await Future.delayed(const Duration(seconds: 2));
+  }
+  return serviceEnabled;
+}
+
+Future<bool> requestPermission() async {
+  PermissionStatus locationStatus = await Permission.location.request();
+  PermissionStatus alwaysStatus = await Permission.locationAlways.request();
+
+  // Keep requesting until granted
+  while (!locationStatus.isGranted || !alwaysStatus.isGranted) {
+    locationStatus = await Permission.location.request();
+    alwaysStatus = await Permission.locationAlways.request();
+  }
+
+  return true;
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   await init();
+  // Register background headless task
+
+  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    await Workmanager().initialize(
+      callbackDispatcher, // 👈 background callback
+    );
+  }
+
+  final now = DateTime.now();
+  final nextMidnight = DateTime(now.year, now.month, now.day + 1);
+  final delay = nextMidnight.difference(now);
+  //Register a periodic background task (runs daily)
+  await Workmanager().registerPeriodicTask(
+    "dailyAttendanceCheck",
+    "dailyAttendanceCheck",
+    frequency: const Duration(hours: 24), // every 24 hours
+    initialDelay: delay, // wait before first run
+    constraints: Constraints(
+      networkType: NetworkType.connected, // only run when online
+    ),
+  );
+
   runApp(const MyApp());
 }
 
@@ -81,17 +134,7 @@ class MyApp extends StatelessWidget {
           // BlocProvider<FeeHistoryBloc>(
           //   create:
           //       (context) => FeeHistoryBloc(LocalFeeService())..add(LoadFees()),
-          //   child: FeeHistoryScreen(),
-          // ),
-          // BlocProvider(
-          //   create: (_) {
-          //     return FeeHistoryBloc(
-          //       repository: FeeHistoryRepository(
-          //         firestore: FirebaseFirestore.instance,
-          //       ),
-          //     ); // ✅ presentation layer
-          //   },
-          //   child: const FeeHistoryScreen(),
+          //   // child: FeeHistoryScreen(),
           // ),
           BlocProvider<AddGroupBloc>(
             create:
@@ -107,20 +150,17 @@ class MyApp extends StatelessWidget {
           BlocProvider(create: (context) => FeeAdminBloc()),
           BlocProvider(
             create:
-                (context) => SuperAdminFeeBloc(
-                  getNotifications: GetSuperAdminFeeNotificationsUsecase(
-                    SuperAdminFeeRepositoryImpl(FirebaseFirestore.instance),
+                (context) => StudentAttendanceBloc(
+                  getAttendance: GetAttendanceUsecase(
+                    attendanceRepository: AttendanceRepositoryImpl(
+                      abstractAttendanceRemoteDatasource:
+                          AttendanceRemoteDatasource(
+                            firestore: FirebaseFirestore.instance,
+                          ),
+                      firestore: FirebaseFirestore.instance,
+                    ),
                   ),
-                  confirmPayment: ConfirmSuperAdminFeePaymentUseCase(
-                    SuperAdminFeeRepositoryImpl(FirebaseFirestore.instance),
-                  ),
-                  // deleteNotification: DeleteSuperAdminFeeNotificationUseCase(
-                  //   SuperAdminFeeRepositoryImpl(FirebaseFirestore.instance),
-                  // ),
-                  // deleteAllPaid: DeleteAllPaidNotificationsUseCase(
-                  //   SuperAdminFeeRepositoryImpl(FirebaseFirestore.instance),
-                  // ),
-                ),
+                )..add(LoadAttendanceEvent(studentId: 'F17-02')),
           ),
         ],
         child: MaterialApp(
@@ -128,23 +168,23 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.system,
-          home: AdminHomePage(),
+          home: OnboardingScreen(),
         ),
       ),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+// class MyHomePage extends StatefulWidget {
+//   const MyHomePage({super.key});
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+//   @override
+//   State<MyHomePage> createState() => _MyHomePageState();
+// }
 
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return OnboardingScreen();
-  }
-}
+// class _MyHomePageState extends State<MyHomePage> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return StudentAttendanceScreen();
+//   }
+// }
