@@ -1,7 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // SharedPreferences keys
+  static const String _keyIsLoggedIn = 'isLoggedIn';
+  static const String _keyStudentId = 'studentId';
+  static const String _keyUserEmail = 'userEmail';
 
   // Get current user
   User? get currentUser => _auth.currentUser;
@@ -9,16 +15,57 @@ class AuthService {
   // Auth state changes stream
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
+  // Check if user is logged in
+  Future<bool> isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyIsLoggedIn) ?? false;
+  }
+
+  // Get saved student ID
+  Future<String?> getSavedStudentId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyStudentId);
+  }
+
+  // Get saved email
+  Future<String?> getSavedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyUserEmail);
+  }
+
+  // Save login state
+  Future<void> _saveLoginState({
+    required String studentId,
+    required String email,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyIsLoggedIn, true);
+    await prefs.setString(_keyStudentId, studentId);
+    await prefs.setString(_keyUserEmail, email);
+  }
+
+  // Clear login state
+  Future<void> _clearLoginState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyIsLoggedIn);
+    await prefs.remove(_keyStudentId);
+    await prefs.remove(_keyUserEmail);
+  }
+
   // Sign up with email and password
   Future<AuthResult> signUpWithEmailAndPassword({
     required String email,
     required String password,
+    required String studentId,
   }) async {
     try {
       final UserCredential result = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      // Save login state
+      await _saveLoginState(studentId: studentId, email: email);
 
       return AuthResult(
         user: result.user,
@@ -44,12 +91,16 @@ class AuthService {
   Future<AuthResult> signInWithEmailAndPassword({
     required String email,
     required String password,
+    required String studentId,
   }) async {
     try {
       final UserCredential result = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      // Save login state
+      await _saveLoginState(studentId: studentId, email: email);
 
       return AuthResult(
         user: result.user,
@@ -75,6 +126,7 @@ class AuthService {
   Future<void> signOut() async {
     try {
       await _auth.signOut();
+      await _clearLoginState();
     } catch (e) {
       throw Exception('Failed to sign out');
     }

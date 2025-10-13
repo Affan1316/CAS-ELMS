@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/firebase_options.dart';
+import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
 import 'package:flutter_cas_app_main/src/core/dependencies/injections.dart';
 import 'package:flutter_cas_app_main/src/core/theme/app_theme.dart';
 import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/bloc/chat_page_bloc.dart';
@@ -12,6 +13,8 @@ import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/b
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/pages/admin_home_page.dart';
 import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/admin_login_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_state.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/groups_list_screen.dart';
@@ -25,6 +28,7 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/data/data_source/a
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
 import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/group_detail_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_home_page.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_feature/super_admin_home_page/presentation/pages/super_admin_home_page.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:intl/intl.dart';
@@ -103,7 +107,7 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.system,
-          home: SuperAdminDashboard(),
+          home: MyHomePage(),
         ),
       ),
     );
@@ -120,9 +124,114 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return SuperAdminDashboard();
+    return SplashScreen();
   }
 }
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  final AuthService _authService = AuthService();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    // Wait a bit for splash effect (optional)
+    await Future.delayed(const Duration(seconds: 1));
+
+    final isLoggedIn = await _authService.isLoggedIn();
+
+    if (!mounted) return;
+
+    if (isLoggedIn) {
+      // User is logged in - get student data and navigate to home
+      final studentId = await _authService.getSavedStudentId();
+
+      if (studentId != null) {
+        // Trigger BLoC event to fetch student data
+        context.read<OnboardingBloc>().add(
+          ReadStudentNameFromFireBaseEvent(id: studentId),
+        );
+      } else {
+        // No student ID found - go to login
+        _navigateToOnboarding();
+      }
+    } else {
+      // User is NOT logged in - go to onboarding/login
+      _navigateToOnboarding();
+    }
+  }
+
+  void _navigateToOnboarding() {
+    // Replace with your actual onboarding screen
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder:
+            (context) =>
+                const OnboardingScreen(), // ⚠️ Replace with your screen
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<OnboardingBloc, OnboardingState>(
+      listener: (context, state) async {
+        if (state is ReadingStudentNameCompleted) {
+          final studentId = await _authService.getSavedStudentId();
+
+          if (!mounted) return;
+
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder:
+                  (context) => StudentHomePage(
+                    id: studentId!,
+                    studentEntityClass: state.studentEntityClass,
+                  ),
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFF4DD0E1),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Your app logo
+              Icon(Icons.school, size: 100, color: Colors.white),
+              const SizedBox(height: 20),
+              const Text(
+                'ELMS',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 40),
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ⚠️ Replace this placeholder with your actual onboarding screen
 
 // void main() {
 //   runApp(const MyApp());
