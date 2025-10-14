@@ -61,6 +61,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         final result = await _authService.signUpWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text,
+          studentId: widget.id,
         );
 
         setState(() => _isLoading = false);

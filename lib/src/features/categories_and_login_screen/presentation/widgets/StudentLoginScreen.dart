@@ -43,6 +43,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
   }
 
   // Updated login handler with Firebase Auth
+  // Updated login handler with SharedPreferences
   Future<void> _handleSignIn() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
@@ -64,11 +65,11 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // 1. Fetch student record from Firestore using the given student ID
+      // 1. Fetch student record from Firestore
       final doc =
           await FirebaseFirestore.instance
               .collection('students')
-              .doc(widget.studentid) // assuming ID is docId
+              .doc(widget.studentid)
               .get();
 
       if (!doc.exists) {
@@ -90,12 +91,14 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
       final result = await _authService.signInWithEmailAndPassword(
         email: email,
         password: password,
+        studentId:
+            widget.studentid, // ✅ Pass student ID to save in SharedPreferences
       );
 
       setState(() => _isLoading = false);
 
       if (result.success) {
-        // Update BLoC if needed
+        // Update BLoC
         context.read<OnboardingBloc>().add(LoginEvent(email));
         context.read<OnboardingBloc>().add(
           ReadStudentNameFromFireBaseEvent(id: widget.studentid),
