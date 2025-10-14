@@ -14,15 +14,15 @@ abstract class AbstractInstallmentRepo {
     required int numberOfInstallments,
   });
   Future<StudentFeeFeatureEntityClass?> getStudent(String studentId);
-  Future<void> updateInstallmentPayment({
-    required String studentId,
-    required String installmentId,
-    required double paidAmount,
-    required DateTime paidDate,
-    required String paymentMethod,
-    required String groupId,
-    required double totalReaminingFeeForThisStudent,
-  });
+  // Future<void> updateInstallmentPayment({
+  //   required String studentId,
+  //   required String installmentId,
+  //   required double paidAmount,
+  //   required DateTime paidDate,
+  //   required String paymentMethod,
+  //   required String groupId,
+  //   required double totalReaminingFeeForThisStudent,
+  // });
   Future<List<FeeEntityClass>> fetchFeesByDateRange(
     DateTime start,
     DateTime end,
@@ -57,5 +57,11 @@ abstract class AbstractInstallmentRepo {
     // FeeInstallmentEntityClass installment,
     StudentFeeFeatureEntityClass student,
     int index,
+  );
+  addToPendingFee2(
+    StudentFeeFeatureEntityClass student,
+    FeeInstallmentEntityClass adminSidePayedInstalment,
+    double paidAmount,
+    String paymentMethod,
   );
 }

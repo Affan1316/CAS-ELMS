@@ -1,11 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_installment_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/student_fee_feature_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/enums/sort_option_enum.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/entities/group_entity.dart';
 
-/// Base FeeAdmin event
 abstract class FeeAdminEvent extends Equatable {
   const FeeAdminEvent();
 
@@ -13,17 +13,12 @@ abstract class FeeAdminEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Installment page base event (kept since it exists in your original file)
 abstract class InstallmentPageEvent extends Equatable {
   const InstallmentPageEvent();
 
   @override
   List<Object?> get props => [];
 }
-
-/// =========================
-/// FeeAdmin Events (all)
-/// =========================
 
 class FeeAdminFetchGroupsEvent extends FeeAdminEvent {
   const FeeAdminFetchGroupsEvent();
@@ -53,12 +48,10 @@ class FeeAdminGroupStudentsFilteringEvent extends FeeAdminEvent {
   List<Object?> get props => [query];
 }
 
-/// This was in your original — keep it as FeeAdminEvent-derived
 class ResetFeeAdminStateEvent extends FeeAdminEvent {
   const ResetFeeAdminStateEvent();
 }
 
-/// ✅ Calculate per-installment amount
 class InstallmentPageCalculateInst extends FeeAdminEvent {
   final String installments;
   final String totalFee;
@@ -72,7 +65,6 @@ class InstallmentPageCalculateInst extends FeeAdminEvent {
   List<Object?> get props => [installments, totalFee];
 }
 
-/// ✅ Create a student with installments
 class CreateStudentInstallmentEvent extends FeeAdminEvent {
   final String studentId;
   final String name;
@@ -101,7 +93,6 @@ class CreateStudentInstallmentEvent extends FeeAdminEvent {
   ];
 }
 
-/// ✅ Fetch student data
 class GetStudentInstalmentEvent extends FeeAdminEvent {
   final String studentId;
   final String groupId;
@@ -112,37 +103,6 @@ class GetStudentInstalmentEvent extends FeeAdminEvent {
 
   @override
   List<Object?> get props => [studentId, groupId];
-}
-
-class UpdateStudentInstalmentEvent extends FeeAdminEvent {
-  final String studentId;
-  final String installmentId;
-  final double paidAmount;
-  final DateTime paidDate;
-  final String paymentMethod;
-  final String groupId;
-  final double totalReaminingFeeForThisStudent;
-
-  const UpdateStudentInstalmentEvent({
-    required this.installmentId,
-    required this.paidAmount,
-    required this.studentId,
-    required this.paidDate,
-    required this.paymentMethod,
-    required this.groupId,
-    required this.totalReaminingFeeForThisStudent,
-  });
-
-  @override
-  List<Object?> get props => [
-    studentId,
-    installmentId,
-    paidAmount,
-    paidDate,
-    paymentMethod,
-    groupId,
-    totalReaminingFeeForThisStudent,
-  ];
 }
 
 class FetchFeesByDateRange extends FeeAdminEvent {
@@ -175,7 +135,6 @@ class SortFees extends FeeAdminEvent {
   List<Object?> get props => [option];
 }
 
-/// Keep extension (UI helper) as-is
 extension SortOptionExt on SortOptionEnum {
   String get title {
     switch (this) {
@@ -204,7 +163,6 @@ extension SortOptionExt on SortOptionEnum {
   }
 }
 
-/// Defaulters-related events
 class AddFeeDefaulterEvent extends FeeAdminEvent {
   final String studentId;
   final String name;
@@ -273,12 +231,24 @@ class CheckFeeDefaulterEvent extends FeeAdminEvent {
 
 class AddToSuperAdminApprovalListEvent extends FeeAdminEvent {
   final StudentFeeFeatureEntityClass student;
-  // final FeeInstallmentEntityClass installment;
+
   final int index;
 
   const AddToSuperAdminApprovalListEvent({
-    // required this.installment,
     required this.student,
     required this.index,
+  });
+}
+
+class AddToPendingFee2Event extends FeeAdminEvent {
+  final StudentFeeFeatureEntityClass student;
+  final FeeInstallmentEntityClass instalment;
+  final double paidAmount;
+  final String paymentMethod;
+  const AddToPendingFee2Event({
+    required this.student,
+    required this.instalment,
+    required this.paidAmount,
+    required this.paymentMethod,
   });
 }

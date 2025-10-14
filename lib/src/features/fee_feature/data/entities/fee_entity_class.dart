@@ -23,8 +23,7 @@ class FeeEntityClass {
   factory FeeEntityClass.fromMap(Map<String, dynamic> map, {String? id}) {
     final ts = map['createdAt'] as Timestamp?;
     final date = ts?.toDate() ?? DateTime.now();
-    final paidAmount =
-        (num.parse(map['paidAmount']) as num?)?.toDouble() ?? 0.0;
+    final paidAmount = map['paidAmount'] ?? 0.0;
     final pmRaw = map['paymentMethod'];
     final status = map['status'] as String? ?? 'Paid';
     debugPrint("|||||||||||$paidAmount|||||||||||");
