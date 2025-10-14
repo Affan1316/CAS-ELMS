@@ -7,6 +7,7 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/student_fee_feature_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/enums/sort_option_enum.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/add_to_fee_defaulter_usecase.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/add_to_pending_fee2.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/add_to_super_admin_approval_list_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/defaulter_check_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_fee_defaulter_collective.dart';
@@ -14,9 +15,7 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/re
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_group_Usecase_fee.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_group_names_fee_defaulters_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_group_students_for_fee_use_case.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_student_installment_usecase_fee.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/remove_student_from_defaulters_usecase.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/update_student_installment_usecase_fee.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_state.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/entities/group_entity.dart';
@@ -32,8 +31,7 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
       ActualImplemetationInstallmentRepo();
   final Feeadminreadinstalmentusecase feeadminreadinstalmentusecase =
       Feeadminreadinstalmentusecase();
-  final UpdateStudentInstallmentUsecaseFee updateStudentInstallmentUsecaseFee =
-      UpdateStudentInstallmentUsecaseFee();
+
   final AddToFeeDefaulterUsecase addToFeeDefaulterUsecase =
       AddToFeeDefaulterUsecase();
   final ReadFeeDefaulterCollective readFeeDefaulterCollective =
@@ -47,6 +45,8 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
   final DefaulterCheckUsecase _defaulterCheckUsecase = DefaulterCheckUsecase();
   AddToSuperAdminApprovalListUsecase addToSuperAdminApprovalListUsecase =
       AddToSuperAdminApprovalListUsecase();
+  AddToPendingFee2 addToPendingFee2 = AddToPendingFee2();
+
   List<GroupEntity> _allGroups = [];
   final List<StudentFeatureGroupStudentEntityClass> _allStudentsOfThisGroup =
       [];
@@ -59,9 +59,11 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     on<InstallmentPageCalculateInst>(_onCalculateInstallment);
     on<CreateStudentInstallmentEvent>(_onCreateStudentInstallment);
     on<GetStudentInstalmentEvent>(_onGetStudent);
-    on<UpdateStudentInstalmentEvent>(_handleUpdateStudentInstalment);
+
     on<FetchFeesByDateRange>(_onFetchFeesByDateRange);
+
     on<FetchTodayFees>(_onFetchTodayFees);
+
     on<UpdateSelectedDate>(_onUpdateSelectedDate);
     on<SortFees>(_onSortFees);
     on<AddFeeDefaulterEvent>(_handleAddingFeeDefaulter);
@@ -72,42 +74,21 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     on<AddToSuperAdminApprovalListEvent>(
       _handleAddingFeeInstallmentToSuperAdminApprovalList,
     );
+    on<AddToPendingFee2Event>(_handleAddingToPendingFee);
   }
 
   Future<void> _handleFetchGroups(
     FeeAdminFetchGroupsEvent event,
     Emitter<FeeAdminState> emit,
   ) async {
-    // debugPrint('[FeeAdminBloc] _handleFetchGroups -> fetching groups');
     emit(FeeAdminGroupsLoadingState());
 
     try {
-      // i use .first because i want get() like functionality
-      // but in group feature data is being read from firestore as stream
-      // for getting changed data instantly.
-      // That is complex because then i have to use stream builder + Bloc builder.
-      // And filter it .
-      // So I decided to use .first, because we do not even need stream in admin side.
-
       final groups = await _readGroupUsecaseFee.getGroups().first;
       _allGroups = List<GroupEntity>.from(groups);
 
-      // debugPrint(
-      //   '[FeeAdminBloc] _handleFetchGroups -> fetched ${_allGroups.length} items',
-      // );
-
-      // if (_allGroups.length <= 10) {
-      //   debugPrint('[FeeAdminBloc] fetched data: $_allGroups');
-      // } else {
-      //   debugPrint(
-      //     '[FeeAdminBloc] fetched sample: ${_allGroups.take(5).toList()} ...',
-      //   );
-      // }
-
       emit(FeeAdminGroupsLoadedState(groups: _allGroups));
     } catch (e, st) {
-      // debugPrint('[FeeAdminBloc] _handleFetchGroups ERROR -> $e');
-      // debugPrint(st.toString());
       emit(FeeAdminErrorState(error: e.toString()));
     }
   }
@@ -117,37 +98,16 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     Emitter<FeeAdminState> emit,
   ) async {
     try {
-      // debugPrint(
-      //   '[FeeAdminBloc] _handleGroupDataFiltering -> query="${event.query}", source length=${_allGroups.length}',
-      // );
-
       final filtered = _filterGroups(event.query, _allGroups);
-
-      // debugPrint(
-      //   '[FeeAdminBloc] _handleGroupDataFiltering -> filtered length=${filtered.length}',
-      // );
-
-      // if (filtered.length <= 10) {
-      //   debugPrint('[FeeAdminBloc] filtered data: $filtered');
-      // } else {
-      //   debugPrint(
-      //     '[FeeAdminBloc] filtered sample: ${filtered.take(5).toList()} ...',
-      //   );
-      // }
 
       emit(FeeAdminGroupDataFilteringCompleteState(filteredDataList: filtered));
     } catch (e, st) {
-      // debugPrint('[FeeAdminBloc] _handleGroupDataFiltering ERROR -> $e');
-      // debugPrint(st.toString());
       emit(FeeAdminErrorState(error: e.toString()));
     }
   }
 
   List<GroupEntity> _filterGroups(String query, List<GroupEntity> groups) {
     if (query.trim().isEmpty) {
-      // debugPrint(
-      //   '[FeeAdminBloc] _filterGroups -> query empty, returning full list (${groups.length})',
-      // );
       return groups;
     }
 
@@ -162,9 +122,6 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
           return name.contains(q) || code.contains(q);
         }).toList();
 
-    // debugPrint(
-    //   '[FeeAdminBloc] _filterGroups -> matched ${result.length} items for "$query"',
-    // );
     return result;
   }
 
@@ -207,9 +164,6 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     List<StudentFeatureGroupStudentEntityClass> groupStudents,
   ) {
     if (query.trim().isEmpty) {
-      // debugPrint(
-      //   '[FeeAdminBloc] _filterGroups -> query empty, returning full list (${groups.length})',
-      // );
       return groupStudents;
     }
 
@@ -228,14 +182,10 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
           return name.contains(q) || code.contains(q);
         }).toList();
     print("Filtred list is $result");
-    // debugPrint(
-    //   '[FeeAdminBloc] _filterGroups -> matched ${result.length} items for "$query"',
-    // );
+
     return result;
   }
 
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  /// ✅ Handle fee calculation
   void _onCalculateInstallment(
     InstallmentPageCalculateInst event,
     Emitter<FeeAdminState> emit,
@@ -255,7 +205,6 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     }
   }
 
-  /// ✅ Create a student with installments
   Future<void> _onCreateStudentInstallment(
     CreateStudentInstallmentEvent event,
     Emitter<FeeAdminState> emit,
@@ -278,7 +227,6 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     }
   }
 
-  /// ✅ Fetch a student from Firestore
   Future<void> _onGetStudent(
     GetStudentInstalmentEvent event,
     Emitter<FeeAdminState> emit,
@@ -304,54 +252,6 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     }
   }
 
-  // Future<void> _handleUpdatingStudentInstalment(
-  //   UpdateStudentInstalmentEvent event,
-  //   Emitter<FeeAdminState> emit,
-  // ) async {
-  //   emit(UpdateStudentInstalmentLoadingState());
-  //   var a = await updateStudentInstallmentUsecaseFee.update(
-  //     installmentId: event.installmentId,
-  //     paidAmount: event.paidAmount,
-  //     paidDate: event.paidDate,
-  //     paymentMethod: event.paymentMethod,
-  //     studentId: event.studentId,
-  //     groupId: event.groupId,
-  //     totalReaminingFeeForThisStudent: event.totalReaminingFeeForThisStudent,
-  //   );
-  //   emit(UpdatedStudentInstalmentState());
-  // }
-  Future<void> _handleUpdateStudentInstalment(
-    UpdateStudentInstalmentEvent event,
-    Emitter<FeeAdminState> emit,
-  ) async {
-    try {
-      emit(UpdateStudentInstalmentLoadingState());
-
-      // 1. Perform update
-      await updateStudentInstallmentUsecaseFee.update(
-        installmentId: event.installmentId,
-        paidAmount: event.paidAmount,
-        paidDate: event.paidDate,
-        paymentMethod: event.paymentMethod,
-        studentId: event.studentId,
-        groupId: event.groupId,
-        totalReaminingFeeForThisStudent: event.totalReaminingFeeForThisStudent,
-      );
-
-      // 2. Get fresh student
-      StudentFeeFeatureEntityClass? updatedStudent =
-          await feeadminreadinstalmentusecase.getStudent(event.studentId);
-
-      if (updatedStudent != null) {
-        emit(UpdatedStudentInstalmentState(student: updatedStudent));
-      } else {
-        emit(FeeAdminErrorState(error: "Could not fetch updated student"));
-      }
-    } catch (e) {
-      emit(FeeAdminErrorState(error: e.toString()));
-    }
-  }
-
   Future<void> _onFetchFeesByDateRange(
     FetchFeesByDateRange event,
     Emitter<FeeAdminState> emit,
@@ -360,12 +260,41 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     try {
       final fees = await actualImplemetationInstallmentRepo
           .fetchFeesByDateRange(event.startDate, event.endDate);
+
+      double cashPaymentTotal = 0;
+      double JazzCashTotal = 0;
+      double UBLTotal = 0;
+      double easyPaisaTotal = 0;
+      for (var fee in fees) {
+        switch (fee.paymentMethod.name) {
+          case "cashPayment":
+            cashPaymentTotal = fee.paidAmount + cashPaymentTotal;
+            break;
+          case "jazzCash":
+            JazzCashTotal = fee.paidAmount + JazzCashTotal;
+            break;
+          case "ubl":
+            UBLTotal = fee.paidAmount + UBLTotal;
+            break;
+          case "easyPaisa":
+            easyPaisaTotal = fee.paidAmount + easyPaisaTotal;
+          default:
+            throw AssertionError(
+              "payment method invalid :${fee.paymentMethod.name}",
+            );
+        }
+      }
+
       emit(
         FeeHistoryLoaded(
           fees: fees,
           startDate: event.startDate,
           endDate: event.endDate,
           sortOption: SortOptionEnum.dateDesc,
+          JazzCashTotal: JazzCashTotal,
+          UBLTotal: UBLTotal,
+          cashPaymentTotal: cashPaymentTotal,
+          easyPaisaTotal: easyPaisaTotal,
         ),
       );
     } catch (e) {
@@ -380,12 +309,45 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     emit(FeeHistoryLoading());
     try {
       final fees = await actualImplemetationInstallmentRepo.fetchTodayFees();
+      double cashPaymentTotal = 0;
+      double JazzCashTotal = 0;
+      double UBLTotal = 0;
+      double easyPaisaTotal = 0;
+      for (var fee in fees) {
+        switch (fee.paymentMethod.name) {
+          case "cashPayment":
+            cashPaymentTotal = fee.paidAmount + cashPaymentTotal;
+            break;
+          case "jazzCash":
+            JazzCashTotal = fee.paidAmount + JazzCashTotal;
+            break;
+          case "ubl":
+            UBLTotal = fee.paidAmount + UBLTotal;
+            break;
+          case "easyPaisa":
+            easyPaisaTotal = fee.paidAmount + easyPaisaTotal;
+          default:
+            throw AssertionError(
+              "payment method invalid :${fee.paymentMethod.name}",
+            );
+        }
+      }
+      debugPrint("###########################################");
+      debugPrint("easyPaisaTotal:$easyPaisaTotal");
+      debugPrint("JazzCashTotal:$JazzCashTotal");
+      debugPrint("UBLTotal:$UBLTotal");
+      debugPrint("cashPaymentTotal:$cashPaymentTotal");
+      debugPrint("###########################################");
       emit(
         FeeHistoryLoaded(
           fees: fees,
           startDate: null,
           endDate: null,
           sortOption: SortOptionEnum.dateDesc,
+          JazzCashTotal: JazzCashTotal,
+          UBLTotal: UBLTotal,
+          cashPaymentTotal: cashPaymentTotal,
+          easyPaisaTotal: easyPaisaTotal,
         ),
       );
     } catch (e) {
@@ -407,6 +369,10 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
           startDate: event.startDate,
           endDate: event.endDate,
           sortOption: SortOptionEnum.dateDesc,
+          JazzCashTotal: 990,
+          UBLTotal: 990,
+          cashPaymentTotal: 990,
+          easyPaisaTotal: 990,
         ),
       );
     }
@@ -469,15 +435,6 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
       emit(FeeAdminErrorState(error: e.toString()));
       return;
     }
-
-    // if (feeDefaultersCollective == null) {
-    //   debugPrint("null feeDefaultersCollective");
-    //   throw AssertionError("data is null");
-    // }
-    // if (listOffeeDefaulterEntity == null) {
-    //   debugPrint("null listOffeeDefaulterEntity");
-    // }
-    // debugPrint("feeDefaultersCollective:$feeDefaultersCollective");
   }
 
   Future<void> _handleReadingGroupNames(
@@ -519,10 +476,22 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     AddToSuperAdminApprovalListEvent event,
     Emitter<FeeAdminState> emit,
   ) async {
-    await addToSuperAdminApprovalListUsecase.add(
-      // event.installment,
+    await addToSuperAdminApprovalListUsecase.add(event.student, event.index);
+  }
+
+  Future<void> _handleAddingToPendingFee(
+    AddToPendingFee2Event event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    await addToPendingFee2.add(
       event.student,
-      event.index,
+      event.instalment,
+      event.paidAmount,
+      event.paymentMethod,
     );
+    final StudentFeeFeatureEntityClass? student =
+        await feeadminreadinstalmentusecase.getStudent(event.student.id);
+
+    emit(AddedToPendingFee(student: student!));
   }
 }

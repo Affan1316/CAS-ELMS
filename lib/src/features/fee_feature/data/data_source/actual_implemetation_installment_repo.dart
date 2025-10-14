@@ -144,126 +144,87 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
     }
   }
 
-  @override
-  Future<void> updateInstallmentPayment({
-    required String studentId,
-    required String installmentId,
-    required double paidAmount,
-    required DateTime paidDate,
-    required String paymentMethod,
-    required String groupId,
-    required double totalReaminingFeeForThisStudent,
-  }) async {
-    try {
-      final docRef = _firestore
-          .collection('student_installment')
-          .doc(studentId);
-      final doc = await docRef.get();
+  // @override
+  // Future<void> updateInstallmentPayment({
+  //   required String studentId,
+  //   required String installmentId,
+  //   required double paidAmount,
+  //   required DateTime paidDate,
+  //   required String paymentMethod,
+  //   required String groupId,
+  //   required double totalReaminingFeeForThisStudent,
+  // }) async {
+  //   try {
+  //     final docRef = _firestore
+  //         .collection('student_installment')
+  //         .doc(studentId);
+  //     final doc = await docRef.get();
 
-      if (!doc.exists) {
-        throw Exception('Student installment document not found');
-      }
+  //     if (!doc.exists) {
+  //       throw Exception('Student installment document not found');
+  //     }
 
-      final data = doc.data()!;
-      final List<dynamic> installments = List<dynamic>.from(
-        data['installments'] ?? [],
-      );
+  //     final data = doc.data()!;
+  //     final List<dynamic> installments = List<dynamic>.from(
+  //       data['installments'] ?? [],
+  //     );
 
-      double totalPaidSoFar = 0;
+  //     double totalPaidSoFar = 0;
 
-      final updatedInstallments =
-          installments.map((e) {
-            final m = Map<String, dynamic>.from(e as Map);
+  //     final updatedInstallments =
+  //         installments.map((e) {
+  //           final m = Map<String, dynamic>.from(e as Map);
 
-            if (m['id'] == installmentId) {
-              final double installmentTotal =
-                  (m['totalAmount'] as num).toDouble();
-              final double newPaid = paidAmount;
+  //           if (m['id'] == installmentId) {
+  //             final double installmentTotal =
+  //                 (m['totalAmount'] as num).toDouble();
+  //             final double newPaid = paidAmount;
 
-              m['paidAmount'] = newPaid;
-              m['paidDate'] = (paidDate ?? DateTime.now()).toIso8601String();
-              m['paymentMethod'] = paymentMethod;
+  //             m['paidAmount'] = newPaid;
+  //             m['paidDate'] = (paidDate ?? DateTime.now()).toIso8601String();
+  //             m['paymentMethod'] = paymentMethod;
 
-              // Update status based on payment
-              if (newPaid >= installmentTotal) {
-                m['status'] = 'pending';
-              }
-              //  else if (newPaid > 0 && newPaid < installmentTotal) {
-              //   m['status'] = 'Partial';
-              // }
-              else {
-                m['status'] = 'Unpaid';
-              }
-            }
+  //             // Update status based on payment
+  //             if (newPaid >= installmentTotal) {
+  //               m['status'] = 'pending';
+  //             }
+  //             //  else if (newPaid > 0 && newPaid < installmentTotal) {
+  //             //   m['status'] = 'Partial';
+  //             // }
+  //             else {
+  //               m['status'] = 'Unpaid';
+  //             }
+  //           }
 
-            totalPaidSoFar += (m['paidAmount'] as num?)?.toDouble() ?? 0;
-            return m;
-          }).toList();
+  //           totalPaidSoFar += (m['paidAmount'] as num?)?.toDouble() ?? 0;
+  //           return m;
+  //         }).toList();
 
-      await docRef.update({
-        'installments': updatedInstallments,
-        'paidAmount': totalPaidSoFar, // keep student-level summary
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      throw Exception('Failed to update installment: $e');
-    }
+  //     await docRef.update({
+  //       'installments': updatedInstallments,
+  //       'paidAmount': totalPaidSoFar, // keep student-level summary
+  //       'updatedAt': FieldValue.serverTimestamp(),
+  //     });
+  //   } catch (e) {
+  //     throw Exception('Failed to update installment: $e');
+  //   }
 
-    // var secondDocId = _firestore.collection("fee_history_daywise").id;
-
-    // if (secondDocId.isEmpty) {
-    //   _firestore.collection("fee_history_daywise").doc("$paidDate").set({
-    //     "fees": [
-    //       {
-    //         "paidAmount": "$paidAmount",
-    //         "paymentMethod": "$paymentMethod",
-    //         "paidDate": "$paidDate",
-    //       },
-    //     ],
-    //   });
-    // } else {
-
-    var documentReference = _firestore.collection("fee_history_daywise");
-    documentReference.doc().set({
-      "paidAmount": "$paidAmount",
-      "paymentMethod": "$paymentMethod",
-      // "paidDate": "$paidDate",
-      "createdAt": FieldValue.serverTimestamp(),
-    });
-
-    // int day = paidDate.day;
-    // int month = paidDate.month;
-    // int year = paidDate.year;
-    // DocumentReference<Map<String, dynamic>> documentReference = _firestore
-    //     .collection("fee_history_daywise")
-    //     .doc("$day-$month-$year");
-
-    // var a = await documentReference.get();
-    // Map<String, dynamic>? mapOflist = a.data();
-
-    // if (mapOflist == null) {
-    //   documentReference.set({
-    //     "fees": [
-    //       {
-    //         "paidAmount": "$paidAmount",
-    //         "paymentMethod": "$paymentMethod",
-    //         "paidDate": "$paidDate",
-    //       },
-    //     ],
-    //   });
-    // } else {
-    //   List fetchedListOfFees = mapOflist["fees"];
-    //   fetchedListOfFees.add({
-    //     "paidAmount": "$paidAmount",
-    //     "paymentMethod": "$paymentMethod",
-    //     "paidDate": "$paidDate",
-    //   });
-    //   mapOflist["fees"] = fetchedListOfFees;
-    //   documentReference.set(mapOflist);
-    // }
-
-    // }
-  }
+  //   debugPrint("453353345454334563463463463456565654645457457457474747457457");
+  //   var sdsds = {
+  //     "paidAmount": "$paidAmount",
+  //     "paymentMethod": "$paymentMethod",
+  //     // "paidDate": "$paidDate",
+  //     "createdAt": FieldValue.serverTimestamp(),
+  //   };
+  //   debugPrint("$sdsds");
+  //   var documentReference = _firestore.collection("fee_history_daywise");
+  //   await documentReference.doc().set({
+  //     "paidAmount": "$paidAmount",
+  //     "paymentMethod": "$paymentMethod",
+  //     // "paidDate": "$paidDate",
+  //     "createdAt": FieldValue.serverTimestamp(),
+  //   });
+  // }
 
   @override
   removeFromDefaulter(
@@ -663,4 +624,51 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
 
     //   // }
   }
+
+  @override
+  addToPendingFee2(
+    StudentFeeFeatureEntityClass student,
+    FeeInstallmentEntityClass adminSidePayedInstalment,
+    double paidAmount,
+    String paymentMethod,
+  ) async {
+    final docRef = _firestore.collection('student_installment').doc(student.id);
+    final doc = await docRef.get();
+
+    if (!doc.exists) {
+      throw Exception('Student installment document not found');
+    }
+
+    final data = doc.data()!;
+    final List<Map<String, dynamic>> installments =
+        List<Map<String, dynamic>>.from(data['installments'] ?? []);
+    Map<String, dynamic> currentMap;
+
+    for (var i = 0; i < installments.length; i++) {
+      currentMap = installments.elementAt(i);
+      // current = FeeInstallmentEntityClass.fromMap(currentMap);
+      if (currentMap["id"] == adminSidePayedInstalment.id) {
+        currentMap["status"] = "pending";
+        currentMap["paidAmount"] = paidAmount;
+        currentMap["paidDate"] = DateTime.now().toIso8601String();
+        currentMap["paymentMethod"] = paymentMethod;
+        installments.removeAt(i);
+        installments.insert(i, currentMap);
+        break;
+      }
+    }
+    await docRef.update({"installments": installments});
+    var docref2 = _firestore
+        .collection("not_approved_fee_installments")
+        .doc(student.id);
+
+    // Doing this i made StudentFeeFeatureEntityClass imutable and i can not modify its map now so i did this
+    var modifyableStudentMap = student.toMap();
+    modifyableStudentMap["installments"] = installments;
+    await docref2.set(modifyableStudentMap);
+  }
 }
+// await _firestore.collection("pending_fees2").doc(student.id).set({
+    //   "studentId": student.id,
+    //   "instalmentId": adminSidePayedInstalment.id,
+    // });

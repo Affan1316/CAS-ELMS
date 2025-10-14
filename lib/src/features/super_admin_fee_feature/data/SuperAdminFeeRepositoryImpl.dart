@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/abstract_repo/super_admin_fee_repository.dart';
 
@@ -18,7 +17,7 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
     for (var element in b) {
       c.add(element.data());
     }
-    debugPrint("$c");
+    // debugPrint("$c");
     return c;
   }
 
@@ -42,7 +41,7 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
       }
 
       // Step 2: Extract data and modify locally
-      final data = snapshot.data();
+      final Map<String, dynamic>? data = snapshot.data();
       if (data == null || !data.containsKey("installments")) {
         print("Installments field missing or null for student $studentId");
         throw Exception("Installments data invalid.");
@@ -50,24 +49,34 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
 
       // Ensure we have a modifiable list
       // Create a new list to avoid modifying the snapshot's internal map directly
+      double totalPaidSoFar = 0.0;
       List<Map<String, dynamic>> installments = List.from(data["installments"]);
+      // installments.map((e) {
+      //   final m = Map<String, dynamic>.from(e as Map);
+      //   totalPaidSoFar += (m['paidAmount'] as num?)?.toDouble() ?? 0;
+      //   return m;
+      // });
 
       bool updated = false;
       for (var element in installments) {
+        totalPaidSoFar = totalPaidSoFar + element["paidAmount"];
         if (element["id"] == id) {
           element["status"] = "Paid";
           updated = true;
           break; // Assuming 'id' is unique, we can stop after finding it
         }
       }
-
+      // data["paidAmount"] = totalPaidSoFar;
       if (!updated) {
         print("Installment with id $id not found for student $studentId");
         throw Exception("Installment not found.");
       }
 
       // Step 3: Write the modified list back using the transaction
-      transaction.update(docRef, {"installments": installments});
+      transaction.update(docRef, {
+        "installments": installments,
+        "paidAmount": totalPaidSoFar,
+      });
       print("Payment confirmed for installment $id of student $studentId.");
     }); // The transaction automatically retries if there are conflicts
 
@@ -101,14 +110,27 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
       // Create a new list to avoid modifying the snapshot's internal map directly
       List<Map<String, dynamic>> installments = List.from(data["installments"]);
 
+      double totalPaidSoFar = 0.0;
       bool updated = false;
       for (var element in installments) {
+        totalPaidSoFar = totalPaidSoFar + element["paidAmount"];
+
         if (element["id"] == id) {
           element["status"] = "Paid";
           updated = true;
+          var documentReference = _remoteDataSource.collection(
+            "fee_history_daywise",
+          );
+          await documentReference.doc().set({
+            "paidAmount": element["paidAmount"],
+            "paymentMethod": element["paymentMethod"],
+            // "paidDate": "$paidDate",
+            "createdAt": FieldValue.serverTimestamp(),
+          });
           break; // Assuming 'id' is unique, we can stop after finding it
         }
       }
+      // data["paidAmount"] = totalPaidSoFar;
 
       if (!updated) {
         print("Installment with id $id not found for student $studentId");
@@ -116,7 +138,10 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
       }
 
       // Step 3: Write the modified list back using the transaction
-      transaction.update(docRef, {"installments": installments});
+      transaction.update(docRef, {
+        "installments": installments,
+        "paidAmount": totalPaidSoFar,
+      });
       print("Payment confirmed for installment $id of student $studentId.");
     }); // The transaction automatically retries if there are conflicts
   }

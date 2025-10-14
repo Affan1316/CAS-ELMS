@@ -19,8 +19,13 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
     with TickerProviderStateMixin {
   late final AnimationController _slideController;
   late final Animation<Offset> _slideAnimation;
-  bool _isFilterExpanded = false;
+  late String JazzCashTotal;
+  late String UBLTotal;
+  late String easyPaisaTotal;
+  late String cashPaymentTotal;
 
+  bool _isFilterExpanded = false;
+  late var fees;
   static const List<String> monthNames = [
     "January",
     "February",
@@ -68,19 +73,252 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
     });
   }
 
+  void _showPaymentMethodsBottomSheet(
+    BuildContext context,
+    FeeHistoryLoaded state,
+  ) {
+    print("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+    print(state.JazzCashTotal);
+    print(state.UBLTotal);
+    print(state.cashPaymentTotal);
+    print(state.easyPaisaTotal);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => _buildPaymentMethodsBottomSheet(context, state),
+    );
+  }
+
+  Widget _buildPaymentMethodsBottomSheet(
+    BuildContext context,
+    FeeHistoryLoaded state,
+  ) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isTablet = constraints.maxWidth > 600; // breakpoint
+        final horizontalPadding = isTablet ? 40.0 : 24.0;
+        final verticalPadding = isTablet ? 32.0 : 24.0;
+        final fontScale = isTablet ? 1.2 : 1.0;
+
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: verticalPadding,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Drag handle
+                  Center(
+                    child: Container(
+                      width: screenWidth * 0.12,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+
+                  // Header
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.payment_rounded,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: isTablet ? 32 : 28,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Payment Methods Summary',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontSize:
+                                (Theme.of(
+                                      context,
+                                    ).textTheme.titleLarge?.fontSize ??
+                                    20) *
+                                fontScale,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: screenHeight * 0.03),
+
+                  // Payment Method Cards
+                  Wrap(
+                    runSpacing: 12,
+                    spacing: 12,
+                    children: [
+                      _buildPaymentMethodCard(
+                        context,
+                        'Cash Payments',
+                        Icons.account_balance_wallet_outlined,
+                        Colors.green,
+                        state.cashPaymentTotal,
+                      ),
+                      _buildPaymentMethodCard(
+                        context,
+                        'JazzCash',
+                        Icons.phone_android,
+                        Colors.red,
+                        state.JazzCashTotal,
+                      ),
+                      _buildPaymentMethodCard(
+                        context,
+                        'UBL Bank',
+                        Icons.account_balance,
+                        Colors.blue,
+                        state.UBLTotal,
+                      ),
+                      _buildPaymentMethodCard(
+                        context,
+                        'EasyPaisa',
+                        Icons.account_balance_wallet,
+                        Colors.green[600]!,
+                        state.easyPaisaTotal,
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: screenHeight * 0.03),
+
+                  // Total Row
+                  Container(
+                    padding: EdgeInsets.all(isTablet ? 20 : 16),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.blue[100]!),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.request_quote_outlined,
+                          color: Colors.blue[700],
+                          size: isTablet ? 28 : 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Grand Total',
+                          style: TextStyle(
+                            fontSize: 16 * fontScale,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blue[700],
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          'Rs ${state.totalAmount.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            fontSize: 18 * fontScale,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPaymentMethodCard(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Color color,
+    double amount,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Rs ${amount.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: Colors.grey[400], size: 24),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Color background = const Color(0xFFEAF3FB); // light blue/grey
+    final Color background = const Color(0xFFEAF3FB);
     return Scaffold(
       backgroundColor: background,
       appBar: _buildAppBar(context, Colors.deepPurple),
-      body: BlocBuilder<FeeAdminBloc, FeeAdminState>(
+      body: BlocConsumer<FeeAdminBloc, FeeAdminState>(
+        listener: (context, state) {
+          // Listener logic remains the same
+        },
         builder: (context, state) {
           if (state is FeeHistoryLoading) {
             return _buildLoadingState();
           } else if (state is FeeHistoryError) {
             return _buildErrorState(context, state.message);
           } else if (state is FeeHistoryLoaded) {
+            fees = state.fees;
             return _buildLoadedState(context, state, background);
           } else {
             return const SizedBox.shrink();
@@ -116,25 +354,26 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
           onPressed: () => _refreshData(context),
           tooltip: 'Refresh',
         ),
+        // Add new button for payment methods summary
+        BlocBuilder<FeeAdminBloc, FeeAdminState>(
+          builder: (context, state) {
+            return IconButton(
+              icon: const Icon(Icons.payment),
+              onPressed:
+                  state is FeeHistoryLoaded
+                      ? () => _showPaymentMethodsBottomSheet(context, state)
+                      : null,
+              tooltip: 'Payment Summary',
+            );
+          },
+        ),
         const SizedBox(width: 8),
       ],
     );
   }
 
   Widget _buildLoadingState() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text(
-            'Loading fee records...',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ],
-      ),
-    );
+    return const Center(child: LoadingStateWidget());
   }
 
   Widget _buildErrorState(BuildContext context, String message) {
@@ -1237,6 +1476,25 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
           color: Colors.white, // highlight
           offset: Offset(-4, -4),
           blurRadius: 8,
+        ),
+      ],
+    );
+  }
+}
+
+class LoadingStateWidget extends StatelessWidget {
+  const LoadingStateWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        CircularProgressIndicator(),
+        SizedBox(height: 16),
+        Text(
+          'Loading fee records...',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
         ),
       ],
     );

@@ -73,7 +73,6 @@ class FeeAdminGroupStudentsFilteringCompleteState extends FeeAdminState {
   List<Object?> get props => [filteredDataList];
 }
 
-/// ✅ Calculation result
 class InstallmentPageInstallmentCalculatedState extends FeeAdminState {
   final double installment;
   const InstallmentPageInstallmentCalculatedState({required this.installment});
@@ -82,7 +81,6 @@ class InstallmentPageInstallmentCalculatedState extends FeeAdminState {
   List<Object?> get props => [installment];
 }
 
-/// ✅ Student creation process
 class InstallmentCreatingState extends FeeAdminState {
   const InstallmentCreatingState();
 }
@@ -99,7 +97,6 @@ class InstallmentCreatedFailureState extends FeeAdminState {
   List<Object?> get props => [error];
 }
 
-/// ✅ Student fetch process
 class StudentInstalmentLoadingState extends FeeAdminState {
   const StudentInstalmentLoadingState();
 }
@@ -120,22 +117,6 @@ class StudentLoadFailureState extends FeeAdminState {
   List<Object?> get props => [error];
 }
 
-class UpdateStudentInstalmentLoadingState extends FeeAdminState {
-  const UpdateStudentInstalmentLoadingState();
-}
-
-// class UpdatedStudentInstalmentState extends FeeAdminState {
-//   const UpdatedStudentInstalmentState();
-// }
-class UpdatedStudentInstalmentState extends FeeAdminState {
-  final StudentFeeFeatureEntityClass student;
-
-  const UpdatedStudentInstalmentState({required this.student});
-
-  @override
-  List<Object> get props => [student];
-}
-
 class FeeHistoryLoading extends FeeAdminState {
   const FeeHistoryLoading();
 }
@@ -153,12 +134,20 @@ class FeeHistoryLoaded extends FeeAdminState {
   final DateTime? startDate;
   final DateTime? endDate;
   final SortOptionEnum sortOption;
+  final double cashPaymentTotal;
+  final double JazzCashTotal;
+  final double UBLTotal;
+  final double easyPaisaTotal;
 
   const FeeHistoryLoaded({
     required this.fees,
     this.startDate,
     this.endDate,
     required this.sortOption,
+    required this.cashPaymentTotal,
+    required this.JazzCashTotal,
+    required this.UBLTotal,
+    required this.easyPaisaTotal,
   });
 
   FeeHistoryLoaded copyWith({
@@ -166,22 +155,38 @@ class FeeHistoryLoaded extends FeeAdminState {
     DateTime? startDate,
     DateTime? endDate,
     SortOptionEnum? sortOption,
+    double? cashPaymentTotal,
+    double? JazzCashTotal,
+    double? UBLTotal,
+    double? easyPaisaTotal,
   }) {
     return FeeHistoryLoaded(
       fees: fees ?? this.fees,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       sortOption: sortOption ?? this.sortOption,
+      cashPaymentTotal: cashPaymentTotal ?? this.cashPaymentTotal,
+      JazzCashTotal: JazzCashTotal ?? this.JazzCashTotal,
+      UBLTotal: UBLTotal ?? this.UBLTotal,
+      easyPaisaTotal: easyPaisaTotal ?? this.easyPaisaTotal,
     );
   }
 
   double get totalAmount => fees.fold(0, (sum, fee) => sum + fee.paidAmount);
 
   @override
-  List<Object?> get props => [fees, startDate, endDate, sortOption];
+  List<Object?> get props => [
+    fees,
+    startDate,
+    endDate,
+    sortOption,
+    cashPaymentTotal,
+    JazzCashTotal,
+    UBLTotal,
+    easyPaisaTotal,
+  ];
 }
 
-/// ✅ ensures unique emission
 class FeeDefaultersDataLoaded extends FeeAdminState {
   final List<FeeDefaulterEntity> listOFFeeDefaulterEntity;
   final FeeDefaultersCollective? feeDefaultersCollective;
@@ -230,4 +235,12 @@ class CheckingingFeeDefaulterCompleteState extends FeeAdminState {
 
   @override
   List<Object?> get props => [isDefaulter];
+}
+
+class FeeHistoryPaymentMethodBasedCalculationStarted extends FeeAdminState {}
+
+class AddedToPendingFee extends FeeAdminState {
+  final StudentFeeFeatureEntityClass student;
+
+  const AddedToPendingFee({required this.student});
 }

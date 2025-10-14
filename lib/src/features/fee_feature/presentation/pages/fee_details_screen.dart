@@ -39,7 +39,6 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    debugPrint("init called>>>>>>>>>>>>>>>>>>>>>>>.");
   }
 
   void _refreshData() {
@@ -54,7 +53,6 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("${widget.isDefaulter}");
     final isTablet = MediaQuery.of(context).size.width > 600;
     final currencyFormat = NumberFormat.currency(locale: 'en_US', symbol: '');
 
@@ -70,20 +68,12 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
           },
           builder: (context, state) {
             if (state is StudentLoadedState) {
-              debugPrint(">>>>>>>>>StudentLoadedState>>>>>");
               student = state.student;
             }
             if (state is StudentInstalmentLoadingState) {
               return Center(child: CircularProgressIndicator());
-              // return Container(
-              //   width: 400,
-              //   height: 700,
-              //   color: const Color.fromARGB(255, 201, 21, 162),
-              // );
-              // ;
             }
             if (state is StudentLoadFailureState) {
-              debugPrint("?????error is ${state.error}");
               return Container(
                 width: 400,
                 height: 700,
@@ -91,43 +81,17 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
               );
               ;
             }
-            if (state is UpdateStudentInstalmentLoadingState) {
-              return Center(child: CircularProgressIndicator());
-            }
-            if (state is UpdatedStudentInstalmentState) {
-              context.read<FeeAdminBloc>().add(
-                AddToSuperAdminApprovalListEvent(
-                  student: state.student, // ✅ pass updated student directly
-                  index: index,
-                ),
-              );
-            }
 
-            // if (state is UpdatedStudentInstalmentState) {
-            //   // if (installment != null) {
-            //   context.read<FeeAdminBloc>().add(
-            //     AddToSuperAdminApprovalListEvent(
-            //       student: student,
-            //       // installment: installment!,
-            //       index: index,
-            //     ),
-            //   );
-            //   // } else {
-            //   // throw AssertionError("installment is $installment ");
-            //   // }
-            // }
-            // if (state is UpdatedStudentInstalmentState) {
-            //   _refreshData();
-            // }
-            debugPrint(">>>>>>>>>State is $state>>>>>");
-            debugPrint("student.paidAmount is ${student.paidAmount}");
+            if (state is AddedToPendingFee) {
+              student = state.student;
+              _refreshData();
+            }
 
             return SafeArea(
               child: ResponsivePadding(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // FloatingActionButton(onPressed: _refreshData),
                     ScreenHeader(
                       title: student.name,
                       trailing: IconButton(
@@ -157,17 +121,6 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                               tabletSize: 20,
                             ),
                             const SizedBox(height: 8),
-                            // ResponsiveText(
-                            //   text:
-                            //       "Remaining: ${currencyFormat.format(student.remainingAmount)}",
-                            //   phoneSize: 16,
-                            //   tabletSize: 20,
-                            //   color:
-                            //       student.remainingAmount > 0
-                            //           ? Colors.redAccent
-                            //           : Colors.green,
-                            //   weight: FontWeight.w600,
-                            // ),
                           ],
                         ),
                       ),
@@ -236,7 +189,6 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                                         group: student.groupId,
                                       ),
                                     );
-                                    debugPrint(student.id.toString());
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
@@ -244,7 +196,6 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                                       ),
                                     );
                                   }
-                                  // Future.delayed(Duration(seconds: 1));
                                 },
                                 style: ElevatedButton.styleFrom(
                                   splashFactory: InkRipple.splashFactory,
@@ -276,7 +227,6 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                                   ),
                                 ),
                                 onPressed: () {
-                                  // _refreshData();
                                   if (thisTimepaidamount == null) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
@@ -349,11 +299,6 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
     BuildContext context,
     int index,
   ) {
-    debugPrint(installment.status);
-    debugPrint(installment.paidAmount.toString());
-    debugPrint(installment.paidDate.toString());
-    debugPrint("index =====================:$index");
-
     final currencyFormat = NumberFormat.currency(locale: 'en_US', symbol: '');
     Color statusColor = Colors.green;
 
@@ -368,7 +313,7 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
         DataCell(Text(installment.title)),
         DataCell(Text(DateFormat('MMM dd, yyyy').format(installment.dueDate))),
         DataCell(Text(currencyFormat.format(installment.totalAmount))),
-        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
         DataCell(Text(currencyFormat.format(installment.paidAmount))),
         DataCell(
           Text(
@@ -388,33 +333,19 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                       onPay: (amount, method, date) {
                         thisTimepaidamount = amount;
                         installment = installment;
+
                         context.read<FeeAdminBloc>().add(
-                          UpdateStudentInstalmentEvent(
-                            installmentId: installment.id,
+                          AddToPendingFee2Event(
+                            student: student,
+                            instalment: installment,
                             paidAmount: amount,
-                            studentId: widget.studentId,
-                            paidDate: date,
                             paymentMethod: method,
-                            groupId: widget.groupId,
-                            totalReaminingFeeForThisStudent:
-                                student.totalFee - student.paidAmount,
                           ),
                         );
-
-                        // DataServiceFeeFeature.updateInstallment(
-                        //   widget.studentId,
-                        //   installment.id,
-                        //   amount,
-                        //   method,
-                        //   date,
-                        // );
-                        // _refreshData();
                       },
                     ),
               ).then((_) {
-                // 🔑 Called after dialog is closed
                 isRefreshed = false;
-                // _refreshData();
               });
             },
             style: ElevatedButton.styleFrom(

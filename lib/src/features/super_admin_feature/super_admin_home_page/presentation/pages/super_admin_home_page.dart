@@ -1,3 +1,4 @@
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/super_admin_fee_notifications_screen.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter/material.dart';
 
@@ -479,7 +480,12 @@ class SuperAdminDashboard extends StatelessWidget {
     );
 
     // Here you would implement actual navigation
-    // Navigator.push(context, MaterialPageRoute(builder: (context) => YourScreen()));
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SuperAdminFeeNotificationsScreen(),
+      ),
+    );
   }
 }
 
