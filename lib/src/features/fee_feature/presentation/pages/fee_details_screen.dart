@@ -16,7 +16,15 @@ import 'package:intl/intl.dart';
 
 class FeeDetailsScreen extends StatefulWidget {
   final String studentId;
-  const FeeDetailsScreen({super.key, required this.studentId});
+  final String groupId;
+  final bool isDefaulter;
+
+  const FeeDetailsScreen({
+    super.key,
+    required this.studentId,
+    required this.groupId,
+    required this.isDefaulter,
+  });
 
   @override
   State<FeeDetailsScreen> createState() => _FeeDetailsScreenState();
@@ -24,6 +32,10 @@ class FeeDetailsScreen extends StatefulWidget {
 
 class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
   late StudentFeeFeatureEntityClass student;
+  FeeInstallmentEntityClass? installment;
+  int index = -1;
+  bool isRefreshed = false;
+  double? thisTimepaidamount;
   @override
   void initState() {
     super.initState();
@@ -32,18 +44,30 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
 
   void _refreshData() {
     context.read<FeeAdminBloc>().add(
-      GetStudentInstalmentEvent(studentId: widget.studentId),
+      GetStudentInstalmentEvent(
+        studentId: widget.studentId,
+        groupId: widget.groupId,
+      ),
     );
+    isRefreshed = true;
   }
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("${widget.isDefaulter}");
     final isTablet = MediaQuery.of(context).size.width > 600;
     final currencyFormat = NumberFormat.currency(locale: 'en_US', symbol: '');
 
     return GradientBackground(
       child: Scaffold(
-        body: BlocBuilder<FeeAdminBloc, FeeAdminState>(
+        body: BlocConsumer<FeeAdminBloc, FeeAdminState>(
+          listener: (context, state) {
+            if (state is AddingFeeDefaulterCompleteState) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text("Added to defaulters ")));
+            }
+          },
           builder: (context, state) {
             if (state is StudentLoadedState) {
               debugPrint(">>>>>>>>>StudentLoadedState>>>>>");
@@ -70,6 +94,28 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
             if (state is UpdateStudentInstalmentLoadingState) {
               return Center(child: CircularProgressIndicator());
             }
+            if (state is UpdatedStudentInstalmentState) {
+              context.read<FeeAdminBloc>().add(
+                AddToSuperAdminApprovalListEvent(
+                  student: state.student, // ✅ pass updated student directly
+                  index: index,
+                ),
+              );
+            }
+
+            // if (state is UpdatedStudentInstalmentState) {
+            //   // if (installment != null) {
+            //   context.read<FeeAdminBloc>().add(
+            //     AddToSuperAdminApprovalListEvent(
+            //       student: student,
+            //       // installment: installment!,
+            //       index: index,
+            //     ),
+            //   );
+            //   // } else {
+            //   // throw AssertionError("installment is $installment ");
+            //   // }
+            // }
             // if (state is UpdatedStudentInstalmentState) {
             //   _refreshData();
             // }
@@ -128,29 +174,165 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                     ),
                     const SizedBox(height: 20),
                     Expanded(
-                      child: NeuCard(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: DataTable(
-                              columnSpacing: isTablet ? 40 : 20,
-                              columns: const [
-                                DataColumn(label: Text("title")),
-                                DataColumn(label: Text("Due Date")),
-                                DataColumn(label: Text("Total")),
-                                DataColumn(label: Text("Paid")),
-                                DataColumn(label: Text("Status")),
-                                DataColumn(label: Text("Action")),
-                              ],
-                              rows:
-                                  student.installments.map((installment) {
-                                    return _buildRow(installment, context);
-                                  }).toList(),
+                      child: SingleChildScrollView(
+                        child: NeuCard(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: DataTable(
+                                columnSpacing: isTablet ? 40 : 20,
+                                columns: const [
+                                  DataColumn(label: Text("title")),
+                                  DataColumn(label: Text("Due Date")),
+                                  DataColumn(label: Text("Total")),
+                                  DataColumn(label: Text("Paid")),
+                                  DataColumn(label: Text("Status")),
+                                  DataColumn(label: Text("Action")),
+                                ],
+                                rows:
+                                    student.installments.map((installment) {
+                                      index = index + 1;
+                                      return _buildRow(
+                                        installment,
+                                        context,
+                                        index,
+                                      );
+                                    }).toList(),
+                              ),
                             ),
                           ),
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 20),
+                    Center(
+                      child:
+                          !widget.isDefaulter
+                              ? ElevatedButton(
+                                onPressed: () {
+                                  if (isRefreshed) {
+                                    if (student.totalFee - student.paidAmount ==
+                                        0) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            "Can not add to defaulters complete fee paid",
+                                          ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    final remainingFee =
+                                        student.totalFee - student.paidAmount;
+                                    context.read<FeeAdminBloc>().add(
+                                      AddFeeDefaulterEvent(
+                                        name: student.name,
+                                        remaingFee: remainingFee,
+                                        rollnum: student.groupId,
+                                        studentId: student.id,
+                                        group: student.groupId,
+                                      ),
+                                    );
+                                    debugPrint(student.id.toString());
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("please refresh first"),
+                                      ),
+                                    );
+                                  }
+                                  // Future.delayed(Duration(seconds: 1));
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  splashFactory: InkRipple.splashFactory,
+                                  overlayColor: Colors.black.withOpacity(0.2),
+                                  backgroundColor: const Color(0xFF8B0000),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Add to Defaulter",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              )
+                              : ElevatedButton.icon(
+                                icon: const Icon(
+                                  Icons.check_circle_outline,
+                                  color: Colors.white,
+                                ),
+                                label: const Text(
+                                  "Remove from Defaulter",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  // _refreshData();
+                                  if (thisTimepaidamount == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          "Pay installment to remove from defaulter",
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  } else {
+                                    if (isRefreshed) {
+                                      context.read<FeeAdminBloc>().add(
+                                        RemoveStudentFromDefaultersEvent(
+                                          groupId: student.groupId,
+                                          paidAmount: thisTimepaidamount!,
+                                          studentId: student.id,
+                                          totalReaminingFeeForThisStudent:
+                                              student.totalFee -
+                                              student.paidAmount,
+                                        ),
+                                      );
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "student removed from defaulters",
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            "please refresh first ",
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green.shade700,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 14,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  elevation: 4,
+                                  shadowColor: Colors.black54,
+                                ),
+                              ),
                     ),
                   ],
                 ),
@@ -165,15 +347,17 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
   DataRow _buildRow(
     FeeInstallmentEntityClass installment,
     BuildContext context,
+    int index,
   ) {
     debugPrint(installment.status);
     debugPrint(installment.paidAmount.toString());
     debugPrint(installment.paidDate.toString());
+    debugPrint("index =====================:$index");
 
     final currencyFormat = NumberFormat.currency(locale: 'en_US', symbol: '');
     Color statusColor = Colors.green;
 
-    if (installment.status == "Partial") {
+    if (installment.status == "pending") {
       statusColor = Colors.orange;
     } else if (installment.status == "Unpaid") {
       statusColor = Colors.red;
@@ -197,10 +381,13 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
             onPressed: () {
               showDialog(
                 context: context,
+
                 builder:
                     (_) => PayFeeModal(
                       totalFee: installment.totalAmount,
                       onPay: (amount, method, date) {
+                        thisTimepaidamount = amount;
+                        installment = installment;
                         context.read<FeeAdminBloc>().add(
                           UpdateStudentInstalmentEvent(
                             installmentId: installment.id,
@@ -208,8 +395,12 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                             studentId: widget.studentId,
                             paidDate: date,
                             paymentMethod: method,
+                            groupId: widget.groupId,
+                            totalReaminingFeeForThisStudent:
+                                student.totalFee - student.paidAmount,
                           ),
                         );
+
                         // DataServiceFeeFeature.updateInstallment(
                         //   widget.studentId,
                         //   installment.id,
@@ -220,7 +411,11 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                         // _refreshData();
                       },
                     ),
-              );
+              ).then((_) {
+                // 🔑 Called after dialog is closed
+                isRefreshed = false;
+                // _refreshData();
+              });
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF3E206D),

@@ -7,12 +7,13 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/groups_list_screen.dart';
-import 'package:flutter_cas_app_main/src/features/feedefaulters/presentation/pages/fee_defaulters.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/create_group_page.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/read_group_page.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/add_inquiry_page.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/inquiry_detail_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_enrollment_screen.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/super_admin_fee_notifications_screen.dart';
 import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/pages/workshop_time_tracker.dart';
 
 Widget buildAdminFeatureCard(
@@ -97,7 +98,7 @@ void _navigateToScreen(BuildContext context, int index) {
         print('Navigating to Add Instructor');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => AddInstructorPage()),
+          MaterialPageRoute(builder: (_) => SuperAdminFeeNotificationsScreen()),
         );
         break;
       case 1: // Pay Fee

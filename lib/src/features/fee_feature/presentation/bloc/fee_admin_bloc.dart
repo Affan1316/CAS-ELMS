@@ -1,11 +1,21 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulter_entity.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulters_collective.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_entity_class.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/student_fee_feature_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/enums/sort_option_enum.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/add_to_fee_defaulter_usecase.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/add_to_super_admin_approval_list_usecase.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/defaulter_check_usecase.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_fee_defaulter_collective.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_fee_defaulter_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_group_Usecase_fee.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_group_names_fee_defaulters_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_group_students_for_fee_use_case.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/read_student_installment_usecase_fee.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/remove_student_from_defaulters_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/update_student_installment_usecase_fee.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_state.dart';
@@ -24,6 +34,19 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
       Feeadminreadinstalmentusecase();
   final UpdateStudentInstallmentUsecaseFee updateStudentInstallmentUsecaseFee =
       UpdateStudentInstallmentUsecaseFee();
+  final AddToFeeDefaulterUsecase addToFeeDefaulterUsecase =
+      AddToFeeDefaulterUsecase();
+  final ReadFeeDefaulterCollective readFeeDefaulterCollective =
+      ReadFeeDefaulterCollective();
+  final ReadFeeDefaulterUsecase readFeeDefaulterUsecase =
+      ReadFeeDefaulterUsecase();
+  final ReadGroupNamesFeeDefaultersUsecase readGroupNamesFeeDefaultersUsecase =
+      ReadGroupNamesFeeDefaultersUsecase();
+  final RemoveStudentFromDefaultersUsecase _removeStudentFromDefaultersUsecase =
+      RemoveStudentFromDefaultersUsecase();
+  final DefaulterCheckUsecase _defaulterCheckUsecase = DefaulterCheckUsecase();
+  AddToSuperAdminApprovalListUsecase addToSuperAdminApprovalListUsecase =
+      AddToSuperAdminApprovalListUsecase();
   List<GroupEntity> _allGroups = [];
   final List<StudentFeatureGroupStudentEntityClass> _allStudentsOfThisGroup =
       [];
@@ -36,11 +59,19 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     on<InstallmentPageCalculateInst>(_onCalculateInstallment);
     on<CreateStudentInstallmentEvent>(_onCreateStudentInstallment);
     on<GetStudentInstalmentEvent>(_onGetStudent);
-    on<UpdateStudentInstalmentEvent>(_handleUpdatingStudentInstalment);
+    on<UpdateStudentInstalmentEvent>(_handleUpdateStudentInstalment);
     on<FetchFeesByDateRange>(_onFetchFeesByDateRange);
     on<FetchTodayFees>(_onFetchTodayFees);
     on<UpdateSelectedDate>(_onUpdateSelectedDate);
     on<SortFees>(_onSortFees);
+    on<AddFeeDefaulterEvent>(_handleAddingFeeDefaulter);
+    on<ReadFeeDefaulterEvent>(_handleReadingFeeDefaulter);
+    on<ReadFeeDefaulterGroupsEvent>(_handleReadingGroupNames);
+    on<RemoveStudentFromDefaultersEvent>(_handleRemovingStudentFromDefaulters);
+    on<CheckFeeDefaulterEvent>(_handleCheckingFeeDefaulter);
+    on<AddToSuperAdminApprovalListEvent>(
+      _handleAddingFeeInstallmentToSuperAdminApprovalList,
+    );
   }
 
   Future<void> _handleFetchGroups(
@@ -273,19 +304,52 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     }
   }
 
-  Future<void> _handleUpdatingStudentInstalment(
+  // Future<void> _handleUpdatingStudentInstalment(
+  //   UpdateStudentInstalmentEvent event,
+  //   Emitter<FeeAdminState> emit,
+  // ) async {
+  //   emit(UpdateStudentInstalmentLoadingState());
+  //   var a = await updateStudentInstallmentUsecaseFee.update(
+  //     installmentId: event.installmentId,
+  //     paidAmount: event.paidAmount,
+  //     paidDate: event.paidDate,
+  //     paymentMethod: event.paymentMethod,
+  //     studentId: event.studentId,
+  //     groupId: event.groupId,
+  //     totalReaminingFeeForThisStudent: event.totalReaminingFeeForThisStudent,
+  //   );
+  //   emit(UpdatedStudentInstalmentState());
+  // }
+  Future<void> _handleUpdateStudentInstalment(
     UpdateStudentInstalmentEvent event,
     Emitter<FeeAdminState> emit,
   ) async {
-    emit(UpdateStudentInstalmentLoadingState());
-    var a = await updateStudentInstallmentUsecaseFee.update(
-      installmentId: event.installmentId,
-      paidAmount: event.paidAmount,
-      paidDate: event.paidDate,
-      paymentMethod: event.paymentMethod,
-      studentId: event.studentId,
-    );
-    emit(UpdatedStudentInstalmentState());
+    try {
+      emit(UpdateStudentInstalmentLoadingState());
+
+      // 1. Perform update
+      await updateStudentInstallmentUsecaseFee.update(
+        installmentId: event.installmentId,
+        paidAmount: event.paidAmount,
+        paidDate: event.paidDate,
+        paymentMethod: event.paymentMethod,
+        studentId: event.studentId,
+        groupId: event.groupId,
+        totalReaminingFeeForThisStudent: event.totalReaminingFeeForThisStudent,
+      );
+
+      // 2. Get fresh student
+      StudentFeeFeatureEntityClass? updatedStudent =
+          await feeadminreadinstalmentusecase.getStudent(event.studentId);
+
+      if (updatedStudent != null) {
+        emit(UpdatedStudentInstalmentState(student: updatedStudent));
+      } else {
+        emit(FeeAdminErrorState(error: "Could not fetch updated student"));
+      }
+    } catch (e) {
+      emit(FeeAdminErrorState(error: e.toString()));
+    }
   }
 
   Future<void> _onFetchFeesByDateRange(
@@ -368,5 +432,97 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
       }
       emit(s.copyWith(fees: newList, sortOption: event.option));
     }
+  }
+
+  Future<void> _handleAddingFeeDefaulter(
+    AddFeeDefaulterEvent event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    await addToFeeDefaulterUsecase.add(
+      event.studentId,
+      event.name,
+      event.rollnum,
+      event.remaingFee,
+      event.group,
+    );
+    emit(AddingFeeDefaulterCompleteState());
+  }
+
+  Future<void> _handleReadingFeeDefaulter(
+    ReadFeeDefaulterEvent event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    debugPrint("${event.groupId}");
+    try {
+      FeeDefaultersCollective feeDefaultersCollective =
+          await readFeeDefaulterCollective.read(event.groupId);
+      List<FeeDefaulterEntity> listOffeeDefaulterEntity =
+          await readFeeDefaulterUsecase.read(event.groupId);
+      emit(
+        FeeDefaultersDataLoaded(
+          listOFFeeDefaulterEntity: listOffeeDefaulterEntity,
+          feeDefaultersCollective: feeDefaultersCollective,
+          emittedAt: DateTime.now(),
+        ),
+      );
+    } catch (e) {
+      emit(FeeAdminErrorState(error: e.toString()));
+      return;
+    }
+
+    // if (feeDefaultersCollective == null) {
+    //   debugPrint("null feeDefaultersCollective");
+    //   throw AssertionError("data is null");
+    // }
+    // if (listOffeeDefaulterEntity == null) {
+    //   debugPrint("null listOffeeDefaulterEntity");
+    // }
+    // debugPrint("feeDefaultersCollective:$feeDefaultersCollective");
+  }
+
+  Future<void> _handleReadingGroupNames(
+    ReadFeeDefaulterGroupsEvent event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    List<String> listOfGroupNames =
+        await readGroupNamesFeeDefaultersUsecase.get();
+    emit(GroupNamesReadCompleted(listOFGroupNames: listOfGroupNames));
+  }
+
+  Future<void> _handleRemovingStudentFromDefaulters(
+    RemoveStudentFromDefaultersEvent event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    await _removeStudentFromDefaultersUsecase.remove(
+      event.groupId,
+      event.studentId,
+      event.paidAmount,
+      event.totalReaminingFeeForThisStudent,
+    );
+  }
+
+  Future<void> _handleCheckingFeeDefaulter(
+    CheckFeeDefaulterEvent event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    bool? isDefaulter = await _defaulterCheckUsecase.check(
+      event.groupId,
+      event.studentId,
+    );
+    if (isDefaulter == null) {
+      throw AssertionError("is defualter is null");
+    }
+    emit(CheckingingFeeDefaulterCompleteState(isDefaulter: isDefaulter));
+  }
+
+  Future<void> _handleAddingFeeInstallmentToSuperAdminApprovalList(
+    AddToSuperAdminApprovalListEvent event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    await addToSuperAdminApprovalListUsecase.add(
+      // event.installment,
+      event.student,
+      event.index,
+    );
   }
 }

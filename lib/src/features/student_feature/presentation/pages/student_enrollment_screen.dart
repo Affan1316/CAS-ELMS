@@ -95,7 +95,7 @@ class _StudentEnrollmentScreenState extends State<StudentEnrollmentScreen> {
         },
         builder: (context, state) {
           if (state is GroupNamesfetching) {
-            return CircularProgressIndicator();
+            return Center(child: CircularProgressIndicator());
           }
 
           return Stack(

@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulter_entity.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulters_collective.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/enums/sort_option_enum.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/entities/group_entity.dart';
@@ -22,7 +24,6 @@ class FeeAdminGroupsLoadingState extends FeeAdminState {
 
 class FeeAdminGroupsLoadedState extends FeeAdminState {
   final List<GroupEntity> groups;
-
   const FeeAdminGroupsLoadedState({required this.groups});
 
   @override
@@ -31,7 +32,6 @@ class FeeAdminGroupsLoadedState extends FeeAdminState {
 
 class FeeAdminGroupDataFilteringCompleteState extends FeeAdminState {
   final List<GroupEntity> filteredDataList;
-
   const FeeAdminGroupDataFilteringCompleteState({
     required this.filteredDataList,
   });
@@ -42,7 +42,6 @@ class FeeAdminGroupDataFilteringCompleteState extends FeeAdminState {
 
 class FeeAdminErrorState extends FeeAdminState {
   final String error;
-
   const FeeAdminErrorState({required this.error});
 
   @override
@@ -58,7 +57,6 @@ class FeeAdminGroupsStudentsLoadingState extends FeeAdminState {
 
 class FeeAdminGroupStudentsLoadedState extends FeeAdminState {
   final List<StudentFeatureGroupStudentEntityClass> dataList;
-
   const FeeAdminGroupStudentsLoadedState({required this.dataList});
 
   @override
@@ -67,7 +65,6 @@ class FeeAdminGroupStudentsLoadedState extends FeeAdminState {
 
 class FeeAdminGroupStudentsFilteringCompleteState extends FeeAdminState {
   final List<StudentFeatureGroupStudentEntityClass> filteredDataList;
-
   const FeeAdminGroupStudentsFilteringCompleteState({
     required this.filteredDataList,
   });
@@ -79,7 +76,6 @@ class FeeAdminGroupStudentsFilteringCompleteState extends FeeAdminState {
 /// ✅ Calculation result
 class InstallmentPageInstallmentCalculatedState extends FeeAdminState {
   final double installment;
-
   const InstallmentPageInstallmentCalculatedState({required this.installment});
 
   @override
@@ -97,7 +93,6 @@ class InstallmentCreatedSuccessState extends FeeAdminState {
 
 class InstallmentCreatedFailureState extends FeeAdminState {
   final String error;
-
   const InstallmentCreatedFailureState({required this.error});
 
   @override
@@ -111,7 +106,6 @@ class StudentInstalmentLoadingState extends FeeAdminState {
 
 class StudentLoadedState extends FeeAdminState {
   final StudentFeeFeatureEntityClass student;
-
   const StudentLoadedState(this.student);
 
   @override
@@ -120,7 +114,6 @@ class StudentLoadedState extends FeeAdminState {
 
 class StudentLoadFailureState extends FeeAdminState {
   final String error;
-
   const StudentLoadFailureState(this.error);
 
   @override
@@ -131,15 +124,28 @@ class UpdateStudentInstalmentLoadingState extends FeeAdminState {
   const UpdateStudentInstalmentLoadingState();
 }
 
+// class UpdatedStudentInstalmentState extends FeeAdminState {
+//   const UpdatedStudentInstalmentState();
+// }
 class UpdatedStudentInstalmentState extends FeeAdminState {
-  const UpdatedStudentInstalmentState();
+  final StudentFeeFeatureEntityClass student;
+
+  const UpdatedStudentInstalmentState({required this.student});
+
+  @override
+  List<Object> get props => [student];
 }
 
-class FeeHistoryLoading extends FeeAdminState {}
+class FeeHistoryLoading extends FeeAdminState {
+  const FeeHistoryLoading();
+}
 
 class FeeHistoryError extends FeeAdminState {
   final String message;
   const FeeHistoryError(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }
 
 class FeeHistoryLoaded extends FeeAdminState {
@@ -170,4 +176,58 @@ class FeeHistoryLoaded extends FeeAdminState {
   }
 
   double get totalAmount => fees.fold(0, (sum, fee) => sum + fee.paidAmount);
+
+  @override
+  List<Object?> get props => [fees, startDate, endDate, sortOption];
+}
+
+/// ✅ ensures unique emission
+class FeeDefaultersDataLoaded extends FeeAdminState {
+  final List<FeeDefaulterEntity> listOFFeeDefaulterEntity;
+  final FeeDefaultersCollective? feeDefaultersCollective;
+  final DateTime emittedAt;
+
+  const FeeDefaultersDataLoaded({
+    required this.listOFFeeDefaulterEntity,
+    required this.feeDefaultersCollective,
+    required this.emittedAt,
+  });
+
+  @override
+  List<Object?> get props => [
+    listOFFeeDefaulterEntity,
+    feeDefaultersCollective,
+    emittedAt,
+  ];
+}
+
+class GroupNamesReadCompleted extends FeeAdminState {
+  final List<String> listOFGroupNames;
+  const GroupNamesReadCompleted({required this.listOFGroupNames});
+
+  @override
+  List<Object?> get props => [listOFGroupNames];
+}
+
+class GroupDataEmpty extends FeeAdminState {
+  final String groupId;
+  const GroupDataEmpty({required this.groupId});
+
+  @override
+  List<Object?> get props => [groupId];
+}
+
+class AddingFeeDefaulterCompleteState extends FeeAdminState {
+  const AddingFeeDefaulterCompleteState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class CheckingingFeeDefaulterCompleteState extends FeeAdminState {
+  final bool isDefaulter;
+  const CheckingingFeeDefaulterCompleteState({required this.isDefaulter});
+
+  @override
+  List<Object?> get props => [isDefaulter];
 }

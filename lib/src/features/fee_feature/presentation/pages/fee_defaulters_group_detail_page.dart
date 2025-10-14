@@ -1,33 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulter_entity.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulters_collective.dart';
 
-class GroupDetailPage extends StatelessWidget {
+class FeeDefaultersGroupDetailPage extends StatelessWidget {
+  final FeeDefaultersCollective feeDefaultersCollective;
+  final List<FeeDefaulterEntity> listOfFeeDefaulterEntity;
   final String groupName;
-  final int totalStudents;
-  final int totalDefaulters;
-  final double installment;
-  final double totalFee;
-  final double concession;
-  final double remainingFee;
-  final List<Map<String, dynamic>> defaulters;
 
-  const GroupDetailPage({
+  const FeeDefaultersGroupDetailPage({
     super.key,
+    required this.feeDefaultersCollective,
+    required this.listOfFeeDefaulterEntity,
     required this.groupName,
-    required this.totalStudents,
-    required this.totalDefaulters,
-    required this.installment,
-    required this.totalFee,
-    required this.concession,
-    required this.remainingFee,
-    required this.defaulters,
   });
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final Size(:width, :height) = size;
-    final double headerHeight = size.height * 0.3;
-    final double cardWidth = size.width * 0.9;
+    final double width = size.width;
+    final double height = size.height;
+    final double headerHeight = height * 0.3;
+    final double cardWidth = width * 0.9;
+
+    // Safe access to potentially null fields
+    final String remainingFeeText =
+        'PKR ${feeDefaultersCollective.remaingFee?.toString() ?? '0'}';
+    final String totalDefaultersText =
+        '${feeDefaultersCollective.total?.toString() ?? '0'}';
 
     return SafeArea(
       child: Scaffold(
@@ -43,38 +42,37 @@ class GroupDetailPage extends StatelessWidget {
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color(0xFF0E96C5), // Your primary blue
+                      Color(0xFF0E96C5), // Primary blue
                       Color(0xFF4CC9F0), // Light Aqua Blue
-                      Color(0xFF8E9EFF), // Soft Light Purple (not pink)
+                      Color(0xFF8E9EFF), // Soft Light Purple
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                 ),
-                child: SafeArea(
-                  child: Center(
-                    child: Padding(
-                      padding: EdgeInsetsGeometry.only(bottom: 70),
-                      child: Text(
-                        '$groupName Group Details',
-                        style: TextStyle(
-                          fontSize: size.width * 0.07,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 70),
+                    child: Text(
+                      '$groupName Group Details',
+                      style: TextStyle(
+                        fontSize: width * 0.07,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-      
+
+            // 🔹 White Bottom Section
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
                 width: width,
                 height: height * 0.75,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(30),
@@ -84,7 +82,8 @@ class GroupDetailPage extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    SizedBox(width: width, height: 2),
+                    const SizedBox(width: double.infinity, height: 2),
+
                     // 🔹 Summary Card
                     Container(
                       width: cardWidth,
@@ -102,55 +101,64 @@ class GroupDetailPage extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          _buildInfoRow("Total Fee", "PKR $totalFee"),
-                          _buildInfoRow("Concession", "PKR $concession"),
-                          _buildInfoRow("Remaining Fee", "PKR $remainingFee"),
+                          _buildInfoRow("Remaining Fee", remainingFeeText),
                           const Divider(height: 22, thickness: 1),
-                          _buildInfoRow("Total Students", "$totalStudents"),
-                          _buildInfoRow("Defaulters", "$totalDefaulters"),
-                          _buildInfoRow("Installment", "PKR $installment"),
+                          _buildInfoRow("Defaulters", totalDefaultersText),
                         ],
                       ),
                     ),
-      
-                    // 🔹 Defaulters Section
+
+                    // 🔹 Section Title
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: size.width * 0.05,
-                        ),
+                        padding: EdgeInsets.symmetric(horizontal: width * 0.05),
                         child: Text(
                           "Defaulters",
                           style: TextStyle(
-                            fontSize: size.width * 0.05,
+                            fontSize: width * 0.05,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
                         ),
                       ),
                     ),
-      
-                    // 🔹 Defaulter Cards
+
+                    // 🔹 Defaulters List
                     SizedBox(
                       width: width,
                       height: height * 0.3,
-                      child: ListView.builder(
-                        itemCount: defaulters.length,
-                        itemBuilder: (context, index) => defaulters
-                            .map(
-                              (student) => Padding(
-                                padding: EdgeInsetsGeometry.only(left: 20, right: 20),
-                                child: _buildDefaulterCard(
-                                  context,
-                                  name: student['name'],
-                                  pending: student['pending'],
-                                  width: cardWidth,
+                      child:
+                          listOfFeeDefaulterEntity.isEmpty
+                              ? const Center(
+                                child: Text(
+                                  'No defaulters found',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey,
+                                  ),
                                 ),
+                              )
+                              : ListView.builder(
+                                itemCount: listOfFeeDefaulterEntity.length,
+                                itemBuilder: (context, index) {
+                                  final student =
+                                      listOfFeeDefaulterEntity[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 6,
+                                    ),
+                                    child: _buildDefaulterCard(
+                                      context,
+                                      name: student.name ?? 'Unknown',
+                                      pending:
+                                          (student.remaingFee ?? 0).toDouble(),
+                                      width: cardWidth,
+                                    ),
+                                  );
+                                },
                               ),
-                            )
-                            .toList()[index],
-                      ),
                     ),
                   ],
                 ),
@@ -162,6 +170,7 @@ class GroupDetailPage extends StatelessWidget {
     );
   }
 
+  // 🔹 Info Row
   Widget _buildInfoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -182,6 +191,7 @@ class GroupDetailPage extends StatelessWidget {
     );
   }
 
+  // 🔹 Defaulter Card
   Widget _buildDefaulterCard(
     BuildContext context, {
     required String name,

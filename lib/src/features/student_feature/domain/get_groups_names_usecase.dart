@@ -5,6 +5,6 @@ class GetGroupsNamesUsecase {
   FirestoreRepositry firestoreRepositry = ActualImplementationFirebaseRepo();
 
   soo() {
-    firestoreRepositry.getGroupsNames();
+    return firestoreRepositry.getGroupsNames();
   }
 }
