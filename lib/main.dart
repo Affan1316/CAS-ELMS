@@ -15,6 +15,8 @@ import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presenta
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/admin_login_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_state.dart';
 
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
@@ -34,6 +36,7 @@ import 'package:flutter_cas_app_main/src/features/student_attendance/presentatio
     hide callbackDispatcher;
 import 'package:flutter_cas_app_main/src/features/student_attendance/presentation/pages/student_attendance_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_home_page.dart';
 import 'package:geofence_foreground_service/geofence_foreground_service.dart';
 import 'package:geofence_foreground_service/models/notification_icon_data.dart';
 import 'package:geolocator/geolocator.dart';
@@ -169,7 +172,7 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.system,
-          home: OnboardingScreen(),
+          home: SplashScreen(),
         ),
       ),
     );
@@ -189,3 +192,106 @@ class MyApp extends StatelessWidget {
 //     return StudentAttendanceScreen();
 //   }
 // }
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  final AuthService _authService = AuthService();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    // Wait a bit for splash effect (optional)
+    await Future.delayed(const Duration(seconds: 1));
+
+    final isLoggedIn = await _authService.isLoggedIn();
+
+    if (!mounted) return;
+
+    if (isLoggedIn) {
+      // User is logged in - get student data and navigate to home
+      final studentId = await _authService.getSavedStudentId();
+
+      if (studentId != null) {
+        // Trigger BLoC event to fetch student data
+        context.read<OnboardingBloc>().add(
+          ReadStudentNameFromFireBaseEvent(id: studentId),
+        );
+      } else {
+        // No student ID found - go to login
+        _navigateToOnboarding();
+      }
+    } else {
+      // User is NOT logged in - go to onboarding/login
+      _navigateToOnboarding();
+    }
+  }
+
+  void _navigateToOnboarding() {
+    // Replace with your actual onboarding screen
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder:
+            (context) =>
+                const OnboardingScreen(), // ⚠️ Replace with your screen
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<OnboardingBloc, OnboardingState>(
+      listener: (context, state) async {
+        if (state is ReadingStudentNameCompleted) {
+          final studentId = await _authService.getSavedStudentId();
+
+          if (!mounted) return;
+
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder:
+                  (context) => StudentHomePage(
+                    id: studentId!,
+                    studentEntityClass: state.studentEntityClass,
+                  ),
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFF4DD0E1),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Your app logo
+              Icon(Icons.school, size: 100, color: Colors.white),
+              const SizedBox(height: 20),
+              const Text(
+                'ELMS',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 40),
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
