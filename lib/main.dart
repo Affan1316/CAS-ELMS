@@ -34,6 +34,10 @@ import 'package:flutter_cas_app_main/src/features/student_attendance/presentatio
     hide callbackDispatcher;
 import 'package:flutter_cas_app_main/src/features/student_attendance/presentation/pages/student_attendance_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/data/SuperAdminFeeRepositoryImpl.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/confirm_super_admin_fee_payment_use_case.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/get_super_admin_fee_notifications_usecase.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_bloc.dart';
 import 'package:geofence_foreground_service/geofence_foreground_service.dart';
 import 'package:geofence_foreground_service/models/notification_icon_data.dart';
 import 'package:geolocator/geolocator.dart';
@@ -145,6 +149,17 @@ class MyApp extends StatelessWidget {
                   ),
                   updateGroupUsecase: UpdateGroupUsecase(
                     abstractGroupRepository: GroupRepositoryImplementation(),
+                  ),
+                ),
+          ),
+          BlocProvider(
+            create:
+                (context) => SuperAdminFeeBloc(
+                  getNotifications: GetSuperAdminFeeNotificationsUsecase(
+                    SuperAdminFeeRepositoryImpl(FirebaseFirestore.instance),
+                  ),
+                  confirmPayment: ConfirmSuperAdminFeePaymentUseCase(
+                    SuperAdminFeeRepositoryImpl(FirebaseFirestore.instance),
                   ),
                 ),
           ),
