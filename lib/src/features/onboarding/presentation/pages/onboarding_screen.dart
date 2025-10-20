@@ -71,9 +71,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   void _skipOnboarding() => Navigator.of(
     context,
   ).push(MaterialPageRoute(builder: (context) => ElmsLandingPage()));
-  void _completeOnboarding() => Navigator.of(
-    context,
-  ).push(MaterialPageRoute(builder: (context) => StudentAttendanceScreen()));   //ElmsLandingPage()
+  void _completeOnboarding() => Navigator.of(context).push(
+    MaterialPageRoute(builder: (context) => StudentAttendanceScreen()),
+  ); //ElmsLandingPage()
 
   // void _navigateToHome() {
   //   // Navigator.pushReplacementNamed(context, '/home');
@@ -142,12 +142,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
     var serviceEnabled = await Geolocator.isLocationServiceEnabled();
     Location location = Location();
-    while(!serviceEnabled) {
+    while (!serviceEnabled) {
       debugPrint("⚠️ Location service is OFF, opening settings...");
       serviceEnabled = await location.requestService();
 
-    // Wait a bit before checking again
-    await Future.delayed(const Duration(seconds: 2));
+      // Wait a bit before checking again
+      await Future.delayed(const Duration(seconds: 2));
       // await Geolocator.openLocationSettings();
       // ⏸ Wait until app is resumed
       return;

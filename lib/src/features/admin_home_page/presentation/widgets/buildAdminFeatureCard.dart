@@ -145,7 +145,7 @@ void _navigateToScreen(BuildContext context, int index) {
         break;
       case 7: // Fee History (but you're using AddInquiryScreen)
         print('Navigating to Add Inquiry');
-        context.read<FeeAdminBloc>().add(FetchTodayFees());
+        // context.read<FeeAdminBloc>().add(FetchTodayFees());
         Navigator.push(
           context,
           MaterialPageRoute(

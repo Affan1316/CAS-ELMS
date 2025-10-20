@@ -29,3 +29,28 @@ class SuperAdminFeeErrorState extends SuperAdminFeeState {
 class ConfirmingPayment extends SuperAdminFeeState {
   const ConfirmingPayment();
 }
+
+class GroupFeeHistoryInitial extends SuperAdminFeeState {}
+
+class GroupFeeHistoryLoaded extends SuperAdminFeeState {
+  final double total;
+
+  final double received;
+
+  final double remaining;
+
+  GroupFeeHistoryLoaded({
+    required this.total,
+    required this.received,
+    required this.remaining,
+  });
+}
+
+class LoadingGroupNames extends SuperAdminFeeState {
+  const LoadingGroupNames();
+}
+
+class GroupNamesLoaded extends SuperAdminFeeState {
+  final List<String> listOfNames;
+  const GroupNamesLoaded({required this.listOfNames});
+}

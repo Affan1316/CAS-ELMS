@@ -4,7 +4,7 @@ import 'package:flutter_cas_app_main/src/features/student_feature/domain/firesto
 class GetGroupsNamesUsecase {
   FirestoreRepositry firestoreRepositry = ActualImplementationFirebaseRepo();
 
-  soo() {
+  getGroupNames() {
     return firestoreRepositry.getGroupsNames();
   }
 }

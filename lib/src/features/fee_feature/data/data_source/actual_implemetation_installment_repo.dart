@@ -104,6 +104,32 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
           .collection('student_installment')
           .doc(studentId)
           .set(payload, SetOptions(merge: true));
+      var docRef = FirebaseFirestore.instance
+          .collection('fee_history_group_wise')
+          .doc(groupId);
+      DocumentSnapshot<Map<String, dynamic>> snapshot = await docRef.get();
+      if (!snapshot.exists) {
+        await docRef.set({
+          "total": totalFee,
+          "received": 0,
+          // "remaining": totalFee,
+        });
+      } else {
+        Map<String, dynamic>? mapOfData = snapshot.data();
+        double previousTotal;
+        double newTotal;
+        // double newRemaining;
+        // double previousRemaining;
+        if (mapOfData != null) {
+          previousTotal = mapOfData["total"];
+          // previousRemaining = mapOfData["remaining"];
+          newTotal = totalFee + previousTotal;
+          // newRemaining = newTotal - previousRemaining;
+          mapOfData["total"] = newTotal;
+          // mapOfData["remaining"] = newRemaining;
+          docRef.set(mapOfData);
+        }
+      }
     } catch (e) {
       throw Exception('Failed to create installment plan: $e');
     }

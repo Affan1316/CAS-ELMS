@@ -15,33 +15,36 @@ class GroupRepositoryImplementation extends AbstractGroupRepository {
 
   @override
   Stream<List<GroupEntity>> fetchAllGroups() {
-  return FirebaseFirestore.instance
-      .collection('groups')
-      .snapshots()
-      .map((snapshot) =>
-          snapshot.docs.map((doc) => GroupModel.fromMap(doc.data())).toList());
-}
+    return FirebaseFirestore.instance
+        .collection('groups')
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs
+                  .map((doc) => GroupModel.fromMap(doc.data()))
+                  .toList(),
+        );
+  }
 
   @override
   Future<GroupEntity?> updateGroup(
-  String groupId,
-  GroupEntity groupEntity,
-) async {
-  GroupModel groupModel = GroupModel.fromGroupEntity(groupEntity);
+    String groupId,
+    GroupEntity groupEntity,
+  ) async {
+    GroupModel groupModel = GroupModel.fromGroupEntity(groupEntity);
 
-  final docRef = FirebaseFirestore.instance.collection('groups').doc(groupId);
+    final docRef = FirebaseFirestore.instance.collection('groups').doc(groupId);
 
-  // update the document
-  await docRef.update(groupModel.toMap());
+    // update the document
+    await docRef.update(groupModel.toMap());
 
-  // fetch the updated document
-  final snapshot = await docRef.get();
+    // fetch the updated document
+    final snapshot = await docRef.get();
 
-  if (snapshot.exists) {
-    return GroupModel.fromMap(snapshot.data()!);
-  } else {
-    return null; // document not found after update
+    if (snapshot.exists) {
+      return GroupModel.fromMap(snapshot.data()!);
+    } else {
+      return null; // document not found after update
+    }
   }
-}
-
 }

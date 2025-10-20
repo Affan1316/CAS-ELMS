@@ -13,3 +13,13 @@ class ConfirmSuperAdminFeePayment extends SuperAdminFeeEvent {
     required this.studentId,
   });
 }
+
+class FetchGroupFeeHistoryEvent extends SuperAdminFeeEvent {
+  final String groupName;
+
+  FetchGroupFeeHistoryEvent({required this.groupName});
+}
+
+class GetGroupNamesEvent extends SuperAdminFeeEvent {
+  const GetGroupNamesEvent();
+}

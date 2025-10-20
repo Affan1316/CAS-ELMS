@@ -5,9 +5,6 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_state.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters_group_detail_page.dart';
 
-/// Simplified FeeDefaulters page
-/// - Plain group-name search (case-insensitive contains)
-/// - No debouncing, no extra filters — minimal and efficient for typical lists
 class FeeDefaulters extends StatefulWidget {
   const FeeDefaulters({super.key});
 

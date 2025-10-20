@@ -97,16 +97,6 @@ class _SuperAdminFeeNotificationsScreenState
         filterStatus: "Pending",
       );
     }
-    // if (state is DeletingNotification) {
-    //   return _buildShimmerList();
-    // }
-
-    // if (state is DeletedNotification) {
-    //   return const NotificationListWidget(
-    //     key: ValueKey("data"),
-    //     filterStatus: "Pending",
-    //   );
-    // }
 
     return const SizedBox.shrink();
   }

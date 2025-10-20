@@ -8,10 +8,6 @@ class ActualImplementationFirebaseRepo implements FirestoreRepositry {
   ActualImplementationFirebaseRepo();
   @override
   addStudentDataToFirebase(StudentEntityClass student) async {
-    print(
-      "++++++++++++++++++++++executing second function___________________________",
-    );
-
     await addStudentDataAccordingToGroupsToFirebase(student);
     return await firestore
         .collection(completeStudentsCollectionName)
@@ -32,10 +28,6 @@ class ActualImplementationFirebaseRepo implements FirestoreRepositry {
   @override
   addStudentDataAccordingToGroupsToFirebase(StudentEntityClass student) async {
     String collectionName = student.group;
-
-    print(
-      "++++++++++++++++++++++ executing fitst function___________________________",
-    );
 
     return await firestore
         .collection("$collectionName students")
@@ -71,10 +63,6 @@ class ActualImplementationFirebaseRepo implements FirestoreRepositry {
 
       for (var doc in querySnapshot.docs) {
         list.add(doc.id);
-        // print('Document ID: ${doc.id}');
-        // print('Document data: ${doc.data()}'); // Access all fields
-        // // You can also access specific fields like:
-        // // print('User Name: ${doc.data()['name']}');
       }
     } catch (e) {
       list.add(e.toString());
@@ -83,14 +71,3 @@ class ActualImplementationFirebaseRepo implements FirestoreRepositry {
     return list;
   }
 }
-
-
-// .map((event) {
-//       var a = event.docs;
-//       var b;
-//       List<GroupStudentEntityClass> list = [];
-//       for (var element in a) {
-//         b = element.data();
-//         list.add(GroupStudentEntityClass.fromMap(b));
-//       }
-//     });

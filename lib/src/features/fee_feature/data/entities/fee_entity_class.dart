@@ -7,6 +7,8 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/data/enums/payment
 /// ---------- Model ----------
 class FeeEntityClass {
   final String id;
+  final String name;
+  final String rollNumber;
   final DateTime date;
   final double paidAmount;
   final PaymentMethodEnum paymentMethod;
@@ -14,6 +16,8 @@ class FeeEntityClass {
 
   FeeEntityClass({
     required this.id,
+    required this.name,
+    required this.rollNumber,
     required this.date,
     required this.paidAmount,
     required this.paymentMethod,
@@ -26,11 +30,16 @@ class FeeEntityClass {
     final paidAmount = map['paidAmount'] ?? 0.0;
     final pmRaw = map['paymentMethod'];
     final status = map['status'] as String? ?? 'Paid';
+    final name = map['name'] as String? ?? '';
+    final rollNumber = map['rollnumber'] as String? ?? '';
+
     debugPrint("|||||||||||$paidAmount|||||||||||");
     debugPrint("|||||||||||$pmRaw|||||||||||");
 
     return FeeEntityClass(
       id: id ?? '',
+      name: name,
+      rollNumber: rollNumber,
       date: date,
       paidAmount: paidAmount,
       paymentMethod: _parsePaymentMethod(pmRaw),

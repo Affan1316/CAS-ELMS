@@ -13,6 +13,7 @@ import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/bloc/ch
 import 'package:flutter_cas_app_main/src/features/add_courses/presentation/bloc/add_course_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presentation/bloc/add_instructor_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/pages/admin_home_page.dart';
 import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/admin_login_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
@@ -28,6 +29,7 @@ import 'package:flutter_cas_app_main/src/features/group/presentation/bloc/group_
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/bloc/inquiry_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/data_source/actual_implemetation_installment_repo.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
+import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/groups_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_attendance/data/datasource/attendance_remote_datasource.dart';
 import 'package:flutter_cas_app_main/src/features/student_attendance/data/repositories/attendance_repository_impl.dart';
 import 'package:flutter_cas_app_main/src/features/student_attendance/domain/usecases/get_attendance_usecase.dart';
@@ -35,11 +37,18 @@ import 'package:flutter_cas_app_main/src/features/student_attendance/presentatio
 import 'package:flutter_cas_app_main/src/features/student_attendance/presentation/infrastructure/background/background_fetch_handler.dart'
     hide callbackDispatcher;
 import 'package:flutter_cas_app_main/src/features/student_attendance/presentation/pages/student_attendance_page.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/domain/get_groups_names_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/data/SuperAdminFeeRepositoryImpl.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_home_page.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_feature/super_admin_home_page/presentation/pages/super_admin_home_page.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/data/data_source/SuperAdminFeeRepositoryImpl.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/confirm_super_admin_fee_payment_use_case.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/fetch_group_fee_history_usecase.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/get_groups_names_super_admin_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/get_super_admin_fee_notifications_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/group_fee_history_page.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/super_admin_groups_page.dart';
 import 'package:geofence_foreground_service/geofence_foreground_service.dart';
 import 'package:geofence_foreground_service/models/notification_icon_data.dart';
 import 'package:geolocator/geolocator.dart';
@@ -163,6 +172,15 @@ class MyApp extends StatelessWidget {
                   confirmPayment: ConfirmSuperAdminFeePaymentUseCase(
                     SuperAdminFeeRepositoryImpl(FirebaseFirestore.instance),
                   ),
+                  fetchGroupFeeHistoryUsecase: FetchGroupFeeHistoryUsecase(
+                    repo: SuperAdminFeeRepositoryImpl(
+                      FirebaseFirestore.instance,
+                    ),
+                  ),
+                  getGroupsNamesSuperAdminUsecase:
+                      GetGroupsNamesSuperAdminUsecase(
+                        orignalUsecase: GetGroupsNamesUsecase(),
+                      ),
                 ),
           ),
           BlocProvider(create: (context) => FeeAdminBloc()),
@@ -254,9 +272,8 @@ class _SplashScreenState extends State<SplashScreen> {
     // Replace with your actual onboarding screen
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder:
-            (context) =>
-                const OnboardingScreen(), // ⚠️ Replace with your screen
+        builder: (context) => const OnboardingScreen(),
+        // ⚠️ Replace with your screen
       ),
     );
   }

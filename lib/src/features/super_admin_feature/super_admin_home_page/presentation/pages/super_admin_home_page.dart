@@ -1,3 +1,5 @@
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/super_admin_fee_notifications_screen.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter/material.dart';
@@ -480,12 +482,34 @@ class SuperAdminDashboard extends StatelessWidget {
     );
 
     // Here you would implement actual navigation
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SuperAdminFeeNotificationsScreen(),
-      ),
-    );
+    if (screenName == "Notifications") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SuperAdminFeeNotificationsScreen(),
+        ),
+      );
+    }
+    if (screenName == "Fee Defaulter") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return FeeDefaulters();
+          },
+        ),
+      );
+    }
+    if (screenName == "Fee History") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return FeeHistoryScreen();
+          },
+        ),
+      );
+    }
   }
 }
 
