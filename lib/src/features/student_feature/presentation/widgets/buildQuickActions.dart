@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_cas_app_main/src/features/alumni_page/presentation/pages/year_selector_page.dart';
 import 'package:flutter_cas_app_main/src/features/assignment_screen/presentation/pages/assignments_page.dart';
+import 'package:flutter_cas_app_main/src/features/leave_request/presentation/pages/list_of_request_leave_page.dart';
+import 'package:flutter_cas_app_main/src/features/quiz/presentation/pages/quiz_home_screen.dart';
 import 'package:flutter_cas_app_main/src/features/request_leave/presentation/pages/history_leaves_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_profile_page.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-Widget buildQuickActions(String id) {
+Widget buildQuickActions(String studentName,String section) {
   final List<Map<String, dynamic>> studentFeatures = [
     {
       'title': 'My Assignments',
@@ -22,7 +24,7 @@ Widget buildQuickActions(String id) {
       'color': Color(0xFF10B981),
       'count': '3.8 GPA',
       'isUrgent': false,
-      'screen': YearSelectorPage(),
+      'screen': QuizHomeScreen(),
     },
     {
       'title': 'Workshop Tracker',
@@ -31,6 +33,14 @@ Widget buildQuickActions(String id) {
       'count': '6 Today',
       'isUrgent': false,
       'screen': LeaveScreen(),
+    },
+        {
+      'title': 'Leave Request',
+      'icon': Icons.schedule_rounded,
+      'color': Color(0xFF8B5CF6),
+      'count': '6 Today',
+      'isUrgent': false,
+      'screen': ListOfRequestLeaveScreen(section: section, name: studentName,),
     },
     {
       'title': 'Library',

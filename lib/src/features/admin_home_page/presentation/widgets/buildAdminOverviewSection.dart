@@ -31,7 +31,10 @@ Widget buildAdminOverviewSection() {
   );
 }
 
-Widget buildFeaturesGrid(AnimationController _animationController) {
+Widget buildFeaturesGrid(
+  AnimationController _animationController, {
+  int? pendingLeaveCount,
+}) {
   final features = [
     {
       'title': 'Add Instructor',
@@ -93,6 +96,11 @@ Widget buildFeaturesGrid(AnimationController _animationController) {
       'subtitle': 'Time management',
       'icon': Icons.schedule_outlined,
     },
+    {
+      'title': 'Leave Management System',
+      'subtitle': 'leave management',
+      'icon': Icons.schedule_outlined,
+    },
   ];
 
   return Container(
@@ -121,9 +129,26 @@ Widget buildFeaturesGrid(AnimationController _animationController) {
               ),
             );
 
+            int? badgeCount =
+                (index == 12 &&
+                        pendingLeaveCount != null &&
+                        pendingLeaveCount > 0)
+                    ? pendingLeaveCount
+                    : null;
+            if (index == 12) {
+              print(
+                '✨ Leave Approved card: badgeCount = $badgeCount, pendingLeaveCount = $pendingLeaveCount',
+              );
+            }
+
             return SlideTransition(
               position: slideAnimation,
-              child: buildAdminFeatureCard(features[index], index, context),
+              child: buildAdminFeatureCard(
+                features[index],
+                index,
+                context,
+                badgeCount: badgeCount, // ← NEW PARAMETER
+              ),
             );
           },
         );

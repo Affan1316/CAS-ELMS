@@ -12,80 +12,113 @@ import 'package:flutter_cas_app_main/src/features/group/presentation/pages/creat
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/read_group_page.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/add_inquiry_page.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/inquiry_detail_page.dart';
+import 'package:flutter_cas_app_main/src/features/leave_request/presentation/pages/admin_leave_request_management.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_enrollment_screen.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/super_admin_fee_notifications_screen.dart';
 import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/pages/workshop_time_tracker.dart';
+import 'package:badges/badges.dart' as badges;
 
 Widget buildAdminFeatureCard(
   Map<String, dynamic> feature,
   int index,
-  BuildContext context,
-) {
+  BuildContext context, {
+  int? badgeCount,
+}) {
+  Widget cardContent = Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: Color(0xFFF3F4F6), width: 1),
+      boxShadow: [
+        BoxShadow(
+          color: Color(0xFF000000).withOpacity(0.06),
+          blurRadius: 16,
+          offset: Offset(0, 4),
+        ),
+        BoxShadow(
+          color: Color(0xFF000000).withOpacity(0.04),
+          blurRadius: 4,
+          offset: Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Padding(
+      padding: EdgeInsets.all(20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Color(0xFFE2E8F0), width: 1),
+            ),
+            child: Icon(
+              feature['icon'] as IconData,
+              size: 32,
+              color: Color(0xFF3B82F6),
+            ),
+          ),
+          SizedBox(height: 16),
+          Text(
+            feature['title'] as String,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1F2937),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 4),
+          Text(
+            feature['subtitle'] as String,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF6B7280),
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    ),
+  );
+
+  // Wrap with badge if badgeCount is provided and greater than 0
+  if (badgeCount != null && badgeCount > 0) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        _navigateToScreen(context, index);
+      },
+      child: badges.Badge(
+        badgeContent: Text(
+          badgeCount.toString(),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        badgeStyle: badges.BadgeStyle(
+          badgeColor: Colors.red,
+          padding: EdgeInsets.all(11),
+          borderRadius: BorderRadius.circular(16),
+          elevation: 12,
+        ),
+        position: badges.BadgePosition.topEnd(top: -10, end: -5),
+        child: cardContent,
+      ),
+    );
+  }
+
   return GestureDetector(
     onTap: () {
       HapticFeedback.mediumImpact();
       _navigateToScreen(context, index);
     },
-    child: Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Color(0xFFF3F4F6), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0xFF000000).withOpacity(0.06),
-            blurRadius: 16,
-            offset: Offset(0, 4),
-          ),
-          BoxShadow(
-            color: Color(0xFF000000).withOpacity(0.04),
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Color(0xFFE2E8F0), width: 1),
-              ),
-              child: Icon(
-                feature['icon'] as IconData,
-                size: 32,
-                color: Color(0xFF3B82F6),
-              ),
-            ),
-            SizedBox(height: 16),
-            Text(
-              feature['title'] as String,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1F2937),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 4),
-            Text(
-              feature['subtitle'] as String,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF6B7280),
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    ),
+    child: cardContent,
   );
 }
 
@@ -182,7 +215,7 @@ void _navigateToScreen(BuildContext context, int index) {
           MaterialPageRoute(builder: (_) => GroupMainDetailPage()),
         );
         break;
-      case 10: // Leaves Approved
+      case 10: 
         print('Leaves Approved - Not implemented yet');
         Navigator.of(
           context,
@@ -194,6 +227,12 @@ void _navigateToScreen(BuildContext context, int index) {
         //   context,
         // ).push(MaterialPageRoute(builder: (context) => CreateFeePlanPage()));
         break;
+      case 12: // Leaves Approved
+        print('Navigating to Admin Leave Management System');
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (context) => AdminLeaveRequestManagement()));
+      break;
       default:
         print('Invalid index: $index');
         ScaffoldMessenger.of(

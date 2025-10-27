@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_event.dart';
+import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_state.dart';
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/widgets/buildAdminCarouselSlider.dart';
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/widgets/buildAdminHeader.dart';
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/widgets/buildAdminOverviewSection.dart';
@@ -29,6 +33,7 @@ class _AdminHomePageState extends State<AdminHomePage>
     );
     _pageController = PageController();
     _animationController.forward();
+    context.read<AdminHomeBloc>().add(LoadPendingLeavesEvent());
   }
 
   @override
@@ -53,7 +58,14 @@ class _AdminHomePageState extends State<AdminHomePage>
             SizedBox(height: 32),
             buildAdminOverviewSection(),
             SizedBox(height: 24),
-            buildFeaturesGrid(_animationController),
+            BlocBuilder<AdminHomeBloc, AdminHomeState>(
+              builder: (context, state) {
+                return buildFeaturesGrid(
+                  _animationController,
+                  pendingLeaveCount: state.pendingLeavesCount,
+                );
+              },
+            ),
             SizedBox(height: 20),
           ],
         ),

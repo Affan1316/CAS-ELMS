@@ -156,7 +156,10 @@ class _StudentHomePageState extends State<StudentHomePage>
                       widget.id,
                     ),
                     // buildStatsCard(),
-                    buildQuickActions(widget.id),
+                    buildQuickActions(
+                      widget.studentEntityClass.group,
+                      widget.studentEntityClass.name
+                    ),
                     buildPopularTeachersSection(),
 
                     // buildRecentActivities(),

@@ -28,6 +28,7 @@ import 'package:flutter_cas_app_main/src/features/group/domain/usecases/update_g
 import 'package:flutter_cas_app_main/src/features/group/presentation/bloc/group_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/bloc/inquiry_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/data_source/actual_implemetation_installment_repo.dart';
+import 'package:flutter_cas_app_main/src/features/leave_request/presentation/bloc/leave_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
 import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/groups_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_attendance/data/datasource/attendance_remote_datasource.dart';
@@ -130,7 +131,13 @@ class MyApp extends StatelessWidget {
         providers: [
           BlocProvider<OnboardingBloc>(create: (context) => OnboardingBloc()),
           BlocProvider<ChatPageBloc>(create: (context) => ChatPageBloc()),
-          BlocProvider<AdminHomeBloc>(create: (context) => AdminHomeBloc()),
+          BlocProvider<LeaveBloc>(create: (context) => sl<LeaveBloc>()),
+          BlocProvider<AdminHomeBloc>(
+            create:
+                (context) => AdminHomeBloc(
+                  context.read<LeaveBloc>(),
+                ),
+          ),
           BlocProvider<StudentFeatureBloc>(
             create: (context) => StudentFeatureBloc(),
           ),
