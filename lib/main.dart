@@ -21,7 +21,7 @@ import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/pr
 
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/geofencing/data/datasource/geofence_service_impl.dart';
+
 import 'package:flutter_cas_app_main/src/features/group/data/repositories/group_repository_implementation.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/usecases/add_group_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/usecases/update_group_usecase.dart';
@@ -31,13 +31,8 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/data/data_source/a
 import 'package:flutter_cas_app_main/src/features/leave_request/presentation/bloc/leave_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
 import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/groups_page.dart';
-import 'package:flutter_cas_app_main/src/features/student_attendance/data/datasource/attendance_remote_datasource.dart';
-import 'package:flutter_cas_app_main/src/features/student_attendance/data/repositories/attendance_repository_impl.dart';
-import 'package:flutter_cas_app_main/src/features/student_attendance/domain/usecases/get_attendance_usecase.dart';
-import 'package:flutter_cas_app_main/src/features/student_attendance/presentation/bloc/student_attendance_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/student_attendance/presentation/infrastructure/background/background_fetch_handler.dart'
-    hide callbackDispatcher;
-import 'package:flutter_cas_app_main/src/features/student_attendance/presentation/pages/student_attendance_page.dart';
+
+
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/get_groups_names_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_home_page.dart';
@@ -50,73 +45,23 @@ import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/group_fee_history_page.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/super_admin_groups_page.dart';
-import 'package:geofence_foreground_service/geofence_foreground_service.dart';
-import 'package:geofence_foreground_service/models/notification_icon_data.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:location/location.dart' hide PermissionStatus;
-import 'package:permission_handler/permission_handler.dart';
+
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
-import 'package:workmanager/workmanager.dart';
+
+import 'src/features/my_student_attendence/presentation/bloc/student_attendence_bloc_bloc.dart';
 // import 'package:flutter_cas_app_main/src/features/course_catalog/presentation/pages/course_catalog_screen_state.dart';
 
 // void main() {
 //   runApp(const MyApp());
 // }
 
-// add that
-Future<bool> ensureLocationAlwaysOn() async {
-  Location location = Location();
-  bool serviceEnabled = await location.serviceEnabled();
-
-  // Keep looping until location is turned ON
-  while (!serviceEnabled) {
-    serviceEnabled = await location.requestService();
-
-    // Wait a bit before checking again
-    await Future.delayed(const Duration(seconds: 2));
-  }
-  return serviceEnabled;
-}
-
-Future<bool> requestPermission() async {
-  PermissionStatus locationStatus = await Permission.location.request();
-  PermissionStatus alwaysStatus = await Permission.locationAlways.request();
-
-  // Keep requesting until granted
-  while (!locationStatus.isGranted || !alwaysStatus.isGranted) {
-    locationStatus = await Permission.location.request();
-    alwaysStatus = await Permission.locationAlways.request();
-  }
-
-  return true;
-}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
 
   await init();
-  // Register background headless task
-
-  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-    await Workmanager().initialize(
-      callbackDispatcher, // 👈 background callback
-    );
-  }
-
-  final now = DateTime.now();
-  final nextMidnight = DateTime(now.year, now.month, now.day + 1);
-  final delay = nextMidnight.difference(now);
-  //Register a periodic background task (runs daily)
-  await Workmanager().registerPeriodicTask(
-    "dailyAttendanceCheck",
-    "dailyAttendanceCheck",
-    frequency: const Duration(hours: 24), // every 24 hours
-    initialDelay: delay, // wait before first run
-    constraints: Constraints(
-      networkType: NetworkType.connected, // only run when online
-    ),
-  );
 
   runApp(const MyApp());
 }
@@ -191,20 +136,9 @@ class MyApp extends StatelessWidget {
                 ),
           ),
           BlocProvider(create: (context) => FeeAdminBloc()),
-          BlocProvider(
-            create:
-                (context) => StudentAttendanceBloc(
-                  getAttendance: GetAttendanceUsecase(
-                    attendanceRepository: AttendanceRepositoryImpl(
-                      abstractAttendanceRemoteDatasource:
-                          AttendanceRemoteDatasource(
-                            firestore: FirebaseFirestore.instance,
-                          ),
-                      firestore: FirebaseFirestore.instance,
-                    ),
-                  ),
-                )..add(LoadAttendanceEvent(studentId: 'F17-02')),
-          ),
+          BlocProvider(create: (context) => StudentAttendenceBloc(),),
+          
+        
         ],
         child: MaterialApp(
           title: 'CAS ELMS',

@@ -35,3 +35,17 @@ class FetchGroupStudentsEvent extends StudentFeatureEvent {
 }
 
 class FetchGroupNamesEvent extends StudentFeatureEvent {}
+class CheckPermissionEvent  extends StudentFeatureEvent{
+  
+}
+
+class RequestPermissionEvent extends StudentFeatureEvent {
+  
+}
+class CreateGeofenceEvent  extends StudentFeatureEvent{
+  
+}
+
+class ReCreateGeofenceEvent  extends StudentFeatureEvent{
+
+}

@@ -8,6 +8,8 @@ import 'package:flutter_cas_app_main/src/features/request_leave/presentation/pag
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_profile_page.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../my_student_attendence/presentation/student_adentence_page.dart';
+
 Widget buildQuickActions(String studentName,String section) {
   final List<Map<String, dynamic>> studentFeatures = [
     {
@@ -63,6 +65,7 @@ Widget buildQuickActions(String studentName,String section) {
       'color': Color(0xFF84CC16),
       'count': '95%',
       'isUrgent': false,
+      'screen': StudentAdentencePage()
     },
   ];
   return Column(

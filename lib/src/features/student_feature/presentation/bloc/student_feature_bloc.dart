@@ -1,6 +1,10 @@
 // import 'package:flutter/material.dart';
 // import 'dart:ui';
 
+import 'dart:async';
+import 'dart:developer';
+
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/actual_implementation_firebase_repo.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/cached_data.dart';
@@ -10,13 +14,38 @@ import 'package:flutter_cas_app_main/src/features/student_feature/domain/add_stu
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/read_student_use_case.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';
+import 'package:geolocator/geolocator.dart';
+
+import '../../../workshop_geofencing/Data/services/geofence_sevice.dart';
+import '../../../workshop_geofencing/Data/services/permission_service.dart';
+import '../../../workshop_geofencing/Data/services/work_manager_service.dart';
+import '../../../workshop_geofencing/Domain/repository/shared_preference_repository.dart';
 
 class StudentFeatureBloc
     extends Bloc<StudentFeatureEvent, StudentFeatureState> {
+
+
+   MyGeofenceService geofenceService = MyGeofenceService();
+  PermissionService permissionService = PermissionService();
+  SharePreferenceRepository sharePreferenceRepository =
+      SharePreferenceRepository();
+
+
+ bool isLocationPermissionGranted = false;
+  bool isNotificationPermissionGranted = false;
+  bool isLocationAlwaysPermissionGranted = false;
+
+
+
   StudentFeatureBloc() : super(StudentEnrollmentInitial()) {
     on<SubmitEnrollmentFormEvent>(_handleEnrollmentSubmission);
     on<FetchGroupStudentsEvent>(_handleGroupDataLoading);
     on<FetchGroupNamesEvent>(_handleGroupNamesLoading);
+     on<CheckPermissionEvent>(onCheckPermissionEvent);
+    on<RequestPermissionEvent>(onRequestPermissionEvent);
+
+    on<CreateGeofenceEvent>(onCreateGeofenceEvent);
+    on<ReCreateGeofenceEvent>(onReCreateGeofenceEvent);
   }
   final FirestoreRepositry _firestoreRepositry =
       ActualImplementationFirebaseRepo();
@@ -115,5 +144,85 @@ class StudentFeatureBloc
     emit(GroupNamesfetching());
     var groupsNamesList = await _firestoreRepositry.getGroupsNames();
     emit(GroupNamesfetchingCompleted(listOfGroupNames: groupsNamesList));
+  }
+
+
+
+
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ///
+  
+  FutureOr<void> onCheckPermissionEvent(CheckPermissionEvent event, Emitter<StudentFeatureState> emit) async{
+     var notificationPermission = await permissionService
+        .hasNotificationPermission();
+    var locationPermission = await permissionService.hasLocationPermission();
+    var locationAlwaysPermission = await permissionService
+        .hasLocationAlwaysPermission();
+        WorkManagerService.registerPeriodicLocationCheckAndReCreateFenceOnce();
+    if (notificationPermission &&
+        locationPermission &&
+        locationAlwaysPermission) {
+      add(CreateGeofenceEvent());
+
+    } else {
+      add(RequestPermissionEvent());
+    }
+  }
+  
+  
+   FutureOr<void> onRequestPermissionEvent(RequestPermissionEvent event, Emitter<StudentFeatureState> emit) async{
+    await permissionService.handleAllPermissions();
+    add(CheckPermissionEvent());
+  }
+
+  FutureOr<void> onCreateGeofenceEvent(CreateGeofenceEvent event, Emitter<StudentFeatureState> emit) async{
+    debugPrint("On Create Geofence Event");
+    isLocationAlwaysPermissionGranted = await permissionService
+        .hasLocationAlwaysPermission();
+    isLocationPermissionGranted = await permissionService
+        .hasLocationPermission();
+
+    if (isLocationPermissionGranted && isLocationAlwaysPermissionGranted) {
+      try {
+        if (! await sharePreferenceRepository.getIsCreated()) {
+          await geofenceService.createGeofence();
+
+           await sharePreferenceRepository.setIsCreated(true);
+          // log(isFencesCreated.toString(), name: "isFencesCreated");
+
+        }
+      } catch (e) {
+        debugPrint(e.toString());
+      }
+      //To Trigger Geofence event Quicker
+      await Geolocator.getCurrentPosition(
+        locationSettings: LocationSettings(accuracy: LocationAccuracy.best),
+      );
+    } else {
+      add(RequestPermissionEvent());
+    }
+  }
+
+  FutureOr<void> onReCreateGeofenceEvent(ReCreateGeofenceEvent event, Emitter<StudentFeatureState> emit)async {
+     isLocationAlwaysPermissionGranted = await permissionService
+        .hasLocationAlwaysPermission();
+    isLocationPermissionGranted = await permissionService
+        .hasLocationPermission();
+
+    if (isLocationPermissionGranted && isLocationAlwaysPermissionGranted) {
+
+        await geofenceService.reCreatefence();
+       await sharePreferenceRepository.setIsCreated(true);
+
+        //To Trigger Geofence event Quicker
+        await Geolocator.getCurrentPosition(
+          locationSettings: LocationSettings(accuracy: LocationAccuracy.best),
+        );
+
+    }else {
+      add(RequestPermissionEvent());
+    }
   }
 }

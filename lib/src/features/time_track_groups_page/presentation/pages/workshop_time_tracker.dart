@@ -11,6 +11,8 @@ import 'package:flutter_cas_app_main/src/features/time_track_groups_page/present
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 
+import '../../../../core/theme/app_colors.dart';
+
 
 class WorkshopTimeTracker extends StatefulWidget {
   const WorkshopTimeTracker({super.key});

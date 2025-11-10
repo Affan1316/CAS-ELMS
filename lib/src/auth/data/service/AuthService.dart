@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Domain/repository/shared_preference_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
@@ -42,6 +43,7 @@ class AuthService {
     await prefs.setBool(_keyIsLoggedIn, true);
     await prefs.setString(_keyStudentId, studentId);
     await prefs.setString(_keyUserEmail, email);
+    await prefs.setString(SharedPreferenceKeys.rollNo, studentId);
   }
 
   // Clear login state

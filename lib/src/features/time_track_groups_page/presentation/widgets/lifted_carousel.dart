@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../time_graph_page/data/app_color.dart';
 
 class LiftedCarousel extends StatefulWidget {

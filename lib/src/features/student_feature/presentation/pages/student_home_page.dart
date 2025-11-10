@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildHeader.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildPopularTeachersSection.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildQuickActions.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildRecentActivities.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildStatsCard.dart';
+import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/getTimeConversions.dart';
+import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/services/notification_service.dart';
+import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/services/work_manager_service.dart';
+
+import '../../../my_student_attendence/presentation/student_adentence_page.dart';
+import '../../../workshop_geofencing/Data/services/geofence_sevice.dart';
+import '../bloc/Student_feature_event.dart';
+import '../bloc/student_feature_bloc.dart';
 
 class StudentHomePage extends StatefulWidget {
   final String id;
@@ -102,6 +111,8 @@ class _StudentHomePageState extends State<StudentHomePage>
   @override
   void initState() {
     super.initState();
+    
+    context.read<StudentFeatureBloc>().add(CheckPermissionEvent());
     debugPrint("${widget.studentEntityClass.name}");
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
@@ -150,6 +161,8 @@ class _StudentHomePageState extends State<StudentHomePage>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 30),
+
                     buildHeader(
                       widget.studentEntityClass.name,
                       context,
@@ -158,7 +171,7 @@ class _StudentHomePageState extends State<StudentHomePage>
                     // buildStatsCard(),
                     buildQuickActions(
                       widget.studentEntityClass.group,
-                      widget.studentEntityClass.name
+                      widget.studentEntityClass.name,
                     ),
                     buildPopularTeachersSection(),
 

@@ -2,17 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/main.dart';
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/pages/elms_landing_page.dart';
-import 'package:flutter_cas_app_main/src/features/geofencing/data/datasource/geofence_firebase_datasource.dart';
-import 'package:flutter_cas_app_main/src/features/geofencing/data/datasource/geofence_service_impl.dart';
-import 'package:flutter_cas_app_main/src/features/geofencing/data/repositories/geofence_repository_impl.dart';
-import 'package:flutter_cas_app_main/src/features/geofencing/domain/usecases/start_geofencing_usecase.dart';
-import 'package:flutter_cas_app_main/src/features/geofencing/domain/usecases/stop_geofencing_usecase.dart';
-import 'package:flutter_cas_app_main/src/features/geofencing/presentation/listener/geofence_listener.dart';
+
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/OnboardingPageModel.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/widgets/onboarding_screen_widget.dart';
-import 'package:flutter_cas_app_main/src/features/student_attendance/presentation/pages/student_attendance_page.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:location/location.dart';
+
+import '../../../my_student_attendence/presentation/student_adentence_page.dart';
+
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -72,7 +67,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     context,
   ).push(MaterialPageRoute(builder: (context) => ElmsLandingPage()));
   void _completeOnboarding() => Navigator.of(context).push(
-    MaterialPageRoute(builder: (context) => StudentAttendanceScreen()),
+    MaterialPageRoute(builder: (context) => StudentAdentencePage()),
   ); //ElmsLandingPage()
 
   // void _navigateToHome() {
@@ -85,7 +80,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this); // 👈 register observer
-    _checkAndStartGeofencing();
   }
 
   @override
@@ -97,65 +91,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && !_geofencingStarted) {
-      // 👈 runs after returning from location settings
-      _checkAndStartGeofencing();
-    }
+    
   }
 
-  Future<void> _intiallizeGeofencing() async {
-    final geofenceRepository = GeofenceRepositoryImpl(
-      firebaseDataSource: GeofenceFirebaseDataSource(
-        FirebaseFirestore.instance,
-      ),
-      geofenceService: GeofenceServiceImpl(),
-    );
-
-    final startGeofencingUseCase = StartGeofencingUseCase(geofenceRepository);
-    final stopGeofencingUseCase = StopGeofencingUseCase(geofenceRepository);
-
-    final geofenceListener = GeofenceListener(
-      startGeofencing: startGeofencingUseCase,
-      stopGeofencing: stopGeofencingUseCase,
-    );
-
-    try {
-      geofenceListener.start(
-        studentId: 'f17-02',
-        latitude: 29.394702,
-        longitude: 71.652824,
-      );
-      _geofencingStarted = true;
-      debugPrint("✅ Geofencing started");
-    } catch (e) {
-      debugPrint("❌ Error starting geofencing: $e");
-    }
-  }
-
-  Future<void> _checkAndStartGeofencing() async {
-    final hasPermission = await requestPermission();
-
-    if (!hasPermission) {
-      debugPrint("🚫 Location permission denied");
-      return;
-    }
-
-    var serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    Location location = Location();
-    while (!serviceEnabled) {
-      debugPrint("⚠️ Location service is OFF, opening settings...");
-      serviceEnabled = await location.requestService();
-
-      // Wait a bit before checking again
-      await Future.delayed(const Duration(seconds: 2));
-      // await Geolocator.openLocationSettings();
-      // ⏸ Wait until app is resumed
-      return;
-    }
-
-    // ✅ Safe to start
-    await _intiallizeGeofencing();
-  }
+  
+  
 
   @override
   Widget build(BuildContext context) {
