@@ -680,6 +680,24 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
         currentMap["paymentMethod"] = paymentMethod;
         installments.removeAt(i);
         installments.insert(i, currentMap);
+        // adding rest in next installment
+        double total = currentMap["totalAmount"];
+        if (paidAmount < total) {
+          if (i != installments.length - 1) {
+            currentMap = installments.elementAt(i + 1);
+            currentMap["totalAmount"] = total + (total - paidAmount);
+          } else {
+            installments.add({
+              "id": "to be set yet",
+              "paidAmount": 0,
+              "paidDate": null,
+              "paymentMethod": null,
+              "status": "Unpaid",
+              "title": "Installment ${i + 1}",
+              "totalAmount": (total - paidAmount),
+            });
+          }
+        }
         break;
       }
     }

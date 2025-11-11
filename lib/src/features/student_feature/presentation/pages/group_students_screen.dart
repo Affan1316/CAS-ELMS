@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/full_screen_image.dart';
 import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/data/student.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/group_student_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
@@ -183,6 +184,29 @@ class GroupStudentsScreen extends StatelessWidget {
                           ),
                           child: Row(
                             children: [
+                              GestureDetector(
+                                onTap: () {
+                                  // Open full screen image on tap
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (_) => const FullScreenImage(
+                                            imagePath:
+                                                "assets/images/student-male.png",
+                                          ),
+                                    ),
+                                  );
+                                },
+                                child: const CircleAvatar(
+                                  radius: 28,
+                                  backgroundColor: Color(0xFF009688),
+                                  backgroundImage: AssetImage(
+                                    "assets/images/student-male.png",
+                                  ),
+                                ),
+                              ),
+
                               const SizedBox(width: 16),
                               Expanded(
                                 child: Column(

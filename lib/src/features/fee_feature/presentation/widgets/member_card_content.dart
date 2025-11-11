@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/full_screen_image.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_text.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/group_student_entity_class.dart';
 
@@ -22,17 +23,29 @@ class MemberCardContent extends StatelessWidget {
 
     return Row(
       children: [
-        CircleAvatar(
-          radius: 28,
-          backgroundColor: const Color(0xFF009688),
-          child: Text(
-            student.name.split(' ').map((e) => e[0]).take(2).join(),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+        GestureDetector(
+          onTap: () {
+            // Open full screen image on tap
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (_) => const FullScreenImage(
+                      imagePath:
+                          "assets/images/orignal_student_image_placeholder.jpg",
+                    ),
+              ),
+            );
+          },
+          child: const CircleAvatar(
+            radius: 28,
+            backgroundColor: Color(0xFF009688),
+            backgroundImage: AssetImage(
+              "assets/images/orignal_student_image_placeholder.jpg",
             ),
           ),
         ),
+
         SizedBox(width: isTablet ? 24 : 16),
         Expanded(
           child: Column(

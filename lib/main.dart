@@ -44,6 +44,7 @@ import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/get_super_admin_fee_notifications_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/group_fee_history_page.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/groups_report_page.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/super_admin_groups_page.dart';
 
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
@@ -78,10 +79,7 @@ class MyApp extends StatelessWidget {
           BlocProvider<ChatPageBloc>(create: (context) => ChatPageBloc()),
           BlocProvider<LeaveBloc>(create: (context) => sl<LeaveBloc>()),
           BlocProvider<AdminHomeBloc>(
-            create:
-                (context) => AdminHomeBloc(
-                  context.read<LeaveBloc>(),
-                ),
+            create: (context) => AdminHomeBloc(context.read<LeaveBloc>()),
           ),
           BlocProvider<StudentFeatureBloc>(
             create: (context) => StudentFeatureBloc(),
@@ -213,7 +211,7 @@ class _SplashScreenState extends State<SplashScreen> {
     // Replace with your actual onboarding screen
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => const OnboardingScreen(),
+        builder: (context) => const AdminHomePage(),
         // ⚠️ Replace with your screen
       ),
     );
