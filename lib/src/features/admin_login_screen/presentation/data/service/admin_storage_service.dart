@@ -1,6 +1,11 @@
+// admin_storage_service.dart (MODIFIED)
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
+
+// ADD THIS ENUM HERE
+enum AdminRole { none, admin, superAdmin }
 
 class AdminStorageService {
   static const _storage = FlutterSecureStorage(
@@ -9,6 +14,12 @@ class AdminStorageService {
 
   static const String _adminIdKey = 'admin_id';
   static const String _adminPasswordKey = 'admin_password';
+
+  // --- ADDED ---
+  static const String _superAdminIdKey = 'super_admin_id';
+  static const String _superAdminPasswordKey = 'super_admin_password';
+  // --- END ADDED ---
+
   static const String _isSetupCompleteKey = 'admin_setup_complete';
 
   static String _hashPassword(String password) {
@@ -20,70 +31,136 @@ class AdminStorageService {
   static Future<void> initializeDefaultAdmin() async {
     String? setupComplete = await _storage.read(key: _isSetupCompleteKey);
     if (setupComplete == null) {
+      // Regular Admin
       await _storage.write(key: _adminIdKey, value: 'admin001');
       await _storage.write(
         key: _adminPasswordKey,
         value: _hashPassword('admin123'),
       );
-      await _storage.write(key: _isSetupCompleteKey, value: 'true');
       print('Default admin initialized: ID=admin001, Password=admin123');
+
+      // --- ADDED: Super Admin ---
+      await _storage.write(key: _superAdminIdKey, value: 'superadmin');
+      await _storage.write(
+        key: _superAdminPasswordKey,
+        value: _hashPassword('super123'), // Give a different password
+      );
+      print(
+        'Default super admin initialized: ID=superadmin, Password=super123',
+      );
+      // --- END ADDED ---
+
+      await _storage.write(key: _isSetupCompleteKey, value: 'true');
     }
   }
 
-  static Future<bool> verifyAdminLogin(String adminId, String password) async {
+  // --- MODIFIED: This function now returns an AdminRole ---
+  // In AdminStorageService.dart -> verifyAdminLogin
+
+  static Future<AdminRole> verifyAdminLogin(
+    String adminId,
+    String password,
+  ) async {
     try {
-      String? storedId = await _storage.read(key: _adminIdKey);
-      String? storedPassword = await _storage.read(key: _adminPasswordKey);
+      // Read all credentials
+      String? storedAdminId = await _storage.read(key: _adminIdKey);
+      String? storedAdminPassword = await _storage.read(key: _adminPasswordKey);
+      String? storedSuperAdminId = await _storage.read(key: _superAdminIdKey);
+      String? storedSuperAdminPassword = await _storage.read(
+        key: _superAdminPasswordKey,
+      );
 
-      print('Verifying login - StoredId: $storedId, InputId: $adminId');
-
-      if (storedId == null || storedPassword == null) {
-        print('No stored credentials found');
-        return false;
+      // --- MODIFIED THIS CHECK ---
+      if (storedAdminId == null ||
+          storedAdminPassword == null ||
+          storedSuperAdminId == null ||
+          storedSuperAdminPassword == null) {
+        print('No stored credentials found or setup not complete');
+        return AdminRole.none;
       }
+      // --- END MODIFICATION ---
 
       String hashedInputPassword = _hashPassword(password);
-      print('Stored password hash: $storedPassword');
       print('Input password hash: $hashedInputPassword');
 
-      bool result =
-          storedId == adminId && storedPassword == hashedInputPassword;
-      print('Login result: $result');
-      return result;
+      // Check for Admin
+      if (storedAdminId == adminId &&
+          storedAdminPassword == hashedInputPassword) {
+        print('Login result: ADMIN');
+        return AdminRole.admin;
+      }
+
+      // Check for Super Admin
+      if (storedSuperAdminId == adminId &&
+          storedSuperAdminPassword == hashedInputPassword) {
+        print('Login result: SUPER ADMIN');
+        return AdminRole.superAdmin;
+      }
+
+      // No match
+      print('Login result: NONE');
+      return AdminRole.none;
     } catch (e) {
       print('Error verifying admin login: $e');
-      return false;
+      return AdminRole.none;
     }
   }
+  // --- END MODIFIED ---
 
+  // --- MODIFIED: Check both IDs ---
   static Future<bool> verifyAdminId(String adminId) async {
     try {
-      String? storedId = await _storage.read(key: _adminIdKey);
-      return storedId == adminId;
+      String? storedAdminId = await _storage.read(key: _adminIdKey);
+      String? storedSuperAdminId = await _storage.read(key: _superAdminIdKey);
+
+      // Return true if it matches EITHER admin
+      return (storedAdminId == adminId || storedSuperAdminId == adminId);
     } catch (e) {
       print('Error verifying admin ID: $e');
       return false;
     }
   }
+  // --- END MODIFIED ---
 
+  // --- MODIFIED: Find the correct user to update ---
   static Future<bool> changeAdminPassword(
     String adminId,
     String newPassword,
   ) async {
     try {
-      bool isValidId = await verifyAdminId(adminId);
-      if (!isValidId) return false;
+      String? storedAdminId = await _storage.read(key: _adminIdKey);
+      String? storedSuperAdminId = await _storage.read(key: _superAdminIdKey);
 
       String hashedNewPassword = _hashPassword(newPassword);
-      await _storage.write(key: _adminPasswordKey, value: hashedNewPassword);
-      return true;
+
+      // Check if it's the regular admin
+      if (storedAdminId == adminId) {
+        await _storage.write(key: _adminPasswordKey, value: hashedNewPassword);
+        print('Regular admin password changed');
+        return true;
+      }
+      // Check if it's the super admin
+      else if (storedSuperAdminId == adminId) {
+        await _storage.write(
+          key: _superAdminPasswordKey,
+          value: hashedNewPassword,
+        );
+        print('Super admin password changed');
+        return true;
+      }
+
+      // No user found
+      return false;
     } catch (e) {
       print('Error changing admin password: $e');
       return false;
     }
   }
+  // --- END MODIFIED ---
 
   static Future<String?> getAdminId() async {
+    // This function might need rethinking. For now, it just gets the regular admin.
+    // Your forget password flow doesn't use this, so it's okay for now.
     try {
       return await _storage.read(key: _adminIdKey);
     } catch (e) {
@@ -92,13 +169,18 @@ class AdminStorageService {
     }
   }
 
+  // --- MODIFIED: Clear all keys ---
   static Future<void> clearAdminData() async {
     try {
       await _storage.delete(key: _adminIdKey);
       await _storage.delete(key: _adminPasswordKey);
+      await _storage.delete(key: _superAdminIdKey); // ADDED
+      await _storage.delete(key: _superAdminPasswordKey); // ADDED
       await _storage.delete(key: _isSetupCompleteKey);
     } catch (e) {
       print('Error clearing admin data: $e');
     }
   }
+
+  // --- END MODIFIED ---
 }
