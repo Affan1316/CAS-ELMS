@@ -1,11 +1,10 @@
+// FILE: lib/src/features/admin_home_page/presentation/widgets/buildAdminFeatureCard.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/add_courses/presentation/pages/add_course_page.dart';
 import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presentation/pages/AddInstructorScreen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/groups_list_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/create_group_page.dart';
@@ -24,101 +23,123 @@ Widget buildAdminFeatureCard(
   BuildContext context, {
   int? badgeCount,
 }) {
-  Widget cardContent = Container(
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: Color(0xFFF3F4F6), width: 1),
-      boxShadow: [
-        BoxShadow(
-          color: Color(0xFF000000).withOpacity(0.06),
-          blurRadius: 16,
-          offset: Offset(0, 4),
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      final size = MediaQuery.of(context).size;
+      final isTablet = size.width >= 600;
+      final isDesktop = size.width >= 1024;
+
+      // Responsive sizing
+      final padding = isDesktop ? 24.0 : (isTablet ? 22.0 : 20.0);
+      final iconPadding = isDesktop ? 18.0 : 16.0;
+      final iconSize = isDesktop ? 36.0 : (isTablet ? 34.0 : 32.0);
+      final titleFontSize = isDesktop ? 17.0 : 16.0;
+      final subtitleFontSize = isDesktop ? 13.0 : 12.0;
+      final spacing = isDesktop ? 18.0 : 16.0;
+      final badgeFontSize = isDesktop ? 14.0 : (isTablet ? 13.0 : 12.0);
+      final badgePadding = isDesktop ? 10.0 : 8.0;
+
+      Widget cardContent = Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Color(0xFFF3F4F6), width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0xFF000000).withOpacity(0.06),
+              blurRadius: 16,
+              offset: Offset(0, 4),
+            ),
+            BoxShadow(
+              color: Color(0xFF000000).withOpacity(0.04),
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
-        BoxShadow(
-          color: Color(0xFF000000).withOpacity(0.04),
-          blurRadius: 4,
-          offset: Offset(0, 2),
+        child: Padding(
+          padding: EdgeInsets.all(padding),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.all(iconPadding),
+                decoration: BoxDecoration(
+                  color: Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Color(0xFFE2E8F0), width: 1),
+                ),
+                child: Icon(
+                  feature['icon'] as IconData,
+                  size: iconSize,
+                  color: Color(0xFF3B82F6),
+                ),
+              ),
+              SizedBox(height: spacing),
+              Text(
+                feature['title'] as String,
+                style: TextStyle(
+                  fontSize: titleFontSize,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1F2937),
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(height: 4),
+              Text(
+                feature['subtitle'] as String,
+                style: TextStyle(
+                  fontSize: subtitleFontSize,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF6B7280),
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
-      ],
-    ),
-    child: Padding(
-      padding: EdgeInsets.all(20),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Color(0xFFF8FAFC),
+      );
+
+      // Wrap with badge if badgeCount is provided and greater than 0
+      if (badgeCount != null && badgeCount > 0) {
+        return GestureDetector(
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            _navigateToScreen(context, index);
+          },
+          child: badges.Badge(
+            badgeContent: Text(
+              badgeCount.toString(),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: badgeFontSize,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            badgeStyle: badges.BadgeStyle(
+              badgeColor: Colors.red,
+              padding: EdgeInsets.all(badgePadding),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Color(0xFFE2E8F0), width: 1),
+              elevation: 12,
             ),
-            child: Icon(
-              feature['icon'] as IconData,
-              size: 32,
-              color: Color(0xFF3B82F6),
-            ),
+            position: badges.BadgePosition.topEnd(top: -10, end: -5),
+            child: cardContent,
           ),
-          SizedBox(height: 16),
-          Text(
-            feature['title'] as String,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1F2937),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 4),
-          Text(
-            feature['subtitle'] as String,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: Color(0xFF6B7280),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    ),
-  );
+        );
+      }
 
-  // Wrap with badge if badgeCount is provided and greater than 0
-  if (badgeCount != null && badgeCount > 0) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        _navigateToScreen(context, index);
-      },
-      child: badges.Badge(
-        badgeContent: Text(
-          badgeCount.toString(),
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        badgeStyle: badges.BadgeStyle(
-          badgeColor: Colors.red,
-          padding: EdgeInsets.all(11),
-          borderRadius: BorderRadius.circular(16),
-          elevation: 12,
-        ),
-        position: badges.BadgePosition.topEnd(top: -10, end: -5),
+      return GestureDetector(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          _navigateToScreen(context, index);
+        },
         child: cardContent,
-      ),
-    );
-  }
-
-  return GestureDetector(
-    onTap: () {
-      HapticFeedback.mediumImpact();
-      _navigateToScreen(context, index);
+      );
     },
-    child: cardContent,
   );
 }
 
@@ -127,58 +148,57 @@ void _navigateToScreen(BuildContext context, int index) {
 
   try {
     switch (index) {
-      case 0: // Add Instructor
+      case 0:
         print('Navigating to Add Instructor');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => SuperAdminFeeNotificationsScreen()),
         );
         break;
-      case 1: // Pay Fee
+      case 1:
         print('Navigating to Pay Fee');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => GroupsListScreen()),
         );
         break;
-      case 2: // Fee Defaulter
+      case 2:
         print('Navigating to Fee Defaulter');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => FeeDefaulters()),
         );
         break;
-      case 3: // Create Group
+      case 3:
         print('Navigating to Create Group');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => CreateGroupPage()),
         );
         break;
-      case 4: // Add Student (but you're using EnrollStudentPage)
+      case 4:
         print('Navigating to Enroll Student');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => StudentEnrollmentScreen()),
         );
         break;
-      case 5: // Add Courses
+      case 5:
         print('Navigating to Student Enrollment');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => AddCoursesPage()),
         );
         break;
-      case 6: // Inquiry Details
+      case 6:
         print('Navigating to Inquiry Page');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => InquiryDetailPage()),
         );
         break;
-      case 7: // Fee History (but you're using AddInquiryScreen)
+      case 7:
         print('Navigating to Add Inquiry');
-        // context.read<FeeAdminBloc>().add(FetchTodayFees());
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -187,52 +207,38 @@ void _navigateToScreen(BuildContext context, int index) {
             },
           ),
         );
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(
-        //     builder:
-        //         (_) => BlocProvider(
-        //           create:
-        //               (_) =>
-        //                   FeeHistoryBloc(repository: FeeHistoryRepository())
-        //                     ..add(FetchTodayFees()),
-        //           child: const FeeHistoryScreen(),
-        //         ),
-        //   ),
-        // );
-
         break;
-      case 8: // Add Inquiry
+      case 8:
         print('Add Course - Not implemented yet');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => AddInquiryPage()),
         );
         break;
-      case 9: // Add Fee Plan
+      case 9:
         print('Add Fee Plan - Not implemented yet');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => GroupMainDetailPage()),
         );
         break;
-      case 10: 
+      case 10:
         print('Leaves Approved - Not implemented yet');
         Navigator.of(
           context,
         ).push(MaterialPageRoute(builder: (context) => WorkshopTimeTracker()));
         break;
-      case 11: // Update Group Data
+      case 11:
         print('Update Group Data - Not implemented yet');
-        // Navigator.of(
-        //   context,
-        // ).push(MaterialPageRoute(builder: (context) => CreateFeePlanPage()));
         break;
-      case 12: // Leaves Approved
+      case 12:
         print('Navigating to Admin Leave Management System');
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (context) => AdminLeaveRequestManagement()));
-      break;
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => AdminLeaveRequestManagement(),
+          ),
+        );
+        break;
       default:
         print('Invalid index: $index');
         ScaffoldMessenger.of(
