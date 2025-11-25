@@ -104,7 +104,7 @@ class _StudentHomePageState extends State<StudentHomePage>
   @override
   void initState() {
     super.initState();
-    
+
     context.read<StudentFeatureBloc>().add(CheckPermissionEvent());
     debugPrint(widget.studentEntityClass.name);
     _animationController = AnimationController(
@@ -165,6 +165,7 @@ class _StudentHomePageState extends State<StudentHomePage>
                     buildQuickActions(
                       widget.studentEntityClass.group,
                       widget.studentEntityClass.name,
+                      widget.studentEntityClass.id,
                     ),
                     buildPopularTeachersSection(),
 

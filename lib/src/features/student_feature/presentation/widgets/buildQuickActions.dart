@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/features/request_leave/presentation/pages/history_leaves_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_assignment_page/presentation/pages/assignments_list_page.dart';
 import 'package:flutter_cas_app_main/src/features/leave_request/presentation/pages/list_of_request_leave_page.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_side_fee_details_screen%20.dart';
 import 'package:flutter_cas_app_main/src/features/student_quiz_page/presentation/pages/quiz_home_screen.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../my_student_attendence/presentation/student_adentence_page.dart';
 
-Widget buildQuickActions(String studentName,String section) {
+Widget buildQuickActions(String studentName, String section, String studentId) {
   final List<Map<String, dynamic>> studentFeatures = [
     {
       'title': 'My Assignments',
@@ -33,21 +34,21 @@ Widget buildQuickActions(String studentName,String section) {
       'isUrgent': false,
       'screen': LeaveScreen(),
     },
-        {
+    {
       'title': 'Leave Request',
       'icon': Icons.schedule_rounded,
       'color': Color(0xFF8B5CF6),
       'count': '6 Today',
       'isUrgent': false,
-      'screen': ListOfRequestLeaveScreen(section: section, name: studentName,),
+      'screen': ListOfRequestLeaveScreen(section: section, name: studentName),
     },
     {
-      'title': 'Library',
+      'title': 'Installments',
       'icon': Icons.library_books_rounded,
       'color': Color(0xFF06B6D4),
       'count': '2 Borrowed',
       'isUrgent': false,
-      'screen': Container(child: Text("Not set yet")),
+      'screen': StudentSideFeeDetailsScreen(studentId: studentId),
     },
     {
       'title': 'Study Groups',
@@ -62,7 +63,7 @@ Widget buildQuickActions(String studentName,String section) {
       'color': Color(0xFF84CC16),
       'count': '95%',
       'isUrgent': false,
-      'screen': StudentAdentencePage()
+      'screen': StudentAdentencePage(),
     },
   ];
   return Column(

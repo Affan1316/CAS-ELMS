@@ -1,8 +1,7 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';       
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/firebase_options.dart';
 import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
 import 'package:flutter_cas_app_main/src/core/dependencies/injections.dart';
@@ -27,6 +26,7 @@ import 'package:flutter_cas_app_main/src/features/leave_request/presentation/blo
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
 import 'package:flutter_cas_app_main/src/features/student_assignment_page/presentation/pages/assignments_detail_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_assignment_page/presentation/pages/assignments_list_page.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
 
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/get_groups_names_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
@@ -130,7 +130,21 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.system,
-          home: OnboardingScreen(),
+          home: StudentHomePage(
+            id: '124',
+            studentEntityClass: StudentEntityClass(
+              id: 'f1-1',
+              name: '',
+              email: '',
+              cnic: '',
+              phone: '',
+              address: '',
+              gender: '',
+              fatherName: '',
+              fatherOccupation: '',
+              group: '',
+            ),
+          ),
         ),
       ),
     );
