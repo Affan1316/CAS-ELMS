@@ -111,7 +111,7 @@ class _StudentHomePageState extends State<StudentHomePage>
   @override
   void initState() {
     super.initState();
-    
+
     context.read<StudentFeatureBloc>().add(CheckPermissionEvent());
     debugPrint("${widget.studentEntityClass.name}");
     _animationController = AnimationController(
@@ -161,8 +161,6 @@ class _StudentHomePageState extends State<StudentHomePage>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 30),
-
                     buildHeader(
                       widget.studentEntityClass.name,
                       context,
@@ -173,7 +171,7 @@ class _StudentHomePageState extends State<StudentHomePage>
                       widget.studentEntityClass.group,
                       widget.studentEntityClass.name,
                     ),
-                    buildPopularTeachersSection(),
+                    // buildPopularTeachersSection(),
 
                     // buildRecentActivities(),
                     const SizedBox(height: 30),

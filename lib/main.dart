@@ -87,7 +87,7 @@ class MyApp extends StatelessWidget {
           // BlocProvider<InstallmentPageBloc>(
           //   create:
           //       (context) => InstallmentPageBloc(
-          //         installmentService: ActualImplemetationInstallmentRepo(),
+          //         installmentService: ActualImplemetationInstallmentRepo(), 
           //       ),
           // ),
           BlocProvider<AddInstructorBloc>(
