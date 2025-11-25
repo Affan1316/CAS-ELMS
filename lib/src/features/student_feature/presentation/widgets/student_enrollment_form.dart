@@ -454,8 +454,13 @@ class StudentEnrollmentForm extends StatelessWidget {
                                 builder:
                                     (context) => CreateFeePlanPage(
                                       studentId:
-                                          studentIdController.text.trim(),
-                                      groupId: groupController.text.trim(),
+                                          studentIdController.text
+                                              .toLowerCase()
+                                              .trim(),
+                                      groupId:
+                                          groupController.text
+                                              .toLowerCase()
+                                              .trim(),
                                       name: nameController.text.trim(),
                                     ),
                               ),
@@ -490,20 +495,37 @@ class StudentEnrollmentForm extends StatelessWidget {
                                               .read<StudentFeatureBloc>()
                                               .add(
                                                 SubmitEnrollmentFormEvent(
-                                                  id: studentIdController.text,
-                                                  name: nameController.text,
-                                                  email: emailController.text,
-                                                  cnic: cnicController.text,
-                                                  phone: phoneController.text,
+                                                  id:
+                                                      studentIdController.text
+                                                          .toLowerCase()
+                                                          .trim(),
+                                                  name:
+                                                      nameController.text
+                                                          .trim(),
+                                                  email:
+                                                      emailController.text
+                                                          .trim(),
+                                                  cnic:
+                                                      cnicController.text
+                                                          .trim(),
+                                                  phone:
+                                                      phoneController.text
+                                                          .trim(),
                                                   address:
-                                                      addressController.text,
-                                                  gender: selectedGender,
+                                                      addressController.text
+                                                          .trim(),
+                                                  gender: selectedGender.trim(),
                                                   fatherName:
-                                                      fatherNameController.text,
+                                                      fatherNameController.text
+                                                          .trim(),
                                                   fatherOccupation:
                                                       fatherOccupationController
-                                                          .text,
-                                                  group: groupController.text,
+                                                          .text
+                                                          .trim(),
+                                                  group:
+                                                      groupController.text
+                                                          .toLowerCase()
+                                                        ..trim(),
                                                 ),
                                               );
                                         }

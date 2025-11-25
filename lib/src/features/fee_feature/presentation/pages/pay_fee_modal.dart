@@ -56,92 +56,95 @@ class _PayFeeModalState extends State<PayFeeModal> {
   @override
   Widget build(BuildContext context) {
     final isTablet = MediaQuery.of(context).size.width > 600;
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      insetPadding: EdgeInsets.all(isTablet ? 60 : 20),
-      child: NeuCard(
-        child: Padding(
-          padding: EdgeInsets.all(isTablet ? 32 : 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const ResponsiveText(
-                text: "Pay Fee",
-                phoneSize: 20,
-                tabletSize: 26,
-                weight: FontWeight.bold,
-              ),
-              const SizedBox(height: 16),
+    return SingleChildScrollView(
+      child: Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: EdgeInsets.all(isTablet ? 60 : 20),
+        child: NeuCard(
+          child: Padding(
+            padding: EdgeInsets.all(isTablet ? 32 : 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const ResponsiveText(
+                  text: "Pay Fee",
+                  phoneSize: 20,
+                  tabletSize: 26,
+                  weight: FontWeight.bold,
+                ),
+                const SizedBox(height: 16),
 
-              Text("Total: ${widget.totalFee.toStringAsFixed(2)}"),
+                Text("Total: ${widget.totalFee.toStringAsFixed(2)}"),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              TextField(
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: "Paying Amount",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                TextField(
+                  controller: _amountController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: "Paying Amount",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              InkWell(
-                onTap: _pickDate,
-                child: IgnorePointer(
-                  child: TextField(
-                    controller: _dateController,
-                    readOnly: true,
-                    decoration: InputDecoration(
-                      labelText: "Select Date",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                InkWell(
+                  onTap: _pickDate,
+                  child: IgnorePointer(
+                    child: TextField(
+                      controller: _dateController,
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: "Select Date",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              Column(
-                children: [
-                  _buildRadio("cashPayment"),
-                  _buildRadio("UBL"),
-                  _buildRadio("JazzCash"),
-                  _buildRadio("EasyPaisa"),
-                ],
-              ),
+                Column(
+                  children: [
+                    _buildRadio("cashPayment"),
+                    _buildRadio("UBL"),
+                    _buildRadio("JazzCash"),
+                    _buildRadio("EasyPaisa"),
+                  ],
+                ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _modalButton("Pay", Colors.blue, () {
-                    final amount = double.tryParse(_amountController.text);
-                    if (amount != null && _selectedDate != null) {
-                      widget.onPay?.call(
-                        amount,
-                        _paymentMethod,
-                        _selectedDate!,
-                      );
-                      Navigator.pop(context);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Enter valid amount & date"),
-                        ),
-                      );
-                    }
-                  }),
-                ],
-              ),
-            ],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _modalButton("Pay", Colors.blue, () {
+                      final amount = double.tryParse(_amountController.text);
+
+                      if (amount != null && _selectedDate != null) {
+                        widget.onPay?.call(
+                          amount,
+                          _paymentMethod,
+                          _selectedDate!,
+                        );
+                        Navigator.pop(context);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Enter valid amount & date"),
+                          ),
+                        );
+                      }
+                    }),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
