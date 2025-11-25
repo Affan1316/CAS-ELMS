@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/full_screen_image.dart';
-import 'package:flutter_cas_app_main/src/features/student%20in%20each%20group%20screen/data/student.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/group_student_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/read_whole_group_students_list_usecase.dart';
@@ -10,7 +9,6 @@ import 'package:flutter_cas_app_main/src/features/student_feature/presentation/b
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/StudentDetailPage.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_profile_page.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 class GroupStudentsScreen extends StatelessWidget {
@@ -311,7 +309,7 @@ class GroupStudentsScreen extends StatelessWidget {
                     ],
                   ),
                   child: DropdownButtonFormField<String>(
-                    value: selectedGroup ?? groups.first,
+                    initialValue: selectedGroup ?? groups.first,
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 15,

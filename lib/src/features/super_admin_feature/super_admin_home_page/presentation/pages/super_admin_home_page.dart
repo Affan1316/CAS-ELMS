@@ -2,10 +2,9 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/super_admin_fee_notifications_screen.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:flutter/material.dart';
 
 class SuperAdminDashboard extends StatelessWidget {
-  const SuperAdminDashboard({Key? key}) : super(key: key);
+  const SuperAdminDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {

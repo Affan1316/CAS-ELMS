@@ -1,9 +1,7 @@
 import 'dart:developer';
 
-import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/services/notification_service.dart';
 import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Domain/repository/firestore_repository.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../Data/getTimeConversions.dart';

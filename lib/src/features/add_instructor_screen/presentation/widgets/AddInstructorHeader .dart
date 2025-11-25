@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AddInstructorHeader extends StatelessWidget {
-  const AddInstructorHeader({Key? key}) : super(key: key);
+  const AddInstructorHeader({super.key});
 
   @override
   Widget build(BuildContext context) {

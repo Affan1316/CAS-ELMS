@@ -175,10 +175,12 @@ class StudentEnrollmentForm extends StatelessWidget {
                               label: 'Full Name',
                               icon: Icons.person_outline,
                               validator: (v) {
-                                if (v == null || v.isEmpty)
+                                if (v == null || v.isEmpty) {
                                   return 'Name is required';
-                                if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(v))
+                                }
+                                if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(v)) {
                                   return 'Only letters allowed';
+                                }
                                 return null;
                               },
                             ),
@@ -191,12 +193,14 @@ class StudentEnrollmentForm extends StatelessWidget {
                               icon: Icons.email_outlined,
                               keyboardType: TextInputType.emailAddress,
                               validator: (v) {
-                                if (v == null || v.isEmpty)
+                                if (v == null || v.isEmpty) {
                                   return 'Email is required';
+                                }
                                 if (!RegExp(
                                   r'^[\w\-\.\+]+@([\w\-]+\.)+[\w\-]{2,4}$',
-                                ).hasMatch(v))
+                                ).hasMatch(v)) {
                                   return 'Enter a valid email';
+                                }
                                 return null;
                               },
                             ),
@@ -209,10 +213,12 @@ class StudentEnrollmentForm extends StatelessWidget {
                               icon: Icons.credit_card_outlined,
                               keyboardType: TextInputType.number,
                               validator: (v) {
-                                if (v == null || v.isEmpty)
+                                if (v == null || v.isEmpty) {
                                   return 'CNIC is required';
-                                if (!RegExp(r'^\d{13}$').hasMatch(v))
+                                }
+                                if (!RegExp(r'^\d{13}$').hasMatch(v)) {
                                   return 'Enter 13 digit CNIC';
+                                }
                                 return null;
                               },
                             ),
@@ -251,10 +257,12 @@ class StudentEnrollmentForm extends StatelessWidget {
                               icon: Icons.phone_outlined,
                               keyboardType: TextInputType.phone,
                               validator: (v) {
-                                if (v == null || v.isEmpty)
+                                if (v == null || v.isEmpty) {
                                   return 'Phone required';
-                                if (!RegExp(r'^\d{11}$').hasMatch(v))
+                                }
+                                if (!RegExp(r'^\d{11}$').hasMatch(v)) {
                                   return 'Enter 11-digit Pakistani number';
+                                }
                                 return null;
                               },
                             ),
@@ -446,8 +454,13 @@ class StudentEnrollmentForm extends StatelessWidget {
                                 builder:
                                     (context) => CreateFeePlanPage(
                                       studentId:
-                                          studentIdController.text.trim(),
-                                      groupId: groupController.text.trim(),
+                                          studentIdController.text
+                                              .toLowerCase()
+                                              .trim(),
+                                      groupId:
+                                          groupController.text
+                                              .toLowerCase()
+                                              .trim(),
                                       name: nameController.text.trim(),
                                     ),
                               ),
@@ -482,20 +495,37 @@ class StudentEnrollmentForm extends StatelessWidget {
                                               .read<StudentFeatureBloc>()
                                               .add(
                                                 SubmitEnrollmentFormEvent(
-                                                  id: studentIdController.text,
-                                                  name: nameController.text,
-                                                  email: emailController.text,
-                                                  cnic: cnicController.text,
-                                                  phone: phoneController.text,
+                                                  id:
+                                                      studentIdController.text
+                                                          .toLowerCase()
+                                                          .trim(),
+                                                  name:
+                                                      nameController.text
+                                                          .trim(),
+                                                  email:
+                                                      emailController.text
+                                                          .trim(),
+                                                  cnic:
+                                                      cnicController.text
+                                                          .trim(),
+                                                  phone:
+                                                      phoneController.text
+                                                          .trim(),
                                                   address:
-                                                      addressController.text,
-                                                  gender: selectedGender,
+                                                      addressController.text
+                                                          .trim(),
+                                                  gender: selectedGender.trim(),
                                                   fatherName:
-                                                      fatherNameController.text,
+                                                      fatherNameController.text
+                                                          .trim(),
                                                   fatherOccupation:
                                                       fatherOccupationController
-                                                          .text,
-                                                  group: groupController.text,
+                                                          .text
+                                                          .trim(),
+                                                  group:
+                                                      groupController.text
+                                                          .toLowerCase()
+                                                        ..trim(),
                                                 ),
                                               );
                                         }

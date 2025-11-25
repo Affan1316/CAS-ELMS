@@ -1,10 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_installment_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/student_fee_feature_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/enums/sort_option_enum.dart';
-import 'package:flutter_cas_app_main/src/features/group/domain/entities/group_entity.dart';
 
 abstract class FeeAdminEvent extends Equatable {
   const FeeAdminEvent();

@@ -10,7 +10,7 @@ class OtpStep extends StatelessWidget {
   final String? Function(String?) validateOtp;
 
   const OtpStep({
-    Key? key,
+    super.key,
     required this.otpController,
     required this.isLoading,
     required this.canResendOtp,
@@ -18,7 +18,7 @@ class OtpStep extends StatelessWidget {
     required this.onSubmit,
     required this.onResend,
     required this.validateOtp,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

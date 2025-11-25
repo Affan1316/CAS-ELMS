@@ -7,6 +7,8 @@ import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/pr
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/StudentLoginScreen.dart';
 
 class UserIdInputScreen extends StatefulWidget {
+  const UserIdInputScreen({super.key});
+
   @override
   _UserIdInputScreenState createState() => _UserIdInputScreenState();
 }

@@ -63,8 +63,7 @@ class ShakeWidget extends StatefulWidget {
   final Widget child;
   final bool shouldShake;
 
-  const ShakeWidget({Key? key, required this.child, required this.shouldShake})
-    : super(key: key);
+  const ShakeWidget({super.key, required this.child, required this.shouldShake});
 
   @override
   _ShakeWidgetState createState() => _ShakeWidgetState();

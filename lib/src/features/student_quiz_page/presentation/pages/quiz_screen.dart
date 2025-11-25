@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter_cas_app_main/src/features/quiz/domain/services/google_sheets_service.dart';
-import 'package:flutter_cas_app_main/src/features/quiz/presentation/pages/result_screen.dart';
-import 'package:flutter_cas_app_main/src/features/quiz/utils/resposive.dart';
+import 'package:flutter_cas_app_main/src/features/student_quiz_page/domain/services/google_sheets_service.dart';
+import 'package:flutter_cas_app_main/src/features/student_quiz_page/presentation/pages/result_screen.dart';
+import 'package:flutter_cas_app_main/src/features/student_quiz_page/utils/resposive.dart';
 
 class QuizScreenUpdated extends StatefulWidget {
   final Map<String, dynamic> category;

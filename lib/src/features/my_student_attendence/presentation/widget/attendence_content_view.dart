@@ -26,7 +26,7 @@ class AttendanceContentView extends StatelessWidget {
         ...records.map((record) {
           // Use the dedicated AttendanceListItem widget
           return AttendanceListItem(record: record);
-        }).toList(),
+        }),
       ],
     );
   }

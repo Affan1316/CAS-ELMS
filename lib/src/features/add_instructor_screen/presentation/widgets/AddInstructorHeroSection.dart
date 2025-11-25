@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AddInstructorHeroSection extends StatelessWidget {
-  const AddInstructorHeroSection({Key? key}) : super(key: key);
+  const AddInstructorHeroSection({super.key});
 
   @override
   Widget build(BuildContext context) {

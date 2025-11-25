@@ -5,10 +5,10 @@ class SignUpEmailField extends StatelessWidget {
   final String? Function(String?) validator;
 
   const SignUpEmailField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.validator,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

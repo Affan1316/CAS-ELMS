@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/StudentDetailPage.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_profile_page.dart';
 
 Widget buildHeader(String studentName, BuildContext context, String id) {

@@ -48,7 +48,6 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_installment_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/student_fee_feature_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/abstract_repo/abstract_implemetation_installment_repo.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
 import 'package:uuid/uuid.dart';
 
 class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {

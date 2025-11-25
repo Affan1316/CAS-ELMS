@@ -1,5 +1,5 @@
-import 'package:flutter_cas_app_main/src/features/quiz/domain/entities/question.dart';
-import 'package:flutter_cas_app_main/src/features/quiz/domain/entities/quiz_category.dart';
+import 'package:flutter_cas_app_main/src/features/student_quiz_page/domain/entities/question.dart';
+import 'package:flutter_cas_app_main/src/features/student_quiz_page/domain/entities/quiz_category.dart';
 
 class Quiz {
   final QuizCategory category;

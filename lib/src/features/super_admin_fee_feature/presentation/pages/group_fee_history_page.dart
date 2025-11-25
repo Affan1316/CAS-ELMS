@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_event.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_state.dart';
@@ -8,8 +7,7 @@ import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presen
 class GroupFeeHistoryPage extends StatefulWidget {
   final String groupName;
 
-  const GroupFeeHistoryPage({Key? key, required this.groupName})
-    : super(key: key);
+  const GroupFeeHistoryPage({super.key, required this.groupName});
 
   @override
   State<GroupFeeHistoryPage> createState() => _GroupFeeHistoryPageState();

@@ -27,7 +27,7 @@ class CourseDropdown extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: courses.contains(selectedCourse) ? selectedCourse : null,
+          initialValue: courses.contains(selectedCourse) ? selectedCourse : null,
           icon: const Icon(Icons.keyboard_arrow_down),
           items:
               courses

@@ -13,7 +13,7 @@ class NewPasswordStep extends StatelessWidget {
   final String? Function(String?) validateConfirmPassword;
 
   const NewPasswordStep({
-    Key? key,
+    super.key,
     required this.newPasswordController,
     required this.confirmPasswordController,
     required this.isLoading,
@@ -24,7 +24,7 @@ class NewPasswordStep extends StatelessWidget {
     required this.onSubmit,
     required this.validatePassword,
     required this.validateConfirmPassword,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

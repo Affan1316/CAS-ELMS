@@ -6,7 +6,7 @@ import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
 enum ForgotPasswordStep { email, emailSent }
 
 class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({Key? key}) : super(key: key);
+  const ForgotPasswordScreen({super.key});
 
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();

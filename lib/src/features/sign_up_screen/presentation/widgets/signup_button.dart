@@ -5,10 +5,10 @@ class SignUpButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const SignUpButton({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
