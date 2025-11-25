@@ -79,7 +79,7 @@ class MyApp extends StatelessWidget {
           // BlocProvider<InstallmentPageBloc>(
           //   create:
           //       (context) => InstallmentPageBloc(
-          //         installmentService: ActualImplemetationInstallmentRepo(), 
+          //         installmentService: ActualImplemetationInstallmentRepo(),
           //       ),
           // ),
           BlocProvider<AddInstructorBloc>(
@@ -130,21 +130,7 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.system,
-          home: StudentHomePage(
-            id: '124',
-            studentEntityClass: StudentEntityClass(
-              id: 'f1-1',
-              name: '',
-              email: '',
-              cnic: '',
-              phone: '',
-              address: '',
-              gender: '',
-              fatherName: '',
-              fatherOccupation: '',
-              group: '',
-            ),
-          ),
+          home: OnboardingScreen(),
         ),
       ),
     );
