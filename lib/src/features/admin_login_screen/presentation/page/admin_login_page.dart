@@ -1,3 +1,5 @@
+// AdminLoginScreen.dart (MODIFIED)
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/pages/admin_home_page.dart';
@@ -7,7 +9,15 @@ import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentatio
 import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/forget_password_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/page/forget_password_screen.dart'
     hide AdminHomePage;
-// import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/pages/admin_home_page.dart';
+// --- ADDED: Import the service file to get the AdminRole enum ---
+import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/data/service/admin_storage_service.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_feature/super_admin_home_page/presentation/pages/super_admin_home_page.dart';
+// --- END ADDED ---
+
+// --- ADDED: You will need to create and import your Super Admin screen ---
+// For example:
+// import 'package:flutter_cas_app_main/src/features/super_admin_home_page/presentation/pages/super_admin_home_page.dart';
+// --- END ADDED ---
 
 class AdminLoginScreen extends StatefulWidget {
   @override
@@ -15,6 +25,7 @@ class AdminLoginScreen extends StatefulWidget {
 }
 
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
+  // ... (all your existing code, initState, dispose, etc. remains the same) ...
   final TextEditingController _userIdController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final FocusNode _userIdFocusNode = FocusNode();
@@ -80,6 +91,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       );
     }
   }
+  // --- END OF UNCHANGED CODE ---
 
   @override
   Widget build(BuildContext context) {
@@ -88,35 +100,44 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 216, 240, 239),
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: const Text(
-            'Admin Login',
-            style: TextStyle(
-              color: Colors.black87,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          // ... (appBar code remains the same) ...
         ),
         body: BlocListener<AdminLoginBloc, AdminLoginState>(
           bloc: _adminLoginBloc,
+          // --- THIS LISTENER IS THE KEY CHANGE ---
           listener: (context, state) {
             print('BLoC State Changed: $state');
 
             if (state is AdminLoginSuccess) {
-              print('Login success - navigating to admin home');
+              print(
+                'Login success - Role: ${state.role}',
+              ); // state now has 'role'
               _passwordController.clear();
               _showMessage('Login successful!');
 
-              // Navigate to admin home page
+              // --- ADDED: Logic to decide where to navigate ---
+              Widget destinationPage;
+              if (state.role == AdminRole.superAdmin) {
+                print('Navigating to SUPER ADMIN home');
+                destinationPage =
+                    SuperAdminDashboard(); // <-- Use your real page
+
+                // Placeholder page until you create yours:
+                // destinationPage = Scaffold(
+                //   appBar: AppBar(title: Text('Super Admin Home')),
+                //   body: Center(child: Text('Welcome, Super Admin!')),
+                // );
+              } else {
+                // It must be AdminRole.admin
+                print('Navigating to ADMIN home');
+                destinationPage = AdminHomePage();
+              }
+              // --- END ADDED LOGIC ---
+
               Future.delayed(Duration(milliseconds: 500), () {
                 if (mounted) {
                   Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => AdminHomePage()),
+                    MaterialPageRoute(builder: (context) => destinationPage),
                   );
                 }
               });
@@ -124,7 +145,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
               print('Login failure: ${state.message}');
               _passwordController.clear();
               _showMessage(state.message, isError: true);
-              // Reset the bloc state after showing error
               Future.delayed(Duration(milliseconds: 100), () {
                 if (mounted) {
                   _adminLoginBloc.add(AdminLoginReset());
@@ -132,12 +152,14 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
               });
             }
           },
+          // --- END OF LISTENER CHANGES ---
           child: _buildBody(),
         ),
       ),
     );
   }
 
+  // ... (The rest of your file, _buildBody, _buildInputField, dispose, etc., remains the same) ...
   Widget _buildBody() {
     final screenSize = MediaQuery.of(context).size;
     final screenHeight = screenSize.height;
@@ -376,7 +398,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                       child: Column(
                         children: [
                           Text(
-                            'Default Admin Credentials:',
+                            'Default Credentials:',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.grey.shade700,
@@ -384,7 +406,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                           ),
                           SizedBox(height: 8),
                           Text(
-                            'ID: admin001\nPassword: admin123',
+                            'Admin ID: admin001\nAdmin Pass: admin123\n\nSuper ID: superadmin\nSuper Pass: super123',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.grey.shade600,

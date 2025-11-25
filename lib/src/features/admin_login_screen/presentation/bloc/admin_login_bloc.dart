@@ -1,3 +1,5 @@
+// AdminLoginBloc.dart (MODIFIED)
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/admin_login_event.dart';
 import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/admin_login_state.dart';
@@ -31,7 +33,6 @@ class AdminLoginBloc extends Bloc<AdminLoginEvent, AdminLoginState> {
       'Login submitted - AdminId: ${event.adminId}, Password: ${event.password}',
     );
 
-    // Validate input fields
     if (event.adminId.trim().isEmpty || event.password.isEmpty) {
       emit(const AdminLoginFailure(message: 'Please fill in all fields'));
       return;
@@ -40,18 +41,23 @@ class AdminLoginBloc extends Bloc<AdminLoginEvent, AdminLoginState> {
     emit(AdminLoginLoading());
 
     try {
-      final bool isValid = await AdminStorageService.verifyAdminLogin(
+      // --- MODIFIED: Get the role from the service ---
+      final AdminRole role = await AdminStorageService.verifyAdminLogin(
         event.adminId.trim(),
         event.password,
       );
+      // --- END MODIFIED ---
 
-      if (isValid) {
-        print('Login successful');
-        emit(AdminLoginSuccess());
+      // --- MODIFIED: Check the role ---
+      if (role != AdminRole.none) {
+        print('Login successful with role: $role');
+        // Pass the role to the success state
+        emit(AdminLoginSuccess(role: role));
       } else {
         print('Login failed - invalid credentials');
         emit(const AdminLoginFailure(message: 'Invalid Admin ID or Password'));
       }
+      // --- END MODIFIED ---
     } catch (e) {
       print('Login error: $e');
       emit(const AdminLoginFailure(message: 'Login failed. Please try again.'));

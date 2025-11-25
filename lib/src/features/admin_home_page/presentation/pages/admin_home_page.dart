@@ -1,3 +1,5 @@
+// FILE: lib/src/features/admin_home_page/presentation/pages/admin_home_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_bloc.dart';
@@ -10,6 +12,7 @@ import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/w
 
 class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
+
   @override
   State<AdminHomePage> createState() => _AdminHomePageState();
 }
@@ -19,7 +22,6 @@ class _AdminHomePageState extends State<AdminHomePage>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late PageController _pageController;
-  // int _currentPage = 0;
 
   @override
   void initState() {
@@ -45,29 +47,40 @@ class _AdminHomePageState extends State<AdminHomePage>
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isTablet = size.width >= 600;
+    final isDesktop = size.width >= 1024;
+
     return Scaffold(
       backgroundColor: Color(0xFFFAFAFA),
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            buildAdminHeader(),
-            buildAdminTitleSection(),
-            SizedBox(height: 24),
-            buildAdminCarouselSlider(_pageController),
-            SizedBox(height: 32),
-            buildAdminOverviewSection(),
-            SizedBox(height: 24),
-            BlocBuilder<AdminHomeBloc, AdminHomeState>(
-              builder: (context, state) {
-                return buildFeaturesGrid(
-                  _animationController,
-                  pendingLeaveCount: state.pendingLeavesCount,
-                );
-              },
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: isDesktop ? 1400 : double.infinity,
             ),
-            SizedBox(height: 20),
-          ],
+            child: Column(
+              children: [
+                buildAdminHeader(),
+                buildAdminTitleSection(),
+                SizedBox(height: isDesktop ? 32 : 24),
+                buildAdminCarouselSlider(_pageController),
+                SizedBox(height: isDesktop ? 40 : 32),
+                buildAdminOverviewSection(),
+                SizedBox(height: isDesktop ? 32 : 24),
+                BlocBuilder<AdminHomeBloc, AdminHomeState>(
+                  builder: (context, state) {
+                    return buildFeaturesGrid(
+                      _animationController,
+                      pendingLeaveCount: state.pendingLeavesCount,
+                    );
+                  },
+                ),
+                SizedBox(height: isDesktop ? 40 : 20),
+              ],
+            ),
+          ),
         ),
       ),
     );

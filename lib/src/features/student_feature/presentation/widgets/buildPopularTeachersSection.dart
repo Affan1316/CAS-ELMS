@@ -3,6 +3,45 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_cas_app_main/src/features/course_graph_screen/presentation/pages/elms_graph_page.dart';
 
 Widget buildPopularTeachersSection() {
+  final teachers = [
+    {
+      'name': 'Dr. Sarah Johnson',
+      'subject': 'Mathematics',
+      'rating': '4.9',
+      'students': '1.2k',
+      'gradient': const LinearGradient(
+        colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+      ),
+    },
+    {
+      'name': 'Prof. Michael Chen',
+      'subject': 'Physics',
+      'rating': '4.8',
+      'students': '890',
+      'gradient': const LinearGradient(
+        colors: [Color(0xFF43e97b), Color(0xFF38f9d7)],
+      ),
+    },
+    {
+      'name': 'Dr. Emily Rodriguez',
+      'subject': 'Chemistry',
+      'rating': '4.7',
+      'students': '756',
+      'gradient': const LinearGradient(
+        colors: [Color(0xFF4facfe), Color(0xFF00f2fe)],
+      ),
+    },
+    {
+      'name': 'Prof. David Kim',
+      'subject': 'Computer Science',
+      'rating': '4.9',
+      'students': '1.5k',
+      'gradient': const LinearGradient(
+        colors: [Color(0xFFf093fb), Color(0xFFf5576c)],
+      ),
+    },
+  ];
+
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -33,52 +72,19 @@ Widget buildPopularTeachersSection() {
           ],
         ),
       ),
-      SizedBox(
-        height: 220,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          itemCount: 4,
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.75,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+          ),
+          itemCount: teachers.length,
           itemBuilder: (context, index) {
-            final teachers = [
-              {
-                'name': 'Dr. Sarah Johnson',
-                'subject': 'Mathematics',
-                'rating': '4.9',
-                'students': '1.2k',
-                'gradient': const LinearGradient(
-                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-                ),
-              },
-              {
-                'name': 'Prof. Michael Chen',
-                'subject': 'Physics',
-                'rating': '4.8',
-                'students': '890',
-                'gradient': const LinearGradient(
-                  colors: [Color(0xFF43e97b), Color(0xFF38f9d7)],
-                ),
-              },
-              {
-                'name': 'Dr. Emily Rodriguez',
-                'subject': 'Chemistry',
-                'rating': '4.7',
-                'students': '756',
-                'gradient': const LinearGradient(
-                  colors: [Color(0xFF4facfe), Color(0xFF00f2fe)],
-                ),
-              },
-              {
-                'name': 'Prof. David Kim',
-                'subject': 'Computer Science',
-                'rating': '4.9',
-                'students': '1.5k',
-                'gradient': const LinearGradient(
-                  colors: [Color(0xFFf093fb), Color(0xFFf5576c)],
-                ),
-              },
-            ];
-
             final teacher = teachers[index];
             return InkWell(
               borderRadius: BorderRadius.circular(20),
@@ -89,8 +95,6 @@ Widget buildPopularTeachersSection() {
                 );
               },
               child: Container(
-                width: 160,
-                margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -200,7 +204,7 @@ Widget buildPopularTeachersSection() {
                             const SizedBox(height: 6),
                             Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.people_rounded,
                                   size: 12,
                                   color: Color(0xFF94A3B8),
