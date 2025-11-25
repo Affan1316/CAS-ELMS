@@ -154,8 +154,6 @@ class _StudentHomePageState extends State<StudentHomePage>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 30),
-
                     buildHeader(
                       widget.studentEntityClass.name,
                       context,
@@ -167,7 +165,7 @@ class _StudentHomePageState extends State<StudentHomePage>
                       widget.studentEntityClass.name,
                       widget.studentEntityClass.id,
                     ),
-                    buildPopularTeachersSection(),
+                    // buildPopularTeachersSection(),
 
                     // buildRecentActivities(),
                     const SizedBox(height: 30),
