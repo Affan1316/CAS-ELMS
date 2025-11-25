@@ -32,7 +32,6 @@ import 'package:flutter_cas_app_main/src/features/leave_request/presentation/blo
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
 import 'package:flutter_cas_app_main/src/features/pay_fee/presentation/pages/groups_page.dart';
 
-
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/get_groups_names_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_home_page.dart';
@@ -56,11 +55,9 @@ import 'src/features/my_student_attendence/presentation/bloc/student_attendence_
 //   runApp(const MyApp());
 // }
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  
 
   await init();
 
@@ -134,16 +131,14 @@ class MyApp extends StatelessWidget {
                 ),
           ),
           BlocProvider(create: (context) => FeeAdminBloc()),
-          BlocProvider(create: (context) => StudentAttendenceBloc(),),
-          
-        
+          BlocProvider(create: (context) => StudentAttendenceBloc()),
         ],
         child: MaterialApp(
           title: 'CAS ELMS',
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.system,
-          home: SplashScreen(),
+          home: OnboardingScreen(),
         ),
       ),
     );
@@ -211,7 +206,7 @@ class _SplashScreenState extends State<SplashScreen> {
     // Replace with your actual onboarding screen
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => const AdminHomePage(),
+        builder: (context) => const OnboardingScreen(),
         // ⚠️ Replace with your screen
       ),
     );
