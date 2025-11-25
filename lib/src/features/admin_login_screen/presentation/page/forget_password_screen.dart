@@ -5,6 +5,8 @@ import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentatio
 import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/forget_password_state.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
+
   @override
   _ForgotPasswordScreenState createState() => _ForgotPasswordScreenState();
 }
@@ -104,7 +106,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               bool isLoading = state is ForgotPasswordLoading;
               bool isIdVerified = state is AdminIdVerified;
               String verifiedAdminId =
-                  isIdVerified ? (state as AdminIdVerified).adminId : '';
+                  isIdVerified ? (state).adminId : '';
 
               return SingleChildScrollView(
                 padding: EdgeInsets.all(24),

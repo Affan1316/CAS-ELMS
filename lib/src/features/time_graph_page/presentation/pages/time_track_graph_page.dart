@@ -31,7 +31,7 @@ typedef DummyStudent = ({
 
 class _StudentTimeTrackerPageState extends State<StudentTimeTrackerPage> {
   DateTimeRange? _selectedDateRange;
-  String _selectedFilter = 'This Week';
+  final String _selectedFilter = 'This Week';
 
   //TODO: add real but its dummy Student DAta
   final DummyStudent studentData = (
@@ -98,8 +98,7 @@ class _StudentTimeTrackerPageState extends State<StudentTimeTrackerPage> {
               onPrimary: Colors.white,
               surface: const Color(0xFFE6E9EF),
               onSurface: const Color(0xFF3D4C5F),
-            ),
-            dialogBackgroundColor: Colors.white,
+            ), dialogTheme: DialogThemeData(backgroundColor: Colors.white),
           ),
           child: child!,
         );

@@ -1,6 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cas_app_main/main.dart';
 import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/pages/elms_landing_page.dart';
 
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/OnboardingPageModel.dart';
@@ -74,7 +72,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   //   // Navigator.pushReplacementNamed(context, '/home');
   // }
 
-  bool _geofencingStarted = false;
+  final bool _geofencingStarted = false;
 
   @override
   void initState() {

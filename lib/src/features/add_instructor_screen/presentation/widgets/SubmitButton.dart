@@ -6,7 +6,7 @@ import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presenta
 class SubmitButton extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const SubmitButton({Key? key, required this.onPressed}) : super(key: key);
+  const SubmitButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

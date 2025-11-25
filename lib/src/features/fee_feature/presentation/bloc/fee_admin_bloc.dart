@@ -88,7 +88,7 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
       _allGroups = List<GroupEntity>.from(groups);
 
       emit(FeeAdminGroupsLoadedState(groups: _allGroups));
-    } catch (e, st) {
+    } catch (e) {
       emit(FeeAdminErrorState(error: e.toString()));
     }
   }
@@ -101,7 +101,7 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
       final filtered = _filterGroups(event.query, _allGroups);
 
       emit(FeeAdminGroupDataFilteringCompleteState(filteredDataList: filtered));
-    } catch (e, st) {
+    } catch (e) {
       emit(FeeAdminErrorState(error: e.toString()));
     }
   }
@@ -134,7 +134,7 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     _allStudentsOfThisGroup.clear();
     var a = await _readgroupstudentsforfeeUseCase.read(event.groupTitle).first;
     var b = a.docs;
-    var c;
+    Map<String, dynamic> c;
     for (var element in b) {
       c = element.data();
       _allStudentsOfThisGroup.add(
@@ -418,7 +418,7 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     ReadFeeDefaulterEvent event,
     Emitter<FeeAdminState> emit,
   ) async {
-    debugPrint("${event.groupId}");
+    debugPrint(event.groupId);
     try {
       FeeDefaultersCollective feeDefaultersCollective =
           await readFeeDefaulterCollective.read(event.groupId);
@@ -466,9 +466,6 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
       event.groupId,
       event.studentId,
     );
-    if (isDefaulter == null) {
-      throw AssertionError("is defualter is null");
-    }
     emit(CheckingingFeeDefaulterCompleteState(isDefaulter: isDefaulter));
   }
 

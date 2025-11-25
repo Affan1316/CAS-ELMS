@@ -112,59 +112,62 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
         ),
       );
     } else {
-      final screenWidth = MediaQuery.of(context).size.width;
-      final isTablet = screenWidth >= 768;
+      final size = MediaQuery.of(context).size;
+      final screenWidth = size.width;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             'Please fill in both Cause and From Date',
             style: TextStyle(
-              fontSize: isTablet ? 16 : 14,
+              fontSize: screenWidth * 0.035,
               fontWeight: FontWeight.w500,
             ),
           ),
           backgroundColor: const Color(0xFFFF3B30),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(isTablet ? 16 : 12),
+            borderRadius: BorderRadius.circular(screenWidth * 0.03),
           ),
-          margin: EdgeInsets.all(isTablet ? 20 : 16),
+          margin: EdgeInsets.all(screenWidth * 0.04),
         ),
       );
     }
   }
 
-  double _getResponsiveFontSize(
-    double screenWidth,
-    double mobile,
-    double tablet,
-  ) {
-    if (screenWidth >= 768) return tablet;
-    return mobile;
-  }
-
-  double _getResponsiveSpacing(
-    double screenWidth,
-    double mobile,
-    double tablet,
-  ) {
-    if (screenWidth >= 768) return tablet;
-    return mobile;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final size = MediaQuery.of(context).size;
+    final screenWidth = size.width;
+    final screenHeight = size.height;
     final isTablet = screenWidth >= 768;
-    final isLandscape = screenWidth > screenHeight;
-    final safePadding = MediaQuery.of(context).padding;
+    final isLargeTablet = screenWidth > 900;
 
-    // Responsive dimensions
-    final headerHeight = isTablet ? 220.0 : 180.0;
-    final horizontalPadding = _getResponsiveSpacing(screenWidth, 24, 32);
-    final verticalSpacing = _getResponsiveSpacing(screenWidth, 20, 28);
+    // Fully responsive dimensions
+    final headerHeight = screenHeight * (isTablet ? 0.25 : 0.22);
+    final horizontalPadding = screenWidth * (isTablet ? 0.042 : 0.06);
+    final verticalSpacing = screenHeight * (isTablet ? 0.035 : 0.025);
+    final headerTopPadding = screenHeight * 0.025;
+    final backButtonSize = screenWidth * (isTablet ? 0.035 : 0.05);
+    final backButtonPadding = screenWidth * (isTablet ? 0.021 : 0.03);
+    final titleFontSize = screenWidth * (isTablet ? 0.04 : 0.065);
+    final subtitleFontSize = screenWidth * (isTablet ? 0.022 : 0.038);
+    final sectionTitleSize = screenWidth * (isTablet ? 0.032 : 0.05);
+    final buttonFontSize = screenWidth * (isTablet ? 0.024 : 0.04);
+    final buttonIconSize = screenWidth * (isTablet ? 0.032 : 0.05);
+    final borderRadius = screenWidth * (isTablet ? 0.042 : 0.07);
+    final contentBorderRadius = screenWidth * (isTablet ? 0.026 : 0.035);
+    final headerBarWidth = screenWidth * (isTablet ? 0.006 : 0.01);
+    final headerBarHeight = screenHeight * (isTablet ? 0.035 : 0.03);
+    final contentTopSpacing = screenHeight * (isTablet ? 0.05 : 0.04);
+    final formTopSpacing = screenHeight * 0.02;
+    final buttonVerticalPadding = screenHeight * (isTablet ? 0.025 : 0.02);
+    final buttonHorizontalPadding = screenWidth * (isTablet ? 0.042 : 0.06);
+    final shadowBlurRadius = screenWidth * (isTablet ? 0.032 : 0.05);
+    final shadowOffset = screenHeight * 0.01;
+    final contentTranslateY = -(screenHeight * (isTablet ? 0.04 : 0.035));
+    final twoColumnSpacing = screenWidth * 0.032;
+    final bottomSpacing = screenHeight * 0.025;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -199,14 +202,14 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
                               depth: 2,
                               color: Colors.white.withOpacity(0.2),
                             ),
-                            padding: EdgeInsets.all(isTablet ? 16 : 12),
+                            padding: EdgeInsets.all(backButtonPadding),
                             child: Icon(
                               Icons.arrow_back_rounded,
                               color: Colors.white,
-                              size: isTablet ? 24 : 20,
+                              size: backButtonSize,
                             ),
                           ),
-                          SizedBox(width: isTablet ? 20 : 16),
+                          SizedBox(width: horizontalPadding * 0.7),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,25 +217,17 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
                                 Text(
                                   'New Leave Request',
                                   style: TextStyle(
-                                    fontSize: _getResponsiveFontSize(
-                                      screenWidth,
-                                      26,
-                                      30,
-                                    ),
+                                    fontSize: titleFontSize,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                     letterSpacing: -0.5,
                                   ),
                                 ),
-                                SizedBox(height: isTablet ? 6 : 4),
+                                SizedBox(height: screenHeight * 0.005),
                                 Text(
                                   'Fill in the details below',
                                   style: TextStyle(
-                                    fontSize: _getResponsiveFontSize(
-                                      screenWidth,
-                                      15,
-                                      17,
-                                    ),
+                                    fontSize: subtitleFontSize,
                                     color: Colors.white70,
                                     fontWeight: FontWeight.w400,
                                   ),
@@ -251,31 +246,27 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
             // Content Section
             Expanded(
               child: Container(
-                transform: Matrix4.translationValues(
-                  0,
-                  isTablet ? -32 : -28,
-                  0,
-                ),
+                transform: Matrix4.translationValues(0, contentTranslateY, 0),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF8F9FA),
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(isTablet ? 32 : 28),
-                    topRight: Radius.circular(isTablet ? 32 : 28),
+                    topLeft: Radius.circular(borderRadius),
+                    topRight: Radius.circular(borderRadius),
                   ),
                 ),
                 child: Container(
                   width: double.infinity,
-                  constraints:
-                      isTablet ? const BoxConstraints(maxWidth: 800) : null,
-                  margin:
-                      isTablet && screenWidth > 800
-                          ? EdgeInsets.symmetric(
-                            horizontal: (screenWidth - 800) / 2,
-                          )
-                          : null,
+                  constraints: isTablet 
+                      ? BoxConstraints(maxWidth: screenWidth * 0.7) 
+                      : null,
+                  margin: isTablet && screenWidth > 800
+                      ? EdgeInsets.symmetric(
+                          horizontal: (screenWidth - (screenWidth * 0.7)) / 2,
+                        )
+                      : null,
                   child: SingleChildScrollView(
                     padding: EdgeInsets.only(
-                      top: isTablet ? 40 : 32,
+                      top: contentTopSpacing,
                       left: horizontalPadding,
                       right: horizontalPadding,
                       bottom: horizontalPadding,
@@ -287,22 +278,20 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
                         Row(
                           children: [
                             Container(
-                              width: isTablet ? 5 : 4,
-                              height: isTablet ? 28 : 24,
+                              width: headerBarWidth,
+                              height: headerBarHeight,
                               decoration: BoxDecoration(
                                 color: const Color(0xFF6366F1),
-                                borderRadius: BorderRadius.circular(2),
+                                borderRadius: BorderRadius.circular(
+                                  headerBarWidth * 0.5,
+                                ),
                               ),
                             ),
-                            SizedBox(width: isTablet ? 16 : 12),
+                            SizedBox(width: horizontalPadding * 0.5),
                             Text(
                               'Request Details',
                               style: TextStyle(
-                                fontSize: _getResponsiveFontSize(
-                                  screenWidth,
-                                  20,
-                                  24,
-                                ),
+                                fontSize: sectionTitleSize,
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF1C1C1E),
                               ),
@@ -313,32 +302,29 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
                         SizedBox(height: verticalSpacing),
 
                         // Form Fields - Use responsive layout
-                        if (isTablet && screenWidth > 900)
+                        if (isLargeTablet)
                           // Two-column layout for large tablets
-                          _buildTwoColumnLayout()
+                          _buildTwoColumnLayout(twoColumnSpacing, verticalSpacing)
                         else
                           // Single column layout for mobile and small tablets
-                          _buildSingleColumnLayout(),
+                          _buildSingleColumnLayout(verticalSpacing),
 
-                        SizedBox(height: isTablet ? 40 : 32),
+                        SizedBox(height: verticalSpacing * 1.5),
 
                         // Submit Button
                         Container(
                           width: double.infinity,
-                          constraints:
-                              isTablet
-                                  ? const BoxConstraints(maxWidth: 400)
-                                  : null,
+                          constraints: isTablet
+                              ? BoxConstraints(maxWidth: screenWidth * 0.4)
+                              : null,
                           alignment: isTablet ? Alignment.center : null,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(
-                              isTablet ? 20 : 16,
-                            ),
+                            borderRadius: BorderRadius.circular(contentBorderRadius),
                             boxShadow: [
                               BoxShadow(
                                 color: const Color(0xFF6366F1).withOpacity(0.3),
-                                blurRadius: isTablet ? 24 : 20,
-                                offset: const Offset(0, 8),
+                                blurRadius: shadowBlurRadius,
+                                offset: Offset(0, shadowOffset),
                               ),
                             ],
                           ),
@@ -347,13 +333,18 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
                               if (state is LeaveSuccess) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: const Text(
+                                    content: Text(
                                       'Leave submit successfully!',
+                                      style: TextStyle(
+                                        fontSize: screenWidth * 0.035,
+                                      ),
                                     ),
                                     backgroundColor: const Color(0xFF10B981),
                                     behavior: SnackBarBehavior.floating,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(
+                                        screenWidth * 0.03,
+                                      ),
                                     ),
                                   ),
                                 );
@@ -361,14 +352,19 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
                                 if (state is LeaveFailure) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: const Text(
+                                      content: Text(
                                         'Leave not submit!',
-                                        style: TextStyle(color: Colors.black),
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: screenWidth * 0.035,
+                                        ),
                                       ),
                                       backgroundColor: Colors.red,
                                       behavior: SnackBarBehavior.floating,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: BorderRadius.circular(
+                                          screenWidth * 0.03,
+                                        ),
                                       ),
                                     ),
                                   );
@@ -381,13 +377,13 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
                                 style: NeumorphicStyle(
                                   color: const Color(0xFF6366F1),
                                   boxShape: NeumorphicBoxShape.roundRect(
-                                    BorderRadius.circular(isTablet ? 20 : 16),
+                                    BorderRadius.circular(contentBorderRadius),
                                   ),
                                   depth: 4,
                                 ),
                                 padding: EdgeInsets.symmetric(
-                                  vertical: isTablet ? 20 : 16,
-                                  horizontal: isTablet ? 32 : 24,
+                                  vertical: buttonVerticalPadding,
+                                  horizontal: buttonHorizontalPadding,
                                 ),
                                 child: Center(
                                   child: Row(
@@ -396,17 +392,13 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
                                       Icon(
                                         Icons.send_rounded,
                                         color: Colors.white,
-                                        size: isTablet ? 24 : 20,
+                                        size: buttonIconSize,
                                       ),
-                                      SizedBox(width: isTablet ? 12 : 8),
+                                      SizedBox(width: screenWidth * 0.025),
                                       Text(
                                         'Submit Leave Request',
                                         style: TextStyle(
-                                          fontSize: _getResponsiveFontSize(
-                                            screenWidth,
-                                            16,
-                                            18,
-                                          ),
+                                          fontSize: buttonFontSize,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                         ),
@@ -419,7 +411,7 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
                           ),
                         ),
 
-                        SizedBox(height: verticalSpacing),
+                        SizedBox(height: bottomSpacing),
                       ],
                     ),
                   ),
@@ -432,10 +424,7 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
     );
   }
 
-  Widget _buildSingleColumnLayout() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final verticalSpacing = _getResponsiveSpacing(screenWidth, 20, 28);
-
+  Widget _buildSingleColumnLayout(double verticalSpacing) {
     return Column(
       children: [
         LeaveFormField(
@@ -488,10 +477,7 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
     );
   }
 
-  Widget _buildTwoColumnLayout() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final verticalSpacing = _getResponsiveSpacing(screenWidth, 20, 28);
-
+  Widget _buildTwoColumnLayout(double columnSpacing, double verticalSpacing) {
     return Column(
       children: [
         // First row - Leave Type and From Date
@@ -508,7 +494,7 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
                 hint: "e.g., Full Day, Half Day",
               ),
             ),
-            const SizedBox(width: 24),
+            SizedBox(width: columnSpacing),
             Expanded(
               child: LeaveFormField(
                 label: "From Date",

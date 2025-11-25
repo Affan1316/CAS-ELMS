@@ -9,7 +9,7 @@ Widget buildTeacherAvatar() {
               ? constraints.maxWidth
               : constraints.maxHeight;
 
-      return Container(
+      return SizedBox(
         width: size,
         height: size,
         child: ClipRRect(

@@ -5,7 +5,7 @@ import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presenta
 import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presentation/bloc/add_instructor_state.dart';
 
 class GenderSelection extends StatelessWidget {
-  const GenderSelection({Key? key}) : super(key: key);
+  const GenderSelection({super.key});
 
   @override
   Widget build(BuildContext context) {

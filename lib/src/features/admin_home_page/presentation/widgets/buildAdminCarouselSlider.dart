@@ -7,7 +7,7 @@ import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/b
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_event.dart';
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_state.dart';
 
-Widget buildAdminCarouselSlider(PageController _pageController) {
+Widget buildAdminCarouselSlider(PageController pageController) {
   final carouselItems = [
     {
       'title': 'Course Detail',
@@ -44,10 +44,10 @@ Widget buildAdminCarouselSlider(PageController _pageController) {
 
           return Column(
             children: [
-              Container(
+              SizedBox(
                 height: carouselHeight,
                 child: PageView.builder(
-                  controller: _pageController,
+                  controller: pageController,
                   onPageChanged: (index) {
                     context.read<AdminHomeBloc>().add(PageChangedEvent(index));
                   },

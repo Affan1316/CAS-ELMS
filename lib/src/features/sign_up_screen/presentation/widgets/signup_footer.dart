@@ -3,7 +3,7 @@ import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/pr
 
 class SignUpFooter extends StatelessWidget {
   final String id;
-  const SignUpFooter({Key? key, required this.id}) : super(key: key);
+  const SignUpFooter({super.key, required this.id});
 
   @override
   Widget build(BuildContext context) {

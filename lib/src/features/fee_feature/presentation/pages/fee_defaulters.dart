@@ -211,10 +211,10 @@ class _FeeDefaultersState extends State<FeeDefaulters> {
                   icon: const Icon(Icons.arrow_downward_rounded),
                   label: const Text('Select Month'),
                   style: const ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(
+                    backgroundColor: WidgetStatePropertyAll(
                       Color(0xFF0E96C5),
                     ),
-                    foregroundColor: MaterialStatePropertyAll(Colors.white),
+                    foregroundColor: WidgetStatePropertyAll(Colors.white),
                   ),
                 ),
               ],

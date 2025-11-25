@@ -1,5 +1,4 @@
   // Function to generate bar chart groups
-  import 'dart:ui';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';

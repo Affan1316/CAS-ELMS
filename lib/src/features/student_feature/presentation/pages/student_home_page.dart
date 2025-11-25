@@ -4,14 +4,7 @@ import 'package:flutter_cas_app_main/src/features/student_feature/data/student_e
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildHeader.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildPopularTeachersSection.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildQuickActions.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildRecentActivities.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/buildStatsCard.dart';
-import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/getTimeConversions.dart';
-import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/services/notification_service.dart';
-import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/services/work_manager_service.dart';
 
-import '../../../my_student_attendence/presentation/student_adentence_page.dart';
-import '../../../workshop_geofencing/Data/services/geofence_sevice.dart';
 import '../bloc/Student_feature_event.dart';
 import '../bloc/student_feature_bloc.dart';
 
@@ -113,7 +106,7 @@ class _StudentHomePageState extends State<StudentHomePage>
     super.initState();
     
     context.read<StudentFeatureBloc>().add(CheckPermissionEvent());
-    debugPrint("${widget.studentEntityClass.name}");
+    debugPrint(widget.studentEntityClass.name);
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,

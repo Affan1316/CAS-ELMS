@@ -49,7 +49,7 @@ Widget buildAdminOverviewSection() {
 // FILE: lib/src/features/admin_home_page/presentation/widgets/buildFeaturesGrid.dart
 
 Widget buildFeaturesGrid(
-  AnimationController _animationController, {
+  AnimationController animationController, {
   int? pendingLeaveCount,
 }) {
   final features = [
@@ -147,14 +147,14 @@ Widget buildFeaturesGrid(
           itemCount: features.length,
           itemBuilder: (context, index) {
             return AnimatedBuilder(
-              animation: _animationController,
+              animation: animationController,
               builder: (context, child) {
                 final slideAnimation = Tween<Offset>(
                   begin: Offset(0, 0.3),
                   end: Offset.zero,
                 ).animate(
                   CurvedAnimation(
-                    parent: _animationController,
+                    parent: animationController,
                     curve: Interval(0, 1.0, curve: Curves.easeOutCubic),
                   ),
                 );

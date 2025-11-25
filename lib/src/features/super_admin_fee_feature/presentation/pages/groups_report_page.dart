@@ -11,7 +11,7 @@ import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presen
 /// - Shows totals of all groups and totals of visible groups (when searching)
 /// - Uses existing bloc cache to compute totals (only counts loaded summaries)
 class GroupsReportPage extends StatefulWidget {
-  const GroupsReportPage({Key? key}) : super(key: key);
+  const GroupsReportPage({super.key});
 
   @override
   State<GroupsReportPage> createState() => _GroupsReportPageState();
@@ -47,8 +47,8 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
 
   // simple K/M formatter (same style as the card)
   String _compactAmount(double value) {
-    if (value.abs() >= 1e6) return (value / 1e6).toStringAsFixed(1) + 'M';
-    if (value.abs() >= 1e3) return (value / 1e3).toStringAsFixed(1) + 'K';
+    if (value.abs() >= 1e6) return '${(value / 1e6).toStringAsFixed(1)}M';
+    if (value.abs() >= 1e3) return '${(value / 1e3).toStringAsFixed(1)}K';
     return value.toStringAsFixed(2);
   }
 
@@ -127,7 +127,7 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Received ${_compactAmount(receivedAll)} • ${loadedCount}/${summaries.length} loaded',
+                    'Received ${_compactAmount(receivedAll)} • $loadedCount/${summaries.length} loaded',
                     style: theme.textTheme.bodySmall,
                   ),
                 ],
@@ -394,16 +394,17 @@ class ResponsiveGroupCard extends StatelessWidget {
   final double cornerRadius;
 
   const ResponsiveGroupCard({
-    Key? key,
+    super.key,
     required this.groupName,
     required this.summary,
     this.cornerRadius = 14.0,
-  }) : super(key: key);
+  });
 
   Color _statusColor(double remaining, double percent) {
     // Use both absolute remaining and percent to determine urgency
-    if (remaining <= 0 || percent >= 100)
+    if (remaining <= 0 || percent >= 100) {
       return const Color(0xFF00C48C); // success
+    }
     if (percent < 33) return const Color(0xFFFF6B6B); // low progress = danger
     if (percent < 66) return const Color(0xFFFFA502); // warning
     return const Color(0xFFFFD166); // approaching completion
@@ -411,8 +412,8 @@ class ResponsiveGroupCard extends StatelessWidget {
 
   String _compactAmount(double value) {
     // simple K/M formatter
-    if (value.abs() >= 1e6) return (value / 1e6).toStringAsFixed(1) + 'M';
-    if (value.abs() >= 1e3) return (value / 1e3).toStringAsFixed(1) + 'K';
+    if (value.abs() >= 1e6) return '${(value / 1e6).toStringAsFixed(1)}M';
+    if (value.abs() >= 1e3) return '${(value / 1e3).toStringAsFixed(1)}K';
     return value.toStringAsFixed(2);
   }
 

@@ -18,7 +18,7 @@ class StudentProfilePageState extends State<StudentProfilePage>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
-  bool _isFlipped = false;
+  final bool _isFlipped = false;
 
   // Neomorphic color palette
   final Color _backgroundColor = Color(0xFFE6F3F7);

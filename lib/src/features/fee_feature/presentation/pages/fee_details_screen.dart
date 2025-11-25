@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/data/data_source/data_service_fee_feature.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_state.dart';
@@ -79,7 +78,6 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                 height: 700,
                 color: const Color.fromARGB(255, 101, 232, 19),
               );
-              ;
             }
 
             if (state is AddedToPendingFee) {

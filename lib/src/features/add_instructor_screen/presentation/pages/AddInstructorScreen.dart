@@ -11,7 +11,7 @@ import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presenta
 import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presentation/widgets/SubmitButton.dart';
 
 class AddInstructorPage extends StatefulWidget {
-  const AddInstructorPage({Key? key}) : super(key: key);
+  const AddInstructorPage({super.key});
 
   @override
   State<AddInstructorPage> createState() => _AddInstructorPageState();

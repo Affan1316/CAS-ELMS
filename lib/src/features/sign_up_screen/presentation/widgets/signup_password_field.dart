@@ -7,12 +7,12 @@ class SignUpPasswordField extends StatelessWidget {
   final VoidCallback onToggleVisibility;
 
   const SignUpPasswordField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.validator,
     required this.isPasswordVisible,
     required this.onToggleVisibility,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

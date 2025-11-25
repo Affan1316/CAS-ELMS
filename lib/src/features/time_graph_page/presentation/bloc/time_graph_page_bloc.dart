@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/features/time_graph_page/data/dummy_data.dart';
-import 'package:meta/meta.dart';
 
 part 'time_graph_page_event.dart';
 part 'time_graph_page_state.dart';
@@ -85,9 +84,9 @@ class TimeGraphPageBloc extends Bloc<TimeGraphPageEvent, TimeGraphPageState> {
     await Future.delayed(const Duration(seconds: 2));
     var data = studyData['This Month']!.where((data) {
       return data.date.isAfter(
-            event.dateRange!.start.subtract(const Duration(days: 1)),
+            event.dateRange.start.subtract(const Duration(days: 1)),
           ) &&
-          data.date.isBefore(event.dateRange!.end.add(const Duration(days: 1)));
+          data.date.isBefore(event.dateRange.end.add(const Duration(days: 1)));
     }).toList();
     selectiveFilter = 'Custom';
     totalHours = data.fold(0.0, (sum, item) => sum + item.hours);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_cas_app_main/src/features/quiz/data/quiz_manager.dart';
-import 'package:flutter_cas_app_main/src/features/quiz/presentation/pages/quiz_intro_screen.dart';
-import 'package:flutter_cas_app_main/src/features/quiz/utils/resposive.dart';
+import 'package:flutter_cas_app_main/src/features/student_quiz_page/data/quiz_manager.dart';
+import 'package:flutter_cas_app_main/src/features/student_quiz_page/presentation/pages/quiz_intro_screen.dart';
+import 'package:flutter_cas_app_main/src/features/student_quiz_page/utils/resposive.dart';
 
 class QuizCardUpdated extends StatefulWidget {
   final Map<String, dynamic> category;

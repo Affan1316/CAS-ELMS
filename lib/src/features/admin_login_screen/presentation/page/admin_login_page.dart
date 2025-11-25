@@ -20,6 +20,8 @@ import 'package:flutter_cas_app_main/src/features/super_admin_feature/super_admi
 // --- END ADDED ---
 
 class AdminLoginScreen extends StatefulWidget {
+  const AdminLoginScreen({super.key});
+
   @override
   _AdminLoginScreenState createState() => _AdminLoginScreenState();
 }

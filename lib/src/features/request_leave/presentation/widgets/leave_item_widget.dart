@@ -1,5 +1,4 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:flutter/material.dart';
 import 'status_chip.dart';
 
 class LeaveItemWidget extends StatelessWidget {

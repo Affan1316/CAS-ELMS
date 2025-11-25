@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_cas_app_main/src/features/alumni_page/presentation/pages/year_selector_page.dart';
-import 'package:flutter_cas_app_main/src/features/assignment_screen/presentation/pages/assignments_page.dart';
-import 'package:flutter_cas_app_main/src/features/leave_request/presentation/pages/list_of_request_leave_page.dart';
-import 'package:flutter_cas_app_main/src/features/quiz/presentation/pages/quiz_home_screen.dart';
 import 'package:flutter_cas_app_main/src/features/request_leave/presentation/pages/history_leaves_page.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_profile_page.dart';
+import 'package:flutter_cas_app_main/src/features/student_assignment_page/presentation/pages/assignments_list_page.dart';
+import 'package:flutter_cas_app_main/src/features/leave_request/presentation/pages/list_of_request_leave_page.dart';
+import 'package:flutter_cas_app_main/src/features/student_quiz_page/presentation/pages/quiz_home_screen.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../my_student_attendence/presentation/student_adentence_page.dart';
@@ -18,7 +15,7 @@ Widget buildQuickActions(String studentName,String section) {
       'color': Color(0xFF6366F1),
       'count': '5 Due',
       'isUrgent': true,
-      'screen': InterviewStagesPage(),
+      'screen': AssignmentsListPage(),
     },
     {
       'title': 'IQ Test',

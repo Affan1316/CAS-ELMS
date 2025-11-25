@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_cas_app_main/src/features/quiz/data/quiz_manager.dart';
-import 'package:flutter_cas_app_main/src/features/quiz/domain/services/google_sheets_service.dart';
-import 'package:flutter_cas_app_main/src/features/quiz/utils/resposive.dart';
+import 'package:flutter_cas_app_main/src/features/student_quiz_page/data/quiz_manager.dart';
+import 'package:flutter_cas_app_main/src/features/student_quiz_page/domain/services/google_sheets_service.dart';
+import 'package:flutter_cas_app_main/src/features/student_quiz_page/utils/resposive.dart';
 import 'quiz_home_screen.dart';
 
 class ResultScreenUpdated extends StatefulWidget {

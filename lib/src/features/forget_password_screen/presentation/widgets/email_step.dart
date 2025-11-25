@@ -7,12 +7,12 @@ class EmailStep extends StatelessWidget {
   final String? Function(String?) validateEmail;
 
   const EmailStep({
-    Key? key,
+    super.key,
     required this.emailController,
     required this.isLoading,
     required this.onSubmit,
     required this.validateEmail,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -24,9 +24,9 @@ class FeeDefaultersGroupDetailPage extends StatelessWidget {
 
     // Safe access to potentially null fields
     final String remainingFeeText =
-        'PKR ${feeDefaultersCollective.remaingFee?.toString() ?? '0'}';
+        'PKR ${feeDefaultersCollective.remaingFee.toString() ?? '0'}';
     final String totalDefaultersText =
-        '${feeDefaultersCollective.total?.toString() ?? '0'}';
+        feeDefaultersCollective.total.toString() ?? '0';
 
     return SafeArea(
       child: Scaffold(
