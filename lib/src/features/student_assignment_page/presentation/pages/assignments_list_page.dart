@@ -234,7 +234,7 @@ class _AssignmentsListPageState extends State<AssignmentsListPage> {
                   ),
                 ),
               );
-            }).toList(),
+            }),
 
             // Bottom Padding
             SizedBox(height: size.height * 0.02),
