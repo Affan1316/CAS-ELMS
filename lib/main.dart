@@ -32,7 +32,6 @@ import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/get_super_admin_fee_notifications_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/bloc/group_time_tracker_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/pages/workshop_time_tracker.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 
 import 'src/features/my_student_attendence/presentation/bloc/student_attendence_bloc_bloc.dart';
@@ -126,8 +125,8 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.system,
-          // home: SplashScreen(),
-          home: WorkshopTimeTracker(),
+          home: SplashScreen(),
+          // home: WorkshopTimeTracker(),
         ),
       ),
     );

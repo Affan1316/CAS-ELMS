@@ -12,14 +12,14 @@ import '../widgets/header_background.dart';
 import '../widgets/header_text.dart';
 import '../widgets/lifted_carousel.dart';
 
-class WorkshopTimeTracker extends StatefulWidget {
-  const WorkshopTimeTracker({super.key});
+class GroupWorkshopTimePage extends StatefulWidget {
+  const GroupWorkshopTimePage({super.key});
 
   @override
-  State<WorkshopTimeTracker> createState() => _WorkshopTimeTrackerState();
+  State<GroupWorkshopTimePage> createState() => _GroupWorkshopTimePageState();
 }
 
-class _WorkshopTimeTrackerState extends State<WorkshopTimeTracker> {
+class _GroupWorkshopTimePageState extends State<GroupWorkshopTimePage> {
   int? selectedCourse;
   late List<Widget> courseCards;
 
