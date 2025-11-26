@@ -8,7 +8,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../my_student_attendence/presentation/student_adentence_page.dart';
 
-Widget buildQuickActions(String studentName, String section) {
+Widget buildQuickActions(String studentName, String section, String studentId) {
   final List<Map<String, dynamic>> studentFeatures = [
     {
       'title': 'My Assignments',
