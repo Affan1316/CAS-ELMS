@@ -7,12 +7,12 @@ class SelectCourseEvent extends GroupTimeTrackerEvent {
   final String courseName;
 
   SelectCourseEvent(this.courseName);
-
 }
+
+class LoadAllGroupsDataEvent extends GroupTimeTrackerEvent {}
 
 class SelectGroupEvent extends GroupTimeTrackerEvent {
   final String groupName;
 
   SelectGroupEvent(this.groupName);
-
 }

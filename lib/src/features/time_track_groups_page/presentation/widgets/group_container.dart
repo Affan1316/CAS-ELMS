@@ -1,5 +1,6 @@
 import 'package:flutter_cas_app_main/src/core/theme/app_colors.dart';
-import 'package:flutter_cas_app_main/src/features/time_graph_page/data/app_color.dart' hide AppColors;
+import 'package:flutter_cas_app_main/src/features/time_graph_page/data/app_color.dart'
+    hide AppColors;
 import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/widgets/android_custom_paint.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
@@ -40,7 +41,11 @@ class GroupsContainer extends StatelessWidget {
                   SizedBox(width: 6),
                   Text(
                     groupName,
-                    style: TextStyle(fontSize: TextSizes.titleMedium),
+                    style: TextStyle(
+                      fontSize: TextSizes.titleMedium,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ],
               ),

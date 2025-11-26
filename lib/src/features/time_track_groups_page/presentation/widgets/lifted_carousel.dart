@@ -175,15 +175,15 @@ class _CourseCardState extends State<CourseCard> {
   Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: BoxConstraints(
-        minHeight: 190,
-        maxHeight: 190,
+        minHeight: 160,
+        maxHeight: 160,
         minWidth: 160,
       ),
       child: GestureDetector(
         onTap: widget.onPressed,
         child: Neumorphic(
           style: NeumorphicStyle(
-            color: AppColors.background,
+            color: AppColors.containerColor,
             depth: isSelected ? -6 : 6,
             boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(16)),
           ),
@@ -199,12 +199,15 @@ class _CourseCardState extends State<CourseCard> {
                       child: Image.asset(widget.imgPath!, fit: BoxFit.cover),
                     ),
                 SizedBox(height: 22),
-                Text(
-                  widget.courseName,
-                  style: TextStyle(
-                    fontSize: TextSizes.titleMedium,
-                    // fontWeight: FontWeight.bold,
-                    fontWeight: FontWeight.w500,
+                FittedBox(
+                  child: Text(
+                    widget.courseName,
+                    style: TextStyle(
+                      fontSize: TextSizes.titleMedium,
+                      // fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
               ],

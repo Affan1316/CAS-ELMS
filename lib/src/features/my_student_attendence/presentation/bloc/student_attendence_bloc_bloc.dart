@@ -1,11 +1,17 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
 import 'package:flutter_cas_app_main/src/features/my_student_attendence/data/reposetory/student_attendence_firebase.dart';
+import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/services/location_service.dart';
+import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Domain/repository/hive_repository.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../../../workshop_geofencing/Data/getTimeConversions.dart';
 import '../../../workshop_geofencing/Data/services/geofence_sevice.dart';
+import '../../../workshop_geofencing/Data/services/notification_service.dart';
+import '../../../workshop_geofencing/Domain/repository/shared_preference_repository.dart';
 import '../../data/model/model_classes.dart';
 
 part 'student_attendence_bloc_event.dart';
@@ -15,18 +21,16 @@ class StudentAttendenceBloc extends Bloc<AttendanceEvent, AttendanceState> {
   StudentAttendanceFirebase firebase = StudentAttendanceFirebase();
   AuthService authService = AuthService();
 
-  StudentAttendenceBloc() : super(AttendanceLoading()){
+  StudentAttendenceBloc() : super(AttendanceLoading()) {
     on<LoadAttendance>(_onLoadAttendance);
     on<LocationCheckEvent>(_onLocationCheckEvent);
   }
 
-
-
   void _onLoadAttendance(
-      LoadAttendance event, Emitter<AttendanceState> emit) async {
+    LoadAttendance event,
+    Emitter<AttendanceState> emit,
+  ) async {
     try {
-
-
       final user = await authService.getSavedEmail();
       final userId = await authService.getSavedStudentId();
 
@@ -37,7 +41,9 @@ class StudentAttendenceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         // Emit the new state with the loaded data
         // Choose the date range you want to show. Here I use last 30 days.
         final end = DateTime.now();
-        final start = end.subtract(const Duration(days: 29)); // inclusive 30 days
+        final start = end.subtract(
+          const Duration(days: 29),
+        ); // inclusive 30 days
 
         // Build a full list filling missing dates as Absent
         final fullRecords = fillMissingWithAbsent(
@@ -47,31 +53,53 @@ class StudentAttendenceBloc extends Bloc<AttendanceEvent, AttendanceState> {
           skipWeekends: false, // set false if you want weekends included
         );
 
-
-
-        emit(AttendanceLoaded(student:std,records: fullRecords));
-      }else{
+        emit(AttendanceLoaded(student: std, records: fullRecords));
+      } else {
         emit(AttendanceError(message: 'AuthError User Not Found.'));
       }
-
-
-
     } catch (e) {
       // Emit an error state if something goes wrong
       emit(AttendanceError(message: 'Failed to load attendance data.'));
     }
   }
 
-
-  FutureOr<void> _onLocationCheckEvent(LocationCheckEvent event, Emitter<AttendanceState> emit) {
-    MyGeofenceService().reCreatefence();
+  FutureOr<void> _onLocationCheckEvent(
+    LocationCheckEvent event,
+    Emitter<AttendanceState> emit,
+  ) async {
+    // MyGeofenceService().reCreateFence();
     // getting location trigger event quicker
-    Geolocator.getCurrentPosition();
+    HiveRepository hive = HiveRepository();
+    SharePreferenceRepository sharePreferenceRepository =
+        SharePreferenceRepository();
+    NotificationService notificationService = NotificationService();
+    bool isLocEnabled = await Geolocator.isLocationServiceEnabled();
 
+    if (isLocEnabled) {
+      Position position = await Geolocator.getCurrentPosition();
+      if (isInGeofenceMeters(
+        pointLat: position.latitude,
+        pointLon: position.longitude,
+      )) {
+        log("enter at location check event");
+        await LocationServiceManager().startLocationService();
+        MyGeofenceService.onEnter(
+          hive,
+          sharePreferenceRepository,
+          notificationService,
+        );
+      } else {
+        log("exit at location check event");
+        MyGeofenceService.onExit(
+          hive,
+          sharePreferenceRepository,
+          notificationService,
+        );
+        await LocationServiceManager().stopLocationService();
+      }
+    }
   }
 }
-
-
 
 // --- Helpers --- //
 
@@ -116,18 +144,24 @@ DateTime? _parseCustomDate(String s) {
 
 String _normalizedKey(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-'
-        '${d.month.toString().padLeft(2, '0')}-'
-        '${d.day.toString().padLeft(2, '0')}';
+    '${d.month.toString().padLeft(2, '0')}-'
+    '${d.day.toString().padLeft(2, '0')}';
 
 String _displayDate(DateTime d) =>
     '${d.day.toString().padLeft(2, '0')}-'
-        '${d.month.toString().padLeft(2, '0')}-'
-        '${d.year.toString().padLeft(4, '0')}';
+    '${d.month.toString().padLeft(2, '0')}-'
+    '${d.year.toString().padLeft(4, '0')}';
 
 // weekday names: DateTime.weekday is 1..7 where 1 = Monday
 String _weekdayName(DateTime d) {
   const names = [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
   ];
   return names[d.weekday - 1];
 }
@@ -152,11 +186,13 @@ List<AttendanceRecord> fillMissingWithAbsent({
   }
 
   final List<AttendanceRecord> result = [];
-  for (var d = DateTime(start.year, start.month, start.day);
-  !d.isAfter(DateTime(end.year, end.month, end.day));
-  d = d.add(const Duration(days: 1))) {
-
-    if (skipWeekends && (d.weekday == DateTime.saturday || d.weekday == DateTime.sunday)) {
+  for (
+    var d = DateTime(start.year, start.month, start.day);
+    !d.isAfter(DateTime(end.year, end.month, end.day));
+    d = d.add(const Duration(days: 1))
+  ) {
+    if (skipWeekends &&
+        (d.weekday == DateTime.saturday || d.weekday == DateTime.sunday)) {
       continue;
     }
 
@@ -166,12 +202,14 @@ List<AttendanceRecord> fillMissingWithAbsent({
       result.add(map[key]!);
     } else {
       // Create a synthetic Absent record. Adjust the constructor to your model.
-      result.add(AttendanceRecord(
-        date: _displayDate(d),          // human-friendly display date
-        day: _weekdayName(d),           // correct weekday name
-        status: AttendanceStatus.absent,               // synthesized status
-        // add other fields as needed
-      ));
+      result.add(
+        AttendanceRecord(
+          date: _displayDate(d), // human-friendly display date
+          day: _weekdayName(d), // correct weekday name
+          status: AttendanceStatus.absent, // synthesized status
+          // add other fields as needed
+        ),
+      );
     }
   }
 

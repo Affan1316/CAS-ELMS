@@ -5,6 +5,9 @@ import 'package:flutter_cas_app_main/src/features/student_feature/presentation/b
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/StudentDetailPage.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/webview_screen.dart';
+
+import '../../domain/webview_page_type.dart';
 
 class StudentProfilePage extends StatefulWidget {
   final String id;
@@ -388,16 +391,37 @@ class StudentProfilePageState extends State<StudentProfilePage>
                       SizedBox(height: 16),
                       _buildNeomorphicMenuItem(
                         Icons.settings_outlined,
-                        'Profile Settings',
+                        'Privacy policy',
                         isTablet,
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => const WebViewScreen(
+                                    pageType: WebViewPageType.privacyPolicy,
+                                  ),
+                            ),
+                          );
+                        },
                       ),
                       SizedBox(height: 16),
                       _buildNeomorphicMenuItem(
                         Icons.lock_outline,
-                        'Change Password',
+                        'Terms and Conditions',
                         isTablet,
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => const WebViewScreen(
+                                    pageType:
+                                        WebViewPageType.termsAndConditions,
+                                  ),
+                            ),
+                          );
+                        },
                       ),
                       SizedBox(height: 16),
                       _buildNeomorphicMenuItem(
@@ -405,7 +429,10 @@ class StudentProfilePageState extends State<StudentProfilePage>
                         'Logout',
                         isTablet,
                         isLogout: true,
-                        onTap: () {},
+                        onTap: () async {
+                          // await  WorkManagerService.cancelWorkManger();
+                          // await  MyGeofenceService.dispose();
+                        },
                       ),
 
                       SizedBox(height: isTablet ? 24 : 16),

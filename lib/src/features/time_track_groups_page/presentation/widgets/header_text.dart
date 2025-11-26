@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cas_app_main/src/core/theme/app_colors.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 
 class HeaderText extends StatelessWidget {
@@ -11,6 +12,7 @@ class HeaderText extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
+          color: AppColors.textPrimary,
           fontSize: getRespSize(context, size: TextSizes.headlineLarge),
           fontWeight: FontWeight.w700,
         ),

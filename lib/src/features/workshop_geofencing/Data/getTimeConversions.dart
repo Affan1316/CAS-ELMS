@@ -1,4 +1,4 @@
-
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:time_config_checker/time_config_checker.dart';
 
@@ -7,7 +7,6 @@ String formatDuration(Duration d) {
   String twoDigitMinutes = twoDigits(d.inMinutes.remainder(60));
   return "${twoDigits(d.inHours)}:$twoDigitMinutes";
 }
-
 
 int getMinutesFromStringDuration(String duration) {
   // Split the string using ':' as the separator
@@ -33,6 +32,7 @@ String formatDate({required DateTime date}) {
 String formatTimeFromDate({required DateTime date}) {
   return DateFormat('hh:mm a').format(date);
 }
+
 double convertHourStringToDouble(String hourString) {
   final parts = hourString.split(":");
   final hours = int.parse(parts[0]);
@@ -42,18 +42,34 @@ double convertHourStringToDouble(String hourString) {
   return formattedHours;
 }
 
-
-
 Future<DateTime> getCurrentDate() async {
-  
-    // If there is a network issue, check local time configuration
-    TimeConfig timeConfig = await TimeConfigChecker().getTimeConfig();
-    if (timeConfig.isAutomaticTime && timeConfig.isAutomaticTimeZone) {
-      // Use local device time if automatic time and timezone are enabled
-      return DateTime.now();
-    } else {
-      // Throw an error if automatic time/timezone is not enabled
-      throw Exception('Unable to fetch network time and automatic time is disabled.');
-    }
-  
+  // If there is a network issue, check local time configuration
+  TimeConfig timeConfig = await TimeConfigChecker().getTimeConfig();
+  if (timeConfig.isAutomaticTime && timeConfig.isAutomaticTimeZone) {
+    // Use local device time if automatic time and timezone are enabled
+    return DateTime.now();
+  } else {
+    // Throw an error if automatic time/timezone is not enabled
+    throw Exception(
+      'Unable to fetch network time and automatic time is disabled.',
+    );
+  }
+}
+
+bool isInGeofenceMeters({
+  required double pointLat,
+  required double pointLon,
+  double centerLat = 29.382988,
+  double centerLon = 71.715538,
+  double radiusMeters = 50,
+}) {
+  double distanceMeters = Geolocator.distanceBetween(
+    centerLat,
+    centerLon,
+    pointLat,
+    pointLon,
+  );
+
+  // --- 4. Check against the geofence radius ---
+  return distanceMeters <= radiusMeters;
 }

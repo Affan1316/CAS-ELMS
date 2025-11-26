@@ -33,13 +33,10 @@ class AppColors {
   static const Color iconColor = Color(0xFF1A1A1A);
   static const Color appBarTitle = Color(0xFF1A1A1A);
 
-
-
   static const Color background = Color(0xFFE0E5EC);
   static const Color darkBackground = Color(0xFFC0C3C7);
   static const Color primary = Colors.blue;
   static const Color accent = Colors.teal;
   static const Color text = Colors.black87;
-  static  Color? containerColor = Colors.grey[100];
-
+  static Color? containerColor = Colors.grey[100];
 }
