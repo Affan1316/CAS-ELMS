@@ -1,26 +1,25 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/time_graph_page/data/app_color.dart';
-import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/bloc/group_time_tracker_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/widgets/android_custom_paint.dart';
-import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/widgets/animated_text.dart';
-import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/widgets/group_container.dart';
-import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/widgets/header_background.dart';
-import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/widgets/header_text.dart';
-import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/widgets/lifted_carousel.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../time_graph_page/data/app_color.dart';
+import '../bloc/group_time_tracker_bloc.dart';
+import '../widgets/android_custom_paint.dart';
+import '../widgets/animated_text.dart';
+import '../widgets/group_container.dart';
+import '../widgets/header_background.dart';
+import '../widgets/header_text.dart';
+import '../widgets/lifted_carousel.dart';
 
-
-class WorkshopTimeTracker extends StatefulWidget {
-  const WorkshopTimeTracker({super.key});
+class GroupWorkshopTimePage extends StatefulWidget {
+  const GroupWorkshopTimePage({super.key});
 
   @override
-  State<WorkshopTimeTracker> createState() => _WorkshopTimeTrackerState();
+  State<GroupWorkshopTimePage> createState() => _GroupWorkshopTimePageState();
 }
 
-class _WorkshopTimeTrackerState extends State<WorkshopTimeTracker> {
+class _GroupWorkshopTimePageState extends State<GroupWorkshopTimePage> {
   int? selectedCourse;
   late List<Widget> courseCards;
 
@@ -92,10 +91,12 @@ class _WorkshopTimeTrackerState extends State<WorkshopTimeTracker> {
         intensity: 0.6, // shadow brightness
       ),
       child: Scaffold(
+        backgroundColor: AppColors.background,
         body: CustomScrollView(
           physics: BouncingScrollPhysics(),
           slivers: [
             SliverAppBar(
+              backgroundColor: AppColors.background,
               centerTitle: true,
               title: HeaderText(text: "Workshop Time Tracker"),
               toolbarHeight: context.height * 0.1,
@@ -161,7 +162,7 @@ class _WorkshopTimeTrackerState extends State<WorkshopTimeTracker> {
                   return SliverToBoxAdapter(
                     child: MyAnimatedText(
                       color: Colors.red,
-                      text: "Something went wrong",
+                      text: state.error ?? "Something went wrong",
                     ),
                   );
                 } else {

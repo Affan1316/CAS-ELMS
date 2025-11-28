@@ -15,13 +15,17 @@ class TimeGraphPageLoaded extends TimeGraphPageState {
   final DateTimeRange? dateRange;
   final double? averageHours;
   final double? totalHours;
-  
 
   const TimeGraphPageLoaded({
     required this.studentData,
     this.selectiveFilter,
-    this.dateRange,this.averageHours,this.totalHours, 
+    this.dateRange,
+    this.averageHours,
+    this.totalHours,
   });
 }
 
-class TimeGraphPageError extends TimeGraphPageState {}
+class TimeGraphPageErrorState extends TimeGraphPageState {
+  final String message;
+  const TimeGraphPageErrorState({required this.message});
+}

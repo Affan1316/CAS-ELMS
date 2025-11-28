@@ -9,8 +9,8 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/Fe
 import 'package:flutter_cas_app_main/src/features/student_feature/data/actual_implementation_firebase_repo.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/cached_data.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/domain/firestore_repositry.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/add_student_use_case.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/domain/firestore_repositry.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/read_student_use_case.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';
@@ -212,7 +212,7 @@ class StudentFeatureBloc
         await permissionService.hasLocationPermission();
 
     if (isLocationPermissionGranted && isLocationAlwaysPermissionGranted) {
-      await geofenceService.reCreatefence();
+      await geofenceService.reCreateFence();
       await sharePreferenceRepository.setIsCreated(true);
 
       //To Trigger Geofence event Quicker

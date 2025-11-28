@@ -14,9 +14,7 @@ import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentatio
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_state.dart';
-
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
-
 import 'package:flutter_cas_app_main/src/features/group/data/repositories/group_repository_implementation.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/usecases/add_group_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/usecases/update_group_usecase.dart';
@@ -24,10 +22,6 @@ import 'package:flutter_cas_app_main/src/features/group/presentation/bloc/group_
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/bloc/inquiry_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/leave_request/presentation/bloc/leave_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
-import 'package:flutter_cas_app_main/src/features/student_assignment_page/presentation/pages/assignments_detail_page.dart';
-import 'package:flutter_cas_app_main/src/features/student_assignment_page/presentation/pages/assignments_list_page.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
-
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/get_groups_names_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_home_page.dart';
@@ -37,7 +31,7 @@ import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/get_groups_names_super_admin_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/get_super_admin_fee_notifications_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_bloc.dart';
-
+import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/bloc/group_time_tracker_bloc.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 
 import 'src/features/my_student_attendence/presentation/bloc/student_attendence_bloc_bloc.dart';
@@ -124,6 +118,7 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(create: (context) => FeeAdminBloc()),
           BlocProvider(create: (context) => StudentAttendenceBloc()),
+          BlocProvider(create: (context) => GroupTimeTrackerBloc()),
         ],
         child: MaterialApp(
           title: 'CAS ELMS',
@@ -131,6 +126,7 @@ class MyApp extends StatelessWidget {
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.system,
           home: SplashScreen(),
+          // home: WorkshopTimeTracker(),
         ),
       ),
     );

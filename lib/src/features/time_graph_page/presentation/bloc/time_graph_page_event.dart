@@ -11,17 +11,17 @@ class ThisWeekEvent extends TimeGraphPageEvent {
 
 class LastWeekEvent extends TimeGraphPageEvent {
   const LastWeekEvent();
-  
 }
 
 class ThisMonthEvent extends TimeGraphPageEvent {
   const ThisMonthEvent();
-  
 }
+
 class SelectiveRangeEvent extends TimeGraphPageEvent {
-  
   final DateTimeRange dateRange;
   const SelectiveRangeEvent(this.dateRange);
-  
 }
- 
+
+class InitStudentData extends TimeGraphPageEvent {
+  const InitStudentData();
+}

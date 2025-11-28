@@ -1,11 +1,12 @@
 // FILE: lib/src/features/admin_home_page/presentation/widgets/buildAdminFeatureCard.dart
 
+import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cas_app_main/src/features/add_courses/presentation/pages/add_course_page.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/groups_list_screen.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/create_group_page.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/read_group_page.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/add_inquiry_page.dart';
@@ -13,8 +14,7 @@ import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/inq
 import 'package:flutter_cas_app_main/src/features/leave_request/presentation/pages/admin_leave_request_management.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_enrollment_screen.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/super_admin_fee_notifications_screen.dart';
-import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/pages/workshop_time_tracker.dart';
-import 'package:badges/badges.dart' as badges;
+import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/pages/workshop_time_group_page.dart';
 
 Widget buildAdminFeatureCard(
   Map<String, dynamic> feature,
@@ -223,9 +223,9 @@ void _navigateToScreen(BuildContext context, int index) {
         break;
       case 10:
         print('Leaves Approved - Not implemented yet');
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (context) => WorkshopTimeTracker()));
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => GroupWorkshopTimePage()),
+        );
         break;
       case 11:
         print('Update Group Data - Not implemented yet');

@@ -1,7 +1,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-
+import 'package:intl/intl.dart';
 
 /// Callback function executed when a notification is tapped in the background.
 ///
@@ -35,6 +34,7 @@ class NotificationService {
 
   /// A flag indicating whether the notification service has been initialized.
   bool _isInitialized = false;
+
   /// Getter to check if the notification service is initialized.
   bool get isInit => _isInitialized;
 
@@ -95,7 +95,12 @@ class NotificationService {
   /// [body]: The main content text of the notification.
   /// [payload]: (Optional) A string payload associated with the notification,
   /// defaulting to "open_app". This payload can be retrieved when the notification is tapped.
-  Future<void> showNotification(int id, String title, String body,{String payload = "open_app"}) async {
+  Future<void> showNotification(
+    int id,
+    String title,
+    String body, {
+    String payload = "open_app",
+  }) async {
     try {
       await notificationPlugin.show(
         id,
@@ -106,5 +111,29 @@ class NotificationService {
       );
     } catch (e) {}
     debugPrint("Notification notification shown");
+  }
+
+  Future<void> showSpoofedLocNotification() async {
+    showNotification(
+      123,
+      "⚠️ Spoofed Location Detected",
+      "Please disable mock location apps to ensure accurate tracking.",
+    );
+  }
+
+  Future<void> showExitNotification(DateTime time, String totalTime) async {
+    showNotification(
+      1,
+      "Have a nice day",
+      "You have left the CAS at ${DateFormat("dd/MM/yy hh:mm a").format(time)} with total time: $totalTime and remember to complete assignments!",
+    );
+  }
+
+  Future<void> showEnteredNotification(DateTime time) async {
+    showNotification(
+      3,
+      "Welcome To CAS",
+      "You have entered at ${DateFormat("dd/MM/yy hh:mm a").format(time)}",
+    );
   }
 }
