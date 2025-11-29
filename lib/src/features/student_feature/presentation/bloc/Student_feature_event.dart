@@ -49,3 +49,5 @@ class GetStudentSideFeeEvent extends StudentFeatureEvent {
 
   GetStudentSideFeeEvent({required this.studentId});
 }
+
+class SignOutEvent extends StudentFeatureEvent {}

@@ -6,6 +6,7 @@ import 'package:flutter_cas_app_main/src/features/onboarding/presentation/widget
 
 import '../../../my_student_attendence/presentation/student_adentence_page.dart';
 
+
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -64,7 +65,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     context,
   ).push(MaterialPageRoute(builder: (context) => ElmsLandingPage()));
   void _completeOnboarding() => Navigator.of(context).push(
-    MaterialPageRoute(builder: (context) => ElmsLandingPage()),
+    MaterialPageRoute(builder: (context) => StudentAdentencePage()),
   ); //ElmsLandingPage()
 
   // void _navigateToHome() {
@@ -87,7 +88,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {}
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    
+  }
+
+  
+  
 
   @override
   Widget build(BuildContext context) {

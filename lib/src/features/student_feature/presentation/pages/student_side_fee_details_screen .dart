@@ -59,17 +59,24 @@ class _StudentSideFeeDetailsScreenState
 
     return GradientBackground(
       child: Scaffold(
-        // backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white, // <-- White background for all
         body: BlocBuilder<StudentFeatureBloc, StudentFeatureState>(
           builder: (context, state) {
             // ---------- LOADING ----------
             if (state is StudentSideFeeLoadingState) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: CircularProgressIndicator(color: Colors.black),
+              );
             }
 
             // ---------- ERROR ----------
             if (state is StudentFeeLoadFailureState) {
-              return const Center(child: Text("Failed to load fee details."));
+              return const Center(
+                child: Text(
+                  "Failed to load fee details.",
+                  style: TextStyle(color: Colors.black),
+                ),
+              );
             }
 
             // ---------- SUCCESS ----------
@@ -109,6 +116,7 @@ class _StudentSideFeeDetailsScreenState
                               phoneSize: 20,
                               tabletSize: 26,
                               weight: FontWeight.bold,
+                              color: Colors.black,
                             ),
                             RotationTransition(
                               turns: Tween(
@@ -119,6 +127,7 @@ class _StudentSideFeeDetailsScreenState
                                 icon: const Icon(
                                   Icons.refresh_rounded,
                                   size: 28,
+                                  color: Colors.black,
                                 ),
                                 onPressed: () {
                                   refreshController.forward(from: 0);
@@ -178,13 +187,8 @@ class _StudentSideFeeDetailsScreenState
                       /// ---------------- INSTALLMENTS TABLE ----------------
                       Expanded(
                         child: NeuCard(
-                          // borderRadius: 26,
-                          // blur: 12,
-                          // distance: 3,
-                          // intensity: 0.13,
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
-
                             child: SingleChildScrollView(
                               physics: const BouncingScrollPhysics(),
                               scrollDirection: Axis.vertical,
@@ -192,7 +196,7 @@ class _StudentSideFeeDetailsScreenState
                                 physics: const BouncingScrollPhysics(),
                                 scrollDirection: Axis.horizontal,
                                 child: DataTable(
-                                  headingRowColor: WidgetStatePropertyAll(
+                                  headingRowColor: MaterialStateProperty.all(
                                     Colors.blueGrey.withOpacity(0.07),
                                   ),
                                   columnSpacing: isTablet ? 45 : 28,
@@ -203,11 +207,36 @@ class _StudentSideFeeDetailsScreenState
                                     ),
                                   ),
                                   columns: const [
-                                    DataColumn(label: Text("Installment")),
-                                    DataColumn(label: Text("Due Date")),
-                                    DataColumn(label: Text("Total")),
-                                    DataColumn(label: Text("Paid")),
-                                    DataColumn(label: Text("Status")),
+                                    DataColumn(
+                                      label: Text(
+                                        "Installment",
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                    ),
+                                    DataColumn(
+                                      label: Text(
+                                        "Due Date",
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                    ),
+                                    DataColumn(
+                                      label: Text(
+                                        "Total",
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                    ),
+                                    DataColumn(
+                                      label: Text(
+                                        "Paid",
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                    ),
+                                    DataColumn(
+                                      label: Text(
+                                        "Status",
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                    ),
                                   ],
                                   rows:
                                       student.installments
@@ -249,6 +278,7 @@ class _StudentSideFeeDetailsScreenState
           style: TextStyle(
             fontSize: 16,
             fontWeight: highlight ? FontWeight.bold : FontWeight.w500,
+            color: Colors.black,
           ),
         ),
         Text(
@@ -256,7 +286,7 @@ class _StudentSideFeeDetailsScreenState
           style: TextStyle(
             fontSize: 17,
             fontWeight: highlight ? FontWeight.bold : FontWeight.w600,
-            color: highlight ? Colors.blueAccent : Colors.black87,
+            color: highlight ? Colors.blueAccent : Colors.black,
           ),
         ),
       ],
@@ -277,10 +307,27 @@ class _StudentSideFeeDetailsScreenState
 
     return DataRow(
       cells: [
-        DataCell(Text(installment.title)),
-        DataCell(Text(DateFormat('MMM dd, yyyy').format(installment.dueDate))),
-        DataCell(Text(currencyFormat.format(installment.totalAmount))),
-        DataCell(Text(currencyFormat.format(installment.paidAmount))),
+        DataCell(
+          Text(installment.title, style: const TextStyle(color: Colors.black)),
+        ),
+        DataCell(
+          Text(
+            DateFormat('MMM dd, yyyy').format(installment.dueDate),
+            style: const TextStyle(color: Colors.black),
+          ),
+        ),
+        DataCell(
+          Text(
+            currencyFormat.format(installment.totalAmount),
+            style: const TextStyle(color: Colors.black),
+          ),
+        ),
+        DataCell(
+          Text(
+            currencyFormat.format(installment.paidAmount),
+            style: const TextStyle(color: Colors.black),
+          ),
+        ),
         DataCell(
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

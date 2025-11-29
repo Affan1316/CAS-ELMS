@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/pages/OnboardingScreen.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
@@ -11,6 +12,7 @@ import '../../domain/webview_page_type.dart';
 
 class StudentProfilePage extends StatefulWidget {
   final String id;
+
   const StudentProfilePage({super.key, required this.id});
 
   @override
@@ -60,63 +62,75 @@ class StudentProfilePageState extends State<StudentProfilePage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _backgroundColor,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            // Media query for responsive design
-            double screenWidth = constraints.maxWidth;
-            double screenHeight = constraints.maxHeight;
-            bool isTablet = screenWidth > 600;
+    return BlocListener<StudentFeatureBloc, StudentFeatureState>(
+      bloc: context.read<StudentFeatureBloc>(),
+      listener: (context, state) {
+        if (state is StudentSigInOutState) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const RoleSelectionScreen()),
+            (route) => false,
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: _backgroundColor,
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Media query for responsive design
+              double screenWidth = constraints.maxWidth;
+              double screenHeight = constraints.maxHeight;
+              bool isTablet = screenWidth > 600;
 
-            return Column(
-              children: [
-                // Header
-                _buildHeader(isTablet),
+              return Column(
+                children: [
+                  // Header
+                  _buildHeader(isTablet),
 
-                // Profile Card Container
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isTablet ? 40.0 : 20.0,
-                      vertical: 20.0,
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: isTablet ? 400 : double.infinity,
-                          maxHeight: screenHeight * 0.8,
-                        ),
+                  // Profile Card Container
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isTablet ? 40.0 : 20.0,
+                        vertical: 20.0,
+                      ),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: isTablet ? 400 : double.infinity,
+                            maxHeight: screenHeight * 0.8,
+                          ),
 
-                        child: AnimatedBuilder(
-                          animation: _animation,
-                          builder: (context, child) {
-                            return Transform(
-                              alignment: Alignment.center,
-                              transform:
-                                  Matrix4.identity()
-                                    ..setEntry(3, 2, 0.001)
-                                    ..rotateY(_animation.value * 3.14159),
-                              child:
-                                  _animation.value < 0.5
-                                      ? _buildFrontCard(isTablet, screenWidth)
-                                      : Transform(
-                                        alignment: Alignment.center,
-                                        transform:
-                                            Matrix4.identity()
-                                              ..rotateY(3.14159),
-                                      ),
-                            );
-                          },
+                          child: AnimatedBuilder(
+                            animation: _animation,
+                            builder: (context, child) {
+                              return Transform(
+                                alignment: Alignment.center,
+                                transform:
+                                    Matrix4.identity()
+                                      ..setEntry(3, 2, 0.001)
+                                      ..rotateY(_animation.value * 3.14159),
+                                child:
+                                    _animation.value < 0.5
+                                        ? _buildFrontCard(isTablet, screenWidth)
+                                        : Transform(
+                                          alignment: Alignment.center,
+                                          transform:
+                                              Matrix4.identity()
+                                                ..rotateY(3.14159),
+                                        ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -430,8 +444,9 @@ class StudentProfilePageState extends State<StudentProfilePage>
                         isTablet,
                         isLogout: true,
                         onTap: () async {
-                          // await  WorkManagerService.cancelWorkManger();
-                          // await  MyGeofenceService.dispose();
+                          context.read<StudentFeatureBloc>().add(
+                            SignOutEvent(),
+                          );
                         },
                       ),
 

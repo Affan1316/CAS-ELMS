@@ -26,7 +26,8 @@ class CeoCardWidget extends AnimatedWidget {
     return OrientationBuilder(
       builder: (context, orientation) {
         final isPortrait = orientation == Orientation.portrait;
-        var position = isPortrait ? -imageSizeWidth * 0.2 : -imageSizeWidth * 0.05;
+        var position =
+            isPortrait ? -imageSizeWidth * 0.2 : -imageSizeWidth * 0.05;
 
         return FadeTransition(
           opacity: animationController.drive(
@@ -75,43 +76,47 @@ class CeoCardWidget extends AnimatedWidget {
                         // Text Section
                         Expanded(
                           flex: 6,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              FittedBox(
-                                child: Text(
-                                  "Noman Ameer Khan",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    height: 1.3,
+                          child: SizedBox(
+                            width: cardWidth * 0.7,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                FittedBox(
+                                  child: Text(
+                                    "Noman Ameer Khan",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                      height: 1.3,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              FittedBox(
-                                child: Text(
-                                  "CEO - Center for Advanced Solutions",
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.9),
-                                    fontSize: 16,
-                                    height: 1.3,
+                                const SizedBox(height: 8),
+                                FittedBox(
+                                  child: Text(
+                                    "CEO - Center for Advanced Solutions",
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.9),
+                                      fontSize: 25,
+                                      height: 1.3,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              FittedBox(
-                                child: Text(
-                                  "Empowering tech learners through innovation driven education",
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.9),
-                                    height: 1.3,
+                                const SizedBox(height: 8),
+                                FittedBox(
+                                  child: Text(
+                                    "Empowering tech learners through innovation \ndriven education",
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.9),
+                                      fontSize: 20,
+                                      height: 1.3,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                         const Expanded(flex: 4, child: SizedBox()),
@@ -124,7 +129,7 @@ class CeoCardWidget extends AnimatedWidget {
                     top: position,
                     right: 0,
                     child: Image.asset(
-                      'assets/images/person 1-Photoroom.png',
+                      'assets/images/sir.png',
                       width: imageSizeWidth,
                       height: imageSizeHeight,
                       fit: BoxFit.cover,

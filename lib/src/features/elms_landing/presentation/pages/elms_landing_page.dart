@@ -78,8 +78,9 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
         backgroundColor: Colors.white,
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              SizedBox(height: height * 0.05),
               CeoCardWidget(
                 animationController: _animationController,
                 anime: _ceoCardAnimation,
@@ -109,6 +110,7 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
                   ),
                 ),
               ),
+              // SizedBox(height: height * 0.02),
               AnimatedBuilder(
                 animation: _coursesAnimation,
                 builder:
@@ -136,9 +138,6 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
                             height: height,
                             width: width,
                             ontap: () {
-                              // ScaffoldMessenger.of(
-                              //   context,
-                              // ).showSnackBar(SnackBar(content: Text('data')));
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) => CourseCatalog(),

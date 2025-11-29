@@ -34,14 +34,17 @@ class SharePreferenceRepository {
     log(dateTimeString.toString(), name: "getting CheckIn Time");
     if (dateTimeString != null && dateTimeString.isNotEmpty) {
       return DateTime.tryParse(dateTimeString);
-    } else  {
+    } else {
       return null;
     }
   }
 
-  Future<bool> setRollNo(String rollNo) async {
+  Future<bool> setRollNo(String? rollNo) async {
     var prefs = await SharedPreferences.getInstance();
-    bool boolean = await prefs.setString(SharedPreferenceKeys.rollNo, rollNo);
+    bool boolean = await prefs.setString(
+      SharedPreferenceKeys.rollNo,
+      rollNo ?? "",
+    );
     log(boolean.toString(), name: "setting RollNo");
     return boolean;
   }

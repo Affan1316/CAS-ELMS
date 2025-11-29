@@ -34,6 +34,15 @@ Widget buildHeader(String studentName, BuildContext context, String id) {
                 ),
               ),
             ),
+            const SizedBox(height: 4),
+            Text(
+              'Computer Science • Year 3',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF64748B),
+              ),
+            ),
           ],
         ),
         Row(
