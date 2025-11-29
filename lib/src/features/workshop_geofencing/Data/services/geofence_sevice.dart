@@ -241,6 +241,11 @@ class MyGeofenceService {
   }
 
   static Future<void> dispose() async {
+    SharePreferenceRepository sharePreferenceRepository =
+        SharePreferenceRepository();
+    await sharePreferenceRepository.setCheckInTime(null);
+    await sharePreferenceRepository.setRollNo(null);
+    await sharePreferenceRepository.setIsCreated(false);
     await NativeGeofenceManager.instance.removeAllGeofences();
   }
 }

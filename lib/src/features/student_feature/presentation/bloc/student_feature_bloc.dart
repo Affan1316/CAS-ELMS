@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/FeeAdminReadInstalmentUsecase.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/actual_implementation_firebase_repo.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/cached_data.dart';
@@ -42,6 +43,7 @@ class StudentFeatureBloc
     on<CreateGeofenceEvent>(onCreateGeofenceEvent);
     on<ReCreateGeofenceEvent>(onReCreateGeofenceEvent);
     on<GetStudentSideFeeEvent>(_handleGettingFee);
+    on<SignOutEvent>(onSignOutEvent);
   }
   final FirestoreRepositry _firestoreRepositry =
       ActualImplementationFirebaseRepo();
@@ -250,5 +252,14 @@ class StudentFeatureBloc
     } catch (e) {
       emit(StudentFeeLoadFailureState(error: e.toString()));
     }
+  }
+
+  FutureOr<void> onSignOutEvent(
+    SignOutEvent event,
+    Emitter<StudentFeatureState> emit,
+  ) async {
+    AuthService authService = AuthService();
+    await authService.signOut();
+    emit(StudentSigInOutState());
   }
 }
