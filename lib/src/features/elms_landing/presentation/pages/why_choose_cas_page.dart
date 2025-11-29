@@ -10,7 +10,16 @@ class WhyChooseUsPage extends StatelessWidget {
 
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: Text('Why choose us'),),
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          title: const Text(
+            'Why choose us',
+            style: TextStyle(color: Colors.black),
+          ),
+          backgroundColor: Colors.white,
+          iconTheme: const IconThemeData(color: Colors.black),
+          elevation: 0,
+        ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -43,10 +52,7 @@ class WhyChooseUsPage extends StatelessWidget {
         SizedBox(height: 10),
         Text(
           "Discover what sets Center for Advanced Solutions apart in the world of technology and innovation.",
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.black87,
-          ),
+          style: TextStyle(fontSize: 16, color: Colors.black),
         ),
       ],
     );
@@ -57,7 +63,8 @@ class WhyChooseUsPage extends StatelessWidget {
       _ReasonCard(
         icon: Icons.engineering,
         title: "Expert Team",
-        description: "Work with top-tier developers, data scientists & AI engineers.",
+        description:
+            "Work with top-tier developers, data scientists & AI engineers.",
       ),
       _ReasonCard(
         icon: Icons.lightbulb_outline,
@@ -72,7 +79,8 @@ class WhyChooseUsPage extends StatelessWidget {
       _ReasonCard(
         icon: Icons.support_agent,
         title: "24/7 Support",
-        description: "Dedicated support team for client success and reliability.",
+        description:
+            "Dedicated support team for client success and reliability.",
       ),
       _ReasonCard(
         icon: Icons.extension,
@@ -89,12 +97,15 @@ class WhyChooseUsPage extends StatelessWidget {
     return Wrap(
       spacing: 16,
       runSpacing: 16,
-      children: reasons
-          .map((card) => SizedBox(
-                width: isSmallScreen ? double.infinity : 220,
-                child: card,
-              ))
-          .toList(),
+      children:
+          reasons
+              .map(
+                (card) => SizedBox(
+                  width: isSmallScreen ? double.infinity : 220,
+                  child: card,
+                ),
+              )
+              .toList(),
     );
   }
 
@@ -119,10 +130,7 @@ class WhyChooseUsPage extends StatelessWidget {
           SizedBox(height: 10),
           Text(
             "Partner with CAS today to unlock the power of intelligent technology.",
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.white70,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.white70),
             textAlign: TextAlign.center,
           ),
         ],
@@ -172,12 +180,17 @@ class _ReasonCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
+              color: Colors.black,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             description,
-            style: const TextStyle(fontSize: 14, height: 1.4),
+            style: const TextStyle(
+              fontSize: 14,
+              height: 1.4,
+              color: Colors.black,
+            ),
           ),
         ],
       ),

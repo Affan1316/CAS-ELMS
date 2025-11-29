@@ -5,87 +5,125 @@ class ContactUsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isSmall = size.width < 700;
-
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: Text('Contact us'),),
-        body: Container(
-          width: double.infinity,
-          height: size.height,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildHeader(),
-              isSmall ? _buildColumnForm() : _buildRowForm(),
-              _buildFooter(),
-            ],
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          title: const Text(
+            'Contact us',
+            style: TextStyle(color: Colors.black),
           ),
+          backgroundColor: Colors.white,
+          iconTheme: const IconThemeData(color: Colors.black),
+          elevation: 0,
+        ),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final screenWidth = constraints.maxWidth;
+            final isSmallScreen = screenWidth < 700;
+
+            final horizontalPadding = isSmallScreen ? 16.0 : 24.0;
+            final spacing = isSmallScreen ? 10.0 : 14.0;
+            final titleSize = isSmallScreen ? 22.0 : 26.0;
+            final subtitleSize = isSmallScreen ? 14.0 : 16.0;
+            final textFieldFontSize = isSmallScreen ? 14.0 : 15.0;
+            final buttonFontSize = isSmallScreen ? 14.0 : 15.0;
+
+            return SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding,
+                vertical: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeader(titleSize, subtitleSize),
+                  SizedBox(height: spacing + 4),
+                  isSmallScreen
+                      ? _buildColumnForm(
+                        spacing,
+                        textFieldFontSize,
+                        buttonFontSize,
+                      )
+                      : _buildRowForm(
+                        spacing,
+                        textFieldFontSize,
+                        buttonFontSize,
+                      ),
+                  SizedBox(height: spacing + 6),
+                  _buildFooter(subtitleSize),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return const Column(
+  Widget _buildHeader(double titleSize, double subtitleSize) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           "Get in Touch",
           style: TextStyle(
-            fontSize: 26,
+            fontSize: titleSize,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF0E96C5),
+            color: const Color(0xFF0E96C5),
           ),
         ),
-        SizedBox(height: 6),
+        const SizedBox(height: 4),
         Text(
           "We'd love to hear from you!",
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.black54,
-          ),
+          style: TextStyle(fontSize: subtitleSize, color: Colors.black54),
         ),
       ],
     );
   }
 
-  Widget _buildColumnForm() {
+  Widget _buildColumnForm(
+    double spacing,
+    double fontSize,
+    double buttonFontSize,
+  ) {
     return Column(
       children: [
-        _CustomTextField(hint: "Full Name"),
-        const SizedBox(height: 12),
-        _CustomTextField(hint: "Email Address"),
-        const SizedBox(height: 12),
-        _CustomTextField(hint: "Message", maxLines: 4),
-        const SizedBox(height: 16),
-        _SubmitButton(),
+        _CustomTextField(hint: "Full Name", fontSize: fontSize),
+        SizedBox(height: spacing),
+        _CustomTextField(hint: "Email Address", fontSize: fontSize),
+        SizedBox(height: spacing),
+        _CustomTextField(hint: "Message", fontSize: fontSize, maxLines: 4),
+        SizedBox(height: spacing),
+        _SubmitButton(fontSize: buttonFontSize),
       ],
     );
   }
 
-  Widget _buildRowForm() {
+  Widget _buildRowForm(double spacing, double fontSize, double buttonFontSize) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Column(
             children: [
-              _CustomTextField(hint: "Full Name"),
-              const SizedBox(height: 12),
-              _CustomTextField(hint: "Email Address"),
+              _CustomTextField(hint: "Full Name", fontSize: fontSize),
+              SizedBox(height: spacing),
+              _CustomTextField(hint: "Email Address", fontSize: fontSize),
             ],
           ),
         ),
-        const SizedBox(width: 20),
+        SizedBox(width: spacing),
         Expanded(
           child: Column(
             children: [
-              _CustomTextField(hint: "Message", maxLines: 5),
-              const SizedBox(height: 16),
-              _SubmitButton(),
+              _CustomTextField(
+                hint: "Message",
+                fontSize: fontSize,
+                maxLines: 5,
+              ),
+              SizedBox(height: spacing),
+              _SubmitButton(fontSize: buttonFontSize),
             ],
           ),
         ),
@@ -93,20 +131,20 @@ class ContactUsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter() {
-    return const Column(
+  Widget _buildFooter(double fontSize) {
+    return Column(
       children: [
         Text(
           "Email: contact@cas.tech",
-          style: TextStyle(fontSize: 14),
+          style: TextStyle(fontSize: fontSize, color: Colors.black87),
         ),
         Text(
           "Phone: +92 300 1234567",
-          style: TextStyle(fontSize: 14),
+          style: TextStyle(fontSize: fontSize, color: Colors.black87),
         ),
         Text(
           "Location: Lahore, Pakistan",
-          style: TextStyle(fontSize: 14),
+          style: TextStyle(fontSize: fontSize, color: Colors.black87),
         ),
       ],
     );
@@ -116,22 +154,28 @@ class ContactUsPage extends StatelessWidget {
 class _CustomTextField extends StatelessWidget {
   final String hint;
   final int maxLines;
+  final double fontSize;
 
   const _CustomTextField({
     required this.hint,
     this.maxLines = 1,
+    this.fontSize = 14,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       maxLines: maxLines,
+      style: TextStyle(fontSize: fontSize, color: Colors.black),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(fontSize: 14),
+        hintStyle: TextStyle(fontSize: fontSize),
         filled: true,
-        fillColor: Color(0xFFE8F5FB),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        fillColor: const Color(0xFFE8F5FB),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 10,
+        ),
         border: OutlineInputBorder(
           borderSide: const BorderSide(color: Color(0xFF0E96C5)),
           borderRadius: BorderRadius.circular(12),
@@ -150,20 +194,22 @@ class _CustomTextField extends StatelessWidget {
 }
 
 class _SubmitButton extends StatelessWidget {
+  final double fontSize;
+
+  const _SubmitButton({this.fontSize = 14});
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {
-        // You can add form logic or backend integration here
-      },
+      onPressed: () {},
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF0E96C5),
-        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
-      child: const Text(
+      child: Text(
         "Send Message",
-        style: TextStyle(fontSize: 14, color: Colors.white),
+        style: TextStyle(fontSize: fontSize, color: Colors.white),
       ),
     );
   }

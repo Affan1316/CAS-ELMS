@@ -80,6 +80,18 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Text(
+                  "Wanna Know About CAS? Let Start From Here!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
               CeoCardWidget(
                 animationController: _animationController,
                 anime: _ceoCardAnimation,
@@ -136,9 +148,6 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
                             height: height,
                             width: width,
                             ontap: () {
-                              // ScaffoldMessenger.of(
-                              //   context,
-                              // ).showSnackBar(SnackBar(content: Text('data')));
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) => CourseCatalog(),

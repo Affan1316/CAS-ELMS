@@ -10,7 +10,13 @@ class AboutCasPage extends StatelessWidget {
 
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: Text('About Cas'),),
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          title: const Text('About Cas', style: TextStyle(color: Colors.black)),
+          backgroundColor: Colors.white,
+          iconTheme: const IconThemeData(color: Colors.black),
+          elevation: 0,
+        ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -42,7 +48,7 @@ class AboutCasPage extends StatelessWidget {
           ),
         ],
       ),
-      child:   _heroText(),
+      child: _heroText(),
     );
   }
 
@@ -61,10 +67,7 @@ class AboutCasPage extends StatelessWidget {
         SizedBox(height: 10),
         Text(
           "Building the future with AI, ML & Intelligent Software",
-          style: TextStyle(
-            fontSize: 18,
-            color: Colors.white70,
-          ),
+          style: TextStyle(fontSize: 18, color: Colors.white70),
         ),
       ],
     );
@@ -87,10 +90,7 @@ class AboutCasPage extends StatelessWidget {
           "Center for Advanced Solutions (CAS) is a forward-thinking software development company. "
           "We specialize in crafting intelligent products powered by AI, Machine Learning, and Data Science. "
           "Our team is passionate about transforming complex challenges into user-friendly, scalable digital solutions.",
-          style: TextStyle(
-            fontSize: 16,
-            height: 1.5,
-          ),
+          style: TextStyle(fontSize: 16, height: 1.5, color: Colors.black),
         ),
       ],
     );
@@ -121,12 +121,15 @@ class AboutCasPage extends StatelessWidget {
         Wrap(
           spacing: 16,
           runSpacing: 16,
-          children: items
-              .map((card) => SizedBox(
-                    width: isSmallScreen ? double.infinity : 200,
-                    child: card,
-                  ))
-              .toList(),
+          children:
+              items
+                  .map(
+                    (card) => SizedBox(
+                      width: isSmallScreen ? double.infinity : 200,
+                      child: card,
+                    ),
+                  )
+                  .toList(),
         ),
       ],
     );
@@ -169,6 +172,7 @@ class _FeatureCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
+              color: Colors.black,
             ),
           ),
         ],
