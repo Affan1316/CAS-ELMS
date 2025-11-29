@@ -78,20 +78,9 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
         backgroundColor: Colors.white,
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Text(
-                  "Wanna Know About CAS? Let Start From Here!",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
+              SizedBox(height: height * 0.05),
               CeoCardWidget(
                 animationController: _animationController,
                 anime: _ceoCardAnimation,
@@ -121,6 +110,7 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
                   ),
                 ),
               ),
+              // SizedBox(height: height * 0.02),
               AnimatedBuilder(
                 animation: _coursesAnimation,
                 builder:
