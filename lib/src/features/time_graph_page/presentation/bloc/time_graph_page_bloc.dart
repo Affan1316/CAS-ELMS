@@ -101,7 +101,7 @@ class TimeGraphPageBloc extends Bloc<TimeGraphPageEvent, TimeGraphPageState> {
     emit(TimeGraphPageLoading());
     await Future.delayed(const Duration(seconds: 2));
     var data = await fireStoreRepository.getAllDaysWorkshopTime(
-      studentId: "f18-01",
+      studentId: await sharePreferenceRepository.getRollNo() ?? "",
     );
     if (data != null) {
       var rangedData =

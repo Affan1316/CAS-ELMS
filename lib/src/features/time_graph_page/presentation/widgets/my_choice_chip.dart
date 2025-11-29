@@ -86,20 +86,6 @@ class _MyChoiceChipsState extends State<MyChoiceChips> {
               });
             },
           ),
-          _MyChoiceChip(
-            label: 'This Month',
-            value: 'This Month',
-            selectedFilter: selectedFilter,
-            onSelected: (value) {
-              context.read<TimeGraphPageBloc>().add(const ThisMonthEvent());
-              setState(() {
-                selectedFilter = 'This Month';
-                if ('This Month' != 'Custom') {
-                  _selectedDateRange = null;
-                }
-              });
-            },
-          ),
         ],
       ),
     );

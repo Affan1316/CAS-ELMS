@@ -389,35 +389,35 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   SizedBox(height: isKeyboardOpen ? 20 : 40),
 
                   // Debug info (remove in production)
-                  if (true) // Set to false in production
-                    Container(
-                      padding: EdgeInsets.all(16),
-                      margin: EdgeInsets.only(top: 20),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            'Default Credentials:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey.shade700,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Admin ID: admin001\nAdmin Pass: admin123\n\nSuper ID: superadmin\nSuper Pass: super123',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontFamily: 'monospace',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  // if (true) // Set to false in production
+                  //   Container(
+                  //     padding: EdgeInsets.all(16),
+                  //     margin: EdgeInsets.only(top: 20),
+                  //     decoration: BoxDecoration(
+                  //       color: Colors.grey.shade100,
+                  //       borderRadius: BorderRadius.circular(12),
+                  //     ),
+                  //     child: Column(
+                  //       children: [
+                  //         Text(
+                  //           'Default Credentials:',
+                  //           style: TextStyle(
+                  //             fontWeight: FontWeight.bold,
+                  //             color: Colors.grey.shade700,
+                  //           ),
+                  //         ),
+                  //         SizedBox(height: 8),
+                  //         Text(
+                  //           'Admin ID: admin001\nAdmin Pass: admin123\n\nSuper ID: superadmin\nSuper Pass: super123',
+                  //           textAlign: TextAlign.center,
+                  //           style: TextStyle(
+                  //             color: Colors.grey.shade600,
+                  //             fontFamily: 'monospace',
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
                 ],
               ),
             ),
@@ -470,7 +470,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         controller: controller,
         focusNode: focusNode,
         obscureText: isPassword ? _obscurePassword : false,
-        style: TextStyle(fontSize: fontSize),
+        style: TextStyle(fontSize: fontSize, color: Colors.black),
         enableSuggestions: false,
         autocorrect: false,
         keyboardType:
