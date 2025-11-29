@@ -4,7 +4,6 @@ import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/widgets
 import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/widgets/sending_message.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 
-
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
 
@@ -13,17 +12,10 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
- 
-
   @override
   void initState() {
-   
     super.initState();
-   
-    
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -55,16 +47,12 @@ class _ChatPageState extends State<ChatPage> {
         ),
         body: Stack(
           children: [
-            // Positioned(
-            //   left: 0,
-            //   top: context.height - 100,
-            //   child: ThrownSvgWithGravity(size: 220),
-            // ),
             Positioned(
               top: context.height * 0.3,
-              left: context.width < BreakPoints().maxMobileWidth
-                  ? context.width * 0.15
-                  : context.width * 0.3,
+              left:
+                  context.width < BreakPoints().maxMobileWidth
+                      ? context.width * 0.15
+                      : context.width * 0.3,
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: 500, maxHeight: 360),
                 child: Hero(
@@ -89,15 +77,14 @@ class _ChatPageState extends State<ChatPage> {
 class ChatDataPage extends StatefulWidget {
   const ChatDataPage({super.key});
 
-
   @override
- State<ChatDataPage> createState() => _ChatDataPageState();
+  State<ChatDataPage> createState() => _ChatDataPageState();
 }
 
 class _ChatDataPageState extends State<ChatDataPage> {
   final ScrollController scrollController = ScrollController();
   final TextEditingController textController = TextEditingController();
-  
+
   @override
   void initState() {
     super.initState();
