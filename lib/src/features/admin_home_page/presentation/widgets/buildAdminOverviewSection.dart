@@ -53,11 +53,11 @@ Widget buildFeaturesGrid(
   int? pendingLeaveCount,
 }) {
   final features = [
-    {
-      'title': 'Add Instructor',
-      'subtitle': 'Manage faculty',
-      'icon': Icons.person_add_outlined,
-    },
+    // {
+    //   'title': 'Add Instructor',
+    //   'subtitle': 'Manage faculty',
+    //   'icon': Icons.person_add_outlined,
+    // },
     {
       'title': 'Pay Fee',
       'subtitle': 'Payment portal',
@@ -65,58 +65,58 @@ Widget buildFeaturesGrid(
     },
     {
       'title': 'Fee Defaulter',
-      'subtitle': 'View insights',
-      'icon': Icons.analytics_outlined,
+      'subtitle': 'Track pending fees',
+      'icon': Icons.warning_amber_outlined,
     },
     {
       'title': 'Create Group',
       'subtitle': 'Student groups',
-      'icon': Icons.groups_outlined,
+      'icon': Icons.group_add_outlined,
     },
     {
       'title': 'Add Student',
-      'subtitle': 'Generate reports',
+      'subtitle': 'Register students',
       'icon': Icons.person_add_alt_1_rounded,
     },
     {
       'title': 'Add Courses',
-      'subtitle': 'Time management',
-      'icon': Icons.schedule_outlined,
+      'subtitle': 'Manage curriculum',
+      'icon': Icons.book_outlined,
     },
     {
       'title': 'Inquiry detail',
-      'subtitle': 'Time management',
-      'icon': Icons.schedule_outlined,
+      'subtitle': 'View inquiries',
+      'icon': Icons.info_outline,
     },
     {
       'title': 'Fee History',
-      'subtitle': 'Time management',
-      'icon': Icons.schedule_outlined,
+      'subtitle': 'Payment records',
+      'icon': Icons.history_outlined,
     },
     {
       'title': 'Add Inquiry',
-      'subtitle': 'Time management',
-      'icon': Icons.schedule_outlined,
+      'subtitle': 'New inquiries',
+      'icon': Icons.contact_mail_outlined,
     },
     {
-      'title': 'Add Fee Plan',
-      'subtitle': 'Time management',
-      'icon': LucideIcons.badgeDollarSign,
+      'title': 'All Groups',
+      'subtitle': 'View all groups',
+      'icon': Icons.groups_outlined,
     },
     {
-      'title': 'Installment Section',
-      'subtitle': 'Time management',
-      'icon': Icons.schedule_outlined,
+      'title': 'Workshop Time Tracker',
+      'subtitle': 'Track workshop hours',
+      'icon': Icons.timer_outlined,
     },
-    {
-      'title': 'Update Group Data',
-      'subtitle': 'Time management',
-      'icon': Icons.schedule_outlined,
-    },
+    // {
+    //   'title': 'Update Group Data',
+    //   'subtitle': 'Time management',
+    //   'icon': Icons.schedule_outlined,
+    // },
     {
       'title': 'Leave Management System',
-      'subtitle': 'leave management',
-      'icon': Icons.schedule_outlined,
+      'subtitle': 'Manage absences',
+      'icon': Icons.event_busy_outlined,
     },
   ];
 

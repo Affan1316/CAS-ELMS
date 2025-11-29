@@ -1,5 +1,6 @@
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/groups_report_page.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/super_admin_fee_notifications_screen.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 
@@ -308,42 +309,42 @@ class SuperAdminDashboard extends StatelessWidget {
         color: const Color(0xFFf093fb),
         onTap: () => _navigateToScreen(context, "Fee Defaulter"),
       ),
-      DashboardItem(
-        title: "Inquiry",
-        icon: Icons.help_outline,
-        color: const Color(0xFF4facfe),
-        onTap: () => _navigateToScreen(context, "Inquiry"),
-      ),
-      DashboardItem(
-        title: "Student Management",
-        icon: Icons.school,
-        color: const Color(0xFF43e97b),
-        onTap: () => _navigateToScreen(context, "Student Management"),
-      ),
-      DashboardItem(
-        title: "Course Management",
-        icon: Icons.book,
-        color: const Color(0xFFfa709a),
-        onTap: () => _navigateToScreen(context, "Course Management"),
-      ),
+      // DashboardItem(
+      //   title: "Inquiry",
+      //   icon: Icons.help_outline,
+      //   color: const Color(0xFF4facfe),
+      //   onTap: () => _navigateToScreen(context, "Inquiry"),
+      // ),
+      // DashboardItem(
+      //   title: "Student Management",
+      //   icon: Icons.school,
+      //   color: const Color(0xFF43e97b),
+      //   onTap: () => _navigateToScreen(context, "Student Management"),
+      // ),
+      // DashboardItem(
+      //   title: "Course Management",
+      //   icon: Icons.book,
+      //   color: const Color(0xFFfa709a),
+      //   onTap: () => _navigateToScreen(context, "Course Management"),
+      // ),
       DashboardItem(
         title: "Reports",
         icon: Icons.assessment,
         color: const Color(0xFFffecd2),
         onTap: () => _navigateToScreen(context, "Reports"),
       ),
-      DashboardItem(
-        title: "Settings",
-        icon: Icons.settings,
-        color: const Color(0xFFa8edea),
-        onTap: () => _navigateToScreen(context, "Settings"),
-      ),
-      DashboardItem(
-        title: "Analytics",
-        icon: Icons.analytics,
-        color: const Color(0xFFd299c2),
-        onTap: () => _navigateToScreen(context, "Analytics"),
-      ),
+      // DashboardItem(
+      //   title: "Settings",
+      //   icon: Icons.settings,
+      //   color: const Color(0xFFa8edea),
+      //   onTap: () => _navigateToScreen(context, "Settings"),
+      // ),
+      // DashboardItem(
+      //   title: "Analytics",
+      //   icon: Icons.analytics,
+      //   color: const Color(0xFFd299c2),
+      //   onTap: () => _navigateToScreen(context, "Analytics"),
+      // ),
       DashboardItem(
         title: "Notifications",
         icon: Icons.notifications,
@@ -505,6 +506,16 @@ class SuperAdminDashboard extends StatelessWidget {
         MaterialPageRoute(
           builder: (context) {
             return FeeHistoryScreen();
+          },
+        ),
+      );
+    }
+    if (screenName == "Reports") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return GroupsReportPage();
           },
         ),
       );
