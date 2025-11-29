@@ -121,6 +121,7 @@ class MyApp extends StatelessWidget {
           BlocProvider(create: (context) => GroupTimeTrackerBloc()),
         ],
         child: MaterialApp(
+          debugShowCheckedModeBanner: false,
           title: 'CAS ELMS',
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
