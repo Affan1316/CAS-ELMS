@@ -84,23 +84,22 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
     final theme = Theme.of(context);
 
     return Material(
-      color: const Color(0xFFE8EDF5),
+      color: const Color(0xFF5B21B6),
       borderRadius: BorderRadius.circular(_corner),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFFE8EDF5),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF5B21B6), Color(0xFF4C1D95)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(_corner),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              offset: const Offset(3, 3),
-              blurRadius: 6,
-            ),
-            BoxShadow(
-              color: Colors.white.withOpacity(0.9),
-              offset: const Offset(-3, -3),
-              blurRadius: 6,
+              color: Colors.black.withOpacity(0.2),
+              offset: const Offset(0, 4),
+              blurRadius: 12,
             ),
           ],
         ),
@@ -115,6 +114,7 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
                     'All groups — totals',
                     style: theme.textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.w800,
+                      color: const Color(0xFFE2E8F0),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -123,12 +123,15 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w900,
                       fontSize: 18,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Received ${_compactAmount(receivedAll)} • $loadedCount/${summaries.length} loaded',
-                    style: theme.textTheme.bodySmall,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: const Color(0xFFA0AEC0),
+                    ),
                   ),
                 ],
               ),
@@ -138,7 +141,7 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFFF6F7FB),
+                color: const Color(0xFF7C3AED),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
@@ -148,6 +151,7 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
                     'Filtered',
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w800,
+                      color: const Color(0xFFE2E8F0),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -155,12 +159,15 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
                     _compactAmount(filteredTotal),
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w900,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     _compactAmount(filteredReceived),
-                    style: theme.textTheme.bodySmall,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: const Color(0xFFA0AEC0),
+                    ),
                   ),
                 ],
               ),
@@ -174,15 +181,15 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE6E7EE),
+      backgroundColor: const Color(0xFFF7FAFC),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFE6E7EE),
+        backgroundColor: const Color(0xFFF7FAFC),
         elevation: 0,
         centerTitle: true,
         title: Text(
           'Groups — Reports',
           style: TextStyle(
-            color: Colors.grey[800],
+            color: const Color(0xFF2D3748),
             fontWeight: FontWeight.w700,
             fontSize: 18,
           ),
@@ -290,7 +297,7 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
       decoration: InputDecoration(
         hintText: 'Search groups',
         isDense: true,
-        prefixIcon: const Icon(Icons.search),
+        prefixIcon: const Icon(Icons.search, color: Color(0xFF718096)),
         suffixIcon:
             _searchController.text.isEmpty
                 ? null
@@ -299,7 +306,7 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
                     _searchController.clear();
                     setState(() {});
                   },
-                  icon: const Icon(Icons.clear),
+                  icon: const Icon(Icons.clear, color: Color(0xFF718096)),
                 ),
         contentPadding: const EdgeInsets.symmetric(vertical: 12),
         border: OutlineInputBorder(
@@ -307,7 +314,7 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
           borderSide: BorderSide.none,
         ),
         filled: true,
-        fillColor: const Color(0xFFEFEFF6),
+        fillColor: Colors.white,
       ),
     );
   }
@@ -403,11 +410,13 @@ class ResponsiveGroupCard extends StatelessWidget {
   Color _statusColor(double remaining, double percent) {
     // Use both absolute remaining and percent to determine urgency
     if (remaining <= 0 || percent >= 100) {
-      return const Color(0xFF00C48C); // success
+      return const Color(0xFF10B981); // success - vibrant green
     }
-    if (percent < 33) return const Color(0xFFFF6B6B); // low progress = danger
-    if (percent < 66) return const Color(0xFFFFA502); // warning
-    return const Color(0xFFFFD166); // approaching completion
+    if (percent < 33)
+      return const Color(0xFFEF4444); // low progress = danger - vibrant red
+    if (percent < 66)
+      return const Color(0xFFF59E0B); // warning - vibrant orange
+    return const Color(0xFF3B82F6); // approaching completion - vibrant blue
   }
 
   String _compactAmount(double value) {
@@ -425,7 +434,7 @@ class ResponsiveGroupCard extends StatelessWidget {
       label: 'Group card for $groupName',
       button: true,
       child: Material(
-        color: const Color(0xFFE8EDF5),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(cornerRadius),
         child: InkWell(
           borderRadius: BorderRadius.circular(cornerRadius),
@@ -443,17 +452,13 @@ class ResponsiveGroupCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFE8EDF5),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(cornerRadius),
+              border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  offset: const Offset(4, 4),
-                  blurRadius: 8,
-                ),
-                BoxShadow(
-                  color: Colors.white.withOpacity(0.9),
-                  offset: const Offset(-4, -4),
+                  color: Colors.black.withOpacity(0.06),
+                  offset: const Offset(0, 2),
                   blurRadius: 8,
                 ),
               ],
@@ -478,6 +483,7 @@ class ResponsiveGroupCard extends StatelessWidget {
             '👥 GROUP',
             style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w800,
+              color: const Color(0xFF64748B),
             ),
           ),
           const SizedBox(height: 6),
@@ -485,6 +491,7 @@ class ResponsiveGroupCard extends StatelessWidget {
             groupName,
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w900,
+              color: const Color(0xFF1E293B),
             ),
           ),
           const SizedBox(height: 10),
@@ -520,6 +527,7 @@ class ResponsiveGroupCard extends StatelessWidget {
                       '👥 GROUP',
                       style: theme.textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w800,
+                        color: const Color(0xFF64748B),
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -527,6 +535,7 @@ class ResponsiveGroupCard extends StatelessWidget {
                       groupName,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w900,
+                        color: const Color(0xFF1E293B),
                       ),
                     ),
                   ],
@@ -593,7 +602,13 @@ class ResponsiveGroupCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                       child: SizedBox(
                         height: 10,
-                        child: LinearProgressIndicator(value: progress),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          backgroundColor: const Color(0xFFE2E8F0),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            statusColor,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -605,6 +620,7 @@ class ResponsiveGroupCard extends StatelessWidget {
                         style: const TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 12,
+                          color: Color(0xFF475569),
                         ),
                       ),
                     ),
@@ -625,6 +641,8 @@ class ResponsiveGroupCard extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF3B82F6),
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 8,
@@ -654,11 +672,19 @@ class ResponsiveGroupCard extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800),
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF64748B),
+              ),
             ),
             Text(
               value,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF1E293B),
+              ),
             ),
           ],
         ),
