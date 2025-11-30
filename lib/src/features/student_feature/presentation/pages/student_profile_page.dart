@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/pages/OnboardingScreen.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';
@@ -66,6 +68,8 @@ class StudentProfilePageState extends State<StudentProfilePage>
       bloc: context.read<StudentFeatureBloc>(),
       listener: (context, state) {
         if (state is StudentSigInOutState) {
+          context.read<OnboardingBloc>().add(ResetOnboardingEvent());
+
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => const RoleSelectionScreen()),
@@ -453,27 +457,27 @@ class StudentProfilePageState extends State<StudentProfilePage>
                       SizedBox(height: isTablet ? 24 : 16),
 
                       // Flip indicator
-                      _buildNeomorphicContainer(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.flip, size: 16, color: _accentColor),
-                            SizedBox(width: 8),
-                            Text(
-                              'Tap to flip',
-                              style: TextStyle(
-                                color: _accentColor,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      // _buildNeomorphicContainer(
+                      //   padding: EdgeInsets.symmetric(
+                      //     horizontal: 16,
+                      //     vertical: 8,
+                      //   ),
+                      //   child: Row(
+                      //     mainAxisSize: MainAxisSize.min,
+                      //     children: [
+                      //       Icon(Icons.flip, size: 16, color: _accentColor),
+                      //       SizedBox(width: 8),
+                      //       Text(
+                      //         'Tap to flip',
+                      //         style: TextStyle(
+                      //           color: _accentColor,
+                      //           fontSize: 12,
+                      //           fontWeight: FontWeight.w500,
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),
