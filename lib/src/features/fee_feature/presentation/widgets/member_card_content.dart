@@ -68,7 +68,7 @@ class MemberCardContent extends StatelessWidget {
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF009688),
+            backgroundColor: const Color(0xFF5B21B6),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),

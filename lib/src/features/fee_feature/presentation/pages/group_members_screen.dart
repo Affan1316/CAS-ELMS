@@ -12,6 +12,7 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widge
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/screen_header.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/search_field.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/group_student_entity_class.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_side_fee_details_screen%20.dart';
 import 'fee_details_screen.dart';
 
 class GroupMembersScreen extends StatefulWidget {
@@ -108,11 +109,9 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
                         context,
                         MaterialPageRoute(
                           builder:
-                              (_) => FeeDetailsScreen(
+                              (_) => StudentSideFeeDetailsScreen(
                                 key: ValueKey(_selectedStudent!.rollNum),
                                 studentId: _selectedStudent!.rollNum,
-                                groupId: widget.groupId,
-                                isDefaulter: state.isDefaulter,
                               ),
                         ),
                       );
