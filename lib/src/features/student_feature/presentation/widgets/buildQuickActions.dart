@@ -4,6 +4,7 @@ import 'package:flutter_cas_app_main/src/features/student_assignment_page/presen
 import 'package:flutter_cas_app_main/src/features/leave_request/presentation/pages/list_of_request_leave_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_side_fee_details_screen%20.dart';
 import 'package:flutter_cas_app_main/src/features/student_quiz_page/presentation/pages/quiz_home_screen.dart';
+import 'package:flutter_cas_app_main/src/features/time_graph_page/presentation/pages/time_track_graph_page.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../my_student_attendence/presentation/student_adentence_page.dart';
 import 'dart:math' as math;
@@ -40,7 +41,7 @@ Widget buildQuickActions(String studentName, String section, String studentId) {
       'color': const Color(0xFF8B5CF6),
       'count': '6 Today',
       'isUrgent': false,
-      'screen': const LeaveScreen(),
+      'screen': const StudentTimeTrackerPage(),
     },
     {
       'title': 'Leave Request',
@@ -58,14 +59,14 @@ Widget buildQuickActions(String studentName, String section, String studentId) {
       'isUrgent': false,
       'screen': StudentSideFeeDetailsScreen(studentId: studentId),
     },
-    {
-      'title': 'Study Groups',
-      'icon': Icons.group_rounded,
-      'color': const Color(0xFFEF4444),
-      'count': '3 Active',
-      'isUrgent': false,
-      'screen': Container(child: const Text("Coming soon")),
-    },
+    // {
+    //   'title': 'Study Groups',
+    //   'icon': Icons.group_rounded,
+    //   'color': const Color(0xFFEF4444),
+    //   'count': '3 Active',
+    //   'isUrgent': false,
+    //   'screen': Container(child: const Text("Coming soon")),
+    // },
     {
       'title': 'Attendance',
       'icon': Icons.event_available_rounded,

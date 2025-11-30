@@ -57,6 +57,7 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
 
     return GradientBackground(
       child: Scaffold(
+        backgroundColor: Colors.white,
         body: BlocConsumer<FeeAdminBloc, FeeAdminState>(
           listener: (context, state) {
             if (state is AddingFeeDefaulterCompleteState) {
@@ -134,12 +135,42 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                               child: DataTable(
                                 columnSpacing: isTablet ? 40 : 20,
                                 columns: const [
-                                  DataColumn(label: Text("title")),
-                                  DataColumn(label: Text("Due Date")),
-                                  DataColumn(label: Text("Total")),
-                                  DataColumn(label: Text("Paid")),
-                                  DataColumn(label: Text("Status")),
-                                  DataColumn(label: Text("Action")),
+                                  DataColumn(
+                                    label: Text(
+                                      "title",
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    label: Text(
+                                      "Due Date",
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    label: Text(
+                                      "Total",
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    label: Text(
+                                      "Paid",
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    label: Text(
+                                      "Status",
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    label: Text(
+                                      "Action",
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                  ),
                                 ],
                                 rows:
                                     student.installments.map((installment) {
@@ -308,11 +339,28 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
 
     return DataRow(
       cells: [
-        DataCell(Text(installment.title)),
-        DataCell(Text(DateFormat('MMM dd, yyyy').format(installment.dueDate))),
-        DataCell(Text(currencyFormat.format(installment.totalAmount))),
+        DataCell(
+          Text(installment.title, style: TextStyle(color: Colors.black)),
+        ),
+        DataCell(
+          Text(
+            DateFormat('MMM dd, yyyy').format(installment.dueDate),
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
+        DataCell(
+          Text(
+            currencyFormat.format(installment.totalAmount),
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
 
-        DataCell(Text(currencyFormat.format(installment.paidAmount))),
+        DataCell(
+          Text(
+            currencyFormat.format(installment.paidAmount),
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
         DataCell(
           Text(
             installment.status,

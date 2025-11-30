@@ -6,6 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_event.dart';
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_state.dart';
+import 'package:flutter_cas_app_main/src/features/group/presentation/pages/read_group_page.dart';
+import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/inquiry_detail_page.dart';
 
 Widget buildAdminCarouselSlider(PageController pageController) {
   final carouselItems = [
@@ -17,6 +19,7 @@ Widget buildAdminCarouselSlider(PageController pageController) {
       'icon': Icons.book_outlined,
       'color': Color(0xFF3B82F6),
       'bgColor': Color(0xFFF0F7FF),
+      'route': GroupMainDetailPage(),
     },
     {
       'title': 'Inquiry Detail',
@@ -26,6 +29,7 @@ Widget buildAdminCarouselSlider(PageController pageController) {
       'icon': Icons.help_outline,
       'color': Color(0xFF10B981),
       'bgColor': Color(0xFFF0FDF4),
+      'route': InquiryDetailPage(),
     },
   ];
 
@@ -60,7 +64,16 @@ Widget buildAdminCarouselSlider(PageController pageController) {
                         horizontalPadding,
                         16,
                       ),
-                      child: _buildCarouselCard(carouselItems[index]),
+                      child: _buildCarouselCard(carouselItems[index], () {
+                        HapticFeedback.mediumImpact();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => carouselItems[index]['route'] as Widget,
+                          ),
+                        );
+                      }),
                     );
                   },
                 ),
@@ -95,7 +108,7 @@ Widget buildAdminCarouselSlider(PageController pageController) {
   );
 }
 
-Widget _buildCarouselCard(Map<String, dynamic> item) {
+Widget _buildCarouselCard(Map<String, dynamic> item, VoidCallback onTap) {
   return LayoutBuilder(
     builder: (context, constraints) {
       final size = MediaQuery.of(context).size;
@@ -112,10 +125,7 @@ Widget _buildCarouselCard(Map<String, dynamic> item) {
       final arrowSize = isDesktop ? 18.0 : 16.0;
 
       return GestureDetector(
-        onTap: () {
-          HapticFeedback.mediumImpact();
-          // Handle card tap
-        },
+        onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,

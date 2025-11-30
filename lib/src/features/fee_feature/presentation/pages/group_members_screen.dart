@@ -67,6 +67,7 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
 
     return GradientBackground(
       child: Scaffold(
+        backgroundColor: Colors.white,
         body: SafeArea(
           child: ResponsivePadding(
             child: Column(
