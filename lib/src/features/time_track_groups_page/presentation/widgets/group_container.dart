@@ -27,39 +27,36 @@ class GroupsContainer extends StatelessWidget {
         child: Column(
           children: [
             SizedBox(height: 12),
-            SizedBox(
-              height: 120,
-              width: 120,
-              child: Image.asset("assets/images/group_illustration.png"),
+            FittedBox(
+              child: SizedBox(
+                height: 120,
+                width: 120,
+                child: Image.asset("assets/images/group_illustration.png"),
+              ),
             ),
             SizedBox(height: 12),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: Row(
-                children: [
-                  _getIcons(courseName),
-                  SizedBox(width: 6),
-                  Text(
-                    groupName,
-                    style: TextStyle(
-                      fontSize: TextSizes.titleMedium,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
+              child: FittedBox(
+                child: Row(
+                  children: [
+                    _getIcons(courseName),
+                    SizedBox(width: 6),
+                    Text(
+                      groupName,
+                      style: TextStyle(
+                        fontSize: TextSizes.titleMedium,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-            SizedBox(height: 12),
+            Expanded(child: SizedBox()),
           ],
         ),
-        //  Column(
-        //   children: [
-
-        //     SizedBox(height: 8),
-
-        //   ],
-        // ),
       ),
     );
   }
