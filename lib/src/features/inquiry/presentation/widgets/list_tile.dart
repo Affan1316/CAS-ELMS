@@ -10,9 +10,17 @@ class MyListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.person, color: Colors.blue),
-      title: Text(inquiry.studentName,
-          style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text("${inquiry.courseIntersted} • ${inquiry.phoneNo}"),
+      title: Text(
+        inquiry.studentName,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),
+      ),
+      subtitle: Text(
+        "${inquiry.courseIntersted} • ${inquiry.phoneNo}",
+        style: TextStyle(color: Colors.black),
+      ),
     );
   }
 }

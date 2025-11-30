@@ -30,6 +30,7 @@ class GroupStudentsScreen extends StatelessWidget {
         ReadWholeGroupStudentsListUsecase();
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           "Students of $groupTitle",
