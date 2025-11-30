@@ -9,6 +9,7 @@ import 'package:flutter_cas_app_main/src/features/student_feature/presentation/p
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/webview_screen.dart';
 
 import '../../domain/webview_page_type.dart';
+import '../widgets/logOut_dialog.dart';
 
 class StudentProfilePage extends StatefulWidget {
   final String id;
@@ -444,9 +445,7 @@ class StudentProfilePageState extends State<StudentProfilePage>
                         isTablet,
                         isLogout: true,
                         onTap: () async {
-                          context.read<StudentFeatureBloc>().add(
-                            SignOutEvent(),
-                          );
+                          showLogoutDialog(context);
                         },
                       ),
 
