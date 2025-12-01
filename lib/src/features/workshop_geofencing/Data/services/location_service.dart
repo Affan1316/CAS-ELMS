@@ -6,6 +6,7 @@ import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/getTi
 import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/services/notification_service.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 
 import '../../Domain/repository/firestore_repository.dart';
 import '../../Domain/repository/hive_repository.dart';
@@ -30,7 +31,7 @@ class LocationTaskHandler extends TaskHandler {
   final hiveRepo = HiveRepository();
   final WorkManagerService workManagerService = WorkManagerService();
   final NotificationService notificationService = NotificationService();
-
+  DateTime? entryTime;
   var locationServiceManager = LocationServiceManager();
   var s = SharePreferenceRepository();
   @override
@@ -39,12 +40,14 @@ class LocationTaskHandler extends TaskHandler {
     WorkManagerService.initialize();
     notificationService.initNotification();
     await hiveRepo.initInService();
-
+    TimerForAttendance.startTimer(FireStoreRepository());
     isInCAS = false;
+    entryTime = null; // Reset entry time
   }
 
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
+    TimerForAttendance.stopTimer();
     workManagerService.registerOneOfTask(
       taskName: WorkManagerService.exitTask,
       uniqueName:
@@ -63,6 +66,7 @@ class LocationTaskHandler extends TaskHandler {
       );
       await MyGeofenceService.onExit(hiveRepo, s, notificationService);
       isInCAS = false;
+      TimerForAttendance.stopTimer();
       return;
     }
 
@@ -76,9 +80,8 @@ class LocationTaskHandler extends TaskHandler {
       await MyGeofenceService.onExit(hiveRepo, s, notificationService);
       locationServiceManager.stopLocationService();
       isInCAS = false;
+      TimerForAttendance.stopTimer(); // <-- Reset entry timestamp since user exited
       return;
-    } else {
-      // MyGeofenceService().reCreatefence();
     }
   }
 
@@ -103,31 +106,31 @@ class LocationTaskHandler extends TaskHandler {
     final pos = await Geolocator.getCurrentPosition(
       locationSettings: LocationSettings(accuracy: LocationAccuracy.best),
     );
-    if (!pos.isMocked) {
-      if (data == enterTag) {
-        dv.log("Received Enter Tag", name: "LocationTaskHandler");
-        isInCAS = true;
-        await MyGeofenceService.onEnter(hiveRepo, s, notificationService);
+    // if (!pos.isMocked) {
+    if (data == enterTag) {
+      dv.log("Received Enter Tag", name: "LocationTaskHandler");
+      isInCAS = true;
+      await MyGeofenceService.onEnter(hiveRepo, s, notificationService);
 
-        // Handle enter event
-      } else if (data == exitTag) {
-        // Handle's exit event
+      // Handle enter event
+    } else if (data == exitTag) {
+      // Handle's exit event
 
-        dv.log("Received Exit Tag", name: "LocationTaskHandler");
-        if (isInCAS) {
-          await MyGeofenceService.onExit(hiveRepo, s, notificationService);
+      dv.log("Received Exit Tag", name: "LocationTaskHandler");
+      if (isInCAS) {
+        await MyGeofenceService.onExit(hiveRepo, s, notificationService);
 
-          isInCAS = false;
-        }
-        await locationServiceManager.stopLocationService();
-      } else if (data == dWellTag) {
-        dv.log("Received Dwell Tag", name: "LocationTaskHandler");
-        // Handle dwell event
-        await MyGeofenceService.onDwell(fireStoreRepository);
+        isInCAS = false;
       }
-    } else {
-      notificationService.showSpoofedLocNotification();
+      await locationServiceManager.stopLocationService();
+    } else if (data == dWellTag) {
+      dv.log("Received Dwell Tag", name: "LocationTaskHandler");
+      // Handle dwell event
+      await MyGeofenceService.onDwell(fireStoreRepository);
     }
+    // } else {
+    //   notificationService.showSpoofedLocNotification();
+    // }
   }
 
   @override
@@ -206,5 +209,41 @@ class LocationServiceManager {
 
   Future<void> stopLocationService() async {
     await FlutterForegroundTask.stopService();
+  }
+}
+
+class TimerForAttendance {
+  static Timer? _attendanceTimer;
+  static int _minutesPassed = 0;
+
+  static Future<void> startTimer(FireStoreRepository firestore) async {
+    _attendanceTimer = Timer.periodic(Duration(minutes: 1), (timer) async {
+      _minutesPassed++;
+
+      // ⭐ After 40 minutes → mark attendance
+      if (_minutesPassed >= 40) {
+        String? rollNo = await SharePreferenceRepository().getRollNo();
+        try {
+          DateTime date = await getCurrentDate();
+
+          if (rollNo != null) {
+            await firestore.markAttendance(
+              studentId: rollNo,
+              date: formatDate(date: date),
+              isPresent: true,
+              day: DateFormat("EEEE").format(date),
+            );
+          }
+        } catch (e) {
+          debugPrint(e.toString());
+        }
+        TimerForAttendance.stopTimer();
+      }
+    });
+  }
+
+  static void stopTimer() {
+    _attendanceTimer?.cancel(); // stop timer
+    _attendanceTimer = null;
   }
 }

@@ -1,9 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/core/theme/app_colors.dart';
 import 'package:flutter_cas_app_main/src/features/my_student_attendence/presentation/widget/attendence_content_view.dart';
+
 import 'bloc/student_attendence_bloc_bloc.dart';
-import 'dart:math' as math;
 
 /// StudentAttendancePage with enhanced UI/UX using analytic geometry principles
 ///
@@ -165,7 +167,7 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
               icon: Icon(
                 Icons.location_on_rounded,
                 size: _iconSize,
-                color: AppColors.primaryColor,
+                color: AppColors.buttonText,
               ),
               onPressed: _onLocationPressed,
               tooltip: 'Check Location',
