@@ -131,7 +131,7 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.system,
-          home: SuperAdminDashboard(),
+          home: SplashScreen(),
           // home: StudentTimeTrackerPage(),
         ),
       ),
