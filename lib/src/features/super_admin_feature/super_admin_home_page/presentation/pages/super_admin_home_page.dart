@@ -6,6 +6,7 @@ import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentatio
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/pages/OnboardingScreen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
+import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/inquiry_detail_page.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/groups_report_page.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/super_admin_fee_notifications_screen.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
@@ -570,6 +571,12 @@ class SuperAdminDashboard extends StatelessWidget {
         color: const Color(0xFFfed6e3),
         onTap: () => _navigateToScreen(context, "Notifications"),
       ),
+      DashboardItem(
+        title: "Inquiry",
+        icon: Icons.info_outline,
+        color: const Color.fromARGB(255, 0, 0, 0),
+        onTap: () => _navigateToScreen(context, "Inquiry"),
+      ),
     ];
 
     final crossAxisCount = _getGridCrossAxisCount(screenWidth);
@@ -735,6 +742,16 @@ class SuperAdminDashboard extends StatelessWidget {
         MaterialPageRoute(
           builder: (context) {
             return GroupsReportPage();
+          },
+        ),
+      );
+    }
+    if (screenName == "Inquiry") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return InquiryDetailPage();
           },
         ),
       );
