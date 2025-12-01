@@ -12,6 +12,7 @@ import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presenta
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/pages/admin_home_page.dart';
 import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/admin_login_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/data/service/admin_storage_service.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_state.dart';
@@ -139,20 +140,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// class MyHomePage extends StatefulWidget {
-//   const MyHomePage({super.key});
-
-//   @override
-//   State<MyHomePage> createState() => _MyHomePageState();
-// }
-
-// class _MyHomePageState extends State<MyHomePage> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return StudentAttendanceScreen();
-//   }
-// }
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -172,6 +159,39 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _checkLoginStatus() async {
     // Wait a bit for splash effect (optional)
     await Future.delayed(const Duration(seconds: 1));
+
+    final isAdminLoggedIn = await AdminStorageService.isAdminLoggedIn();
+
+    if (isAdminLoggedIn) {
+      if (!mounted) return;
+
+      // Get admin role
+      final role = await AdminStorageService.getCurrentRole();
+      final adminId = await AdminStorageService.getLoggedInAdminId();
+
+      print('✅ Admin already logged in: $adminId with role $role');
+
+      // ✅ NAVIGATE BASED ON ROLE (same logic as your login screen)
+      Widget destinationPage;
+      if (role == AdminRole.superAdmin) {
+        print('🎯 Navigating to SUPER ADMIN home');
+        destinationPage = SuperAdminDashboard(); // Your super admin page
+      } else if (role == AdminRole.admin) {
+        print('🎯 Navigating to ADMIN home');
+        destinationPage = AdminHomePage(); // Your regular admin page
+      } else {
+        // If role is 'none' or corrupted, logout and go to onboarding
+        print('⚠️ Invalid role, logging out');
+        await AdminStorageService.logout();
+        _navigateToOnboarding();
+        return;
+      }
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => destinationPage),
+      );
+      return;
+    }
 
     final isLoggedIn = await _authService.isLoggedIn();
 
