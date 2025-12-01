@@ -10,6 +10,7 @@ class AdminLoginBloc extends Bloc<AdminLoginEvent, AdminLoginState> {
     on<AdminLoginInitialized>(_onInitialized);
     on<AdminLoginSubmitted>(_onLoginSubmitted);
     on<AdminLoginReset>(_onReset);
+    on<AdminLogoutRequested>(_onLogoutRequested);
   }
 
   Future<void> _onInitialized(
@@ -66,5 +67,36 @@ class AdminLoginBloc extends Bloc<AdminLoginEvent, AdminLoginState> {
 
   void _onReset(AdminLoginReset event, Emitter<AdminLoginState> emit) {
     emit(AdminLoginInitial());
+  }
+
+  Future<void> _onLogoutRequested(
+    AdminLogoutRequested event,
+    Emitter<AdminLoginState> emit,
+  ) async {
+    print('🔐 Logout requested - starting logout process');
+
+    try {
+      emit(AdminLoginLoading());
+      print('⏳ Loading state emitted');
+
+      // Call logout (keeps credentials, clears session)
+      await AdminStorageService.logout();
+      print('✅ Storage logout completed - session cleared');
+
+      // Small delay for smooth UX (optional)
+      await Future.delayed(Duration(milliseconds: 500));
+
+      // Reset to initial state
+      emit(AdminLoginInitial());
+      print('✅ User logged out successfully - credentials preserved');
+      print(
+        '✅ Admin can login again with: admin001/admin123 or superadmin/super123',
+      );
+    } catch (e) {
+      print('❌ Logout error: $e');
+      emit(
+        const AdminLoginFailure(message: 'Logout failed. Please try again.'),
+      );
+    }
   }
 }

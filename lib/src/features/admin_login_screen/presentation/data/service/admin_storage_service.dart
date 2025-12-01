@@ -183,4 +183,18 @@ class AdminStorageService {
   }
 
   // --- END MODIFIED ---
+  static Future<void> logout() async {
+    try {
+      // Clear session-specific data (not credentials)
+      await _storage.delete(key: 'session_token');
+      await _storage.delete(key: 'last_login_time');
+      await _storage.delete(key: 'current_user_role');
+      await _storage.delete(key: 'is_logged_in');
+
+      print('Logout successful - credentials preserved');
+    } catch (e) {
+      print('Error during logout: $e');
+      throw Exception('Logout failed');
+    }
+  }
 }
