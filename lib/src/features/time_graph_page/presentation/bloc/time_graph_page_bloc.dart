@@ -30,7 +30,8 @@ class TimeGraphPageBloc extends Bloc<TimeGraphPageEvent, TimeGraphPageState> {
     // await Future.delayed(Duration(seconds: 2));
     // TODO: add real data implementation
     var data = await fireStoreRepository.getDaysWorkshopTimeForThisWeek(
-      studentId: await sharePreferenceRepository.getRollNo() ?? "",
+      studentId:
+          event.rollNo ?? await sharePreferenceRepository.getRollNo() ?? "",
     );
     selectiveFilter = 'This Week';
     if (data != null) {
@@ -56,7 +57,8 @@ class TimeGraphPageBloc extends Bloc<TimeGraphPageEvent, TimeGraphPageState> {
     // await Future.delayed(Duration(seconds: 2));
     // TODO: add real data implementation
     var data = await fireStoreRepository.getDaysWorkshopTimeForLastWeek(
-      studentId: await sharePreferenceRepository.getRollNo() ?? "",
+      studentId:
+          event.rollNo ?? await sharePreferenceRepository.getRollNo() ?? "",
     );
     selectiveFilter = 'Last Week';
     if (data != null) {
@@ -101,7 +103,8 @@ class TimeGraphPageBloc extends Bloc<TimeGraphPageEvent, TimeGraphPageState> {
     emit(TimeGraphPageLoading());
     await Future.delayed(const Duration(seconds: 2));
     var data = await fireStoreRepository.getAllDaysWorkshopTime(
-      studentId: await sharePreferenceRepository.getRollNo() ?? "",
+      studentId:
+          event.rollNo ?? await sharePreferenceRepository.getRollNo() ?? "",
     );
     if (data != null) {
       var rangedData =

@@ -5,14 +5,15 @@ class MyAppbar extends StatelessWidget {
   final VoidCallback? onTap;
   final String studentName;
 
-
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         IconButton(
           icon: Icon(Icons.arrow_back_ios, color: Color(0xFF3D4C5F)),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         SizedBox(width: 10),
         Text(
