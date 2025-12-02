@@ -37,8 +37,9 @@ class _MyChoiceChip extends StatelessWidget {
 }
 
 class MyChoiceChips extends StatefulWidget {
-  const MyChoiceChips({super.key, required this.selectedFilter});
+  const MyChoiceChips({super.key, required this.selectedFilter, this.rollNo});
   final String selectedFilter;
+  final String? rollNo;
 
   @override
   State<MyChoiceChips> createState() => _MyChoiceChipsState();
@@ -64,7 +65,9 @@ class _MyChoiceChipsState extends State<MyChoiceChips> {
             selectedFilter: selectedFilter,
             onSelected: (selected) {
               setState(() {
-                context.read<TimeGraphPageBloc>().add(ThisWeekEvent());
+                context.read<TimeGraphPageBloc>().add(
+                  ThisWeekEvent(rollNo: widget.rollNo),
+                );
                 selectedFilter = 'This Week';
                 if ('This Week' != 'Custom') {
                   _selectedDateRange = null;
@@ -77,7 +80,9 @@ class _MyChoiceChipsState extends State<MyChoiceChips> {
             value: 'Last Week',
             selectedFilter: selectedFilter,
             onSelected: (value) {
-              context.read<TimeGraphPageBloc>().add(const LastWeekEvent());
+              context.read<TimeGraphPageBloc>().add(
+                LastWeekEvent(rollNo: widget.rollNo),
+              );
               setState(() {
                 selectedFilter = 'Last Week';
                 if ('Last Week' != 'Custom') {

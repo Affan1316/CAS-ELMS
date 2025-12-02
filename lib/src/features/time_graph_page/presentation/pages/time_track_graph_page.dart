@@ -17,7 +17,8 @@ import '../widgets/shadow_container.dart';
 import '../widgets/title_text.dart';
 
 class StudentTimeTrackerPage extends StatefulWidget {
-  const StudentTimeTrackerPage({super.key});
+  const StudentTimeTrackerPage({super.key, this.rollNo});
+  final String? rollNo;
 
   @override
   State<StudentTimeTrackerPage> createState() => _StudentTimeTrackerPageState();
@@ -95,7 +96,9 @@ class _StudentTimeTrackerPageState extends State<StudentTimeTrackerPage> {
 
     if (picked != null && picked != _selectedDateRange) {
       if (context.mounted) {
-        context.read<TimeGraphPageBloc>().add(SelectiveRangeEvent(picked));
+        context.read<TimeGraphPageBloc>().add(
+          SelectiveRangeEvent(dateRange: picked, rollNo: widget.rollNo),
+        );
       }
 
       // setState(() {

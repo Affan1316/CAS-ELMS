@@ -74,28 +74,29 @@ class StudentAttendenceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         SharePreferenceRepository();
     NotificationService notificationService = NotificationService();
     bool isLocEnabled = await Geolocator.isLocationServiceEnabled();
-
     if (isLocEnabled) {
       Position position = await Geolocator.getCurrentPosition();
-      if (isInGeofenceMeters(
+
+      if (!isInGeofenceMeters(
         pointLat: position.latitude,
         pointLon: position.longitude,
+        radiusMeters: 70,
       )) {
-        log("enter at location check event");
-        await LocationServiceManager().startLocationService();
-        MyGeofenceService.onEnter(
-          hive,
-          sharePreferenceRepository,
-          notificationService,
-        );
-      } else {
         log("exit at location check event");
-        MyGeofenceService.onExit(
+        await MyGeofenceService.onExit(
           hive,
           sharePreferenceRepository,
           notificationService,
         );
         await LocationServiceManager().stopLocationService();
+      } else {
+        log("enter at location check event");
+        await LocationServiceManager().startLocationService();
+        await MyGeofenceService.onEnter(
+          hive,
+          sharePreferenceRepository,
+          notificationService,
+        );
       }
     }
   }

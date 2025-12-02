@@ -51,6 +51,10 @@ class AdminLoginBloc extends Bloc<AdminLoginEvent, AdminLoginState> {
 
       // --- MODIFIED: Check the role ---
       if (role != AdminRole.none) {
+        await AdminStorageService.saveLoginSession(
+          adminId: event.adminId.trim(),
+          role: role,
+        );
         print('Login successful with role: $role');
         // Pass the role to the success state
         emit(AdminLoginSuccess(role: role));

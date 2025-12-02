@@ -259,7 +259,7 @@ class StudentFeatureBloc
     Emitter<StudentFeatureState> emit,
   ) async {
     AuthService authService = AuthService();
-    await authService.signOut();
+    await authService.sigInOut();
     emit(StudentSigInOutState());
   }
 }

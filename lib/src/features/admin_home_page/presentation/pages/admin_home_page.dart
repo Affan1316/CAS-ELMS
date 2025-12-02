@@ -51,34 +51,36 @@ class _AdminHomePageState extends State<AdminHomePage>
     final isTablet = size.width >= 600;
     final isDesktop = size.width >= 1024;
 
-    return Scaffold(
-      backgroundColor: Color(0xFFFAFAFA),
-      body: SingleChildScrollView(
-        physics: BouncingScrollPhysics(),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: isDesktop ? 1400 : double.infinity,
-            ),
-            child: Column(
-              children: [
-                buildAdminHeader(),
-                buildAdminTitleSection(),
-                SizedBox(height: isDesktop ? 32 : 24),
-                buildAdminCarouselSlider(_pageController),
-                SizedBox(height: isDesktop ? 40 : 32),
-                buildAdminOverviewSection(),
-                SizedBox(height: isDesktop ? 32 : 24),
-                BlocBuilder<AdminHomeBloc, AdminHomeState>(
-                  builder: (context, state) {
-                    return buildFeaturesGrid(
-                      _animationController,
-                      pendingLeaveCount: state.pendingLeavesCount,
-                    );
-                  },
-                ),
-                SizedBox(height: isDesktop ? 40 : 20),
-              ],
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Color(0xFFFAFAFA),
+        body: SingleChildScrollView(
+          physics: BouncingScrollPhysics(),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: isDesktop ? 1400 : double.infinity,
+              ),
+              child: Column(
+                children: [
+                  buildAdminHeader(),
+                  buildAdminTitleSection(),
+                  SizedBox(height: isDesktop ? 32 : 24),
+                  buildAdminCarouselSlider(_pageController),
+                  SizedBox(height: isDesktop ? 40 : 32),
+                  buildAdminOverviewSection(),
+                  SizedBox(height: isDesktop ? 32 : 24),
+                  BlocBuilder<AdminHomeBloc, AdminHomeState>(
+                    builder: (context, state) {
+                      return buildFeaturesGrid(
+                        _animationController,
+                        pendingLeaveCount: state.pendingLeavesCount,
+                      );
+                    },
+                  ),
+                  SizedBox(height: isDesktop ? 40 : 20),
+                ],
+              ),
             ),
           ),
         ),

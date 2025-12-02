@@ -19,11 +19,14 @@ class SharePreferenceRepository {
 
   Future<bool> setCheckInTime(DateTime? dateTime) async {
     var prefs = await SharedPreferences.getInstance();
-    bool? boolean = await prefs.setString(
+    bool boolean = await prefs.setString(
       SharedPreferenceKeys.checkInTime,
       dateTime?.toIso8601String() ?? "",
     );
-    log(boolean.toString(), name: "setting CheckIn Time");
+    log(
+      "${boolean.toString()} time is ${dateTime?.toIso8601String() ?? ""}",
+      name: "setting CheckIn Time",
+    );
     return boolean;
   }
 

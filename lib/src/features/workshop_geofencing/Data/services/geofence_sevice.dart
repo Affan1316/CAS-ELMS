@@ -115,10 +115,10 @@ class MyGeofenceService {
       triggers: {GeofenceEvent.enter, GeofenceEvent.exit, GeofenceEvent.dwell},
 
       iosSettings: const IosGeofenceSettings(initialTrigger: true),
-      androidSettings: AndroidGeofenceSettings(
+      androidSettings: const AndroidGeofenceSettings(
         initialTriggers: {GeofenceEvent.enter},
-
-        loiteringDelay: const Duration(minutes: 40),
+        notificationResponsiveness: Duration(minutes: 5),
+        loiteringDelay: Duration(minutes: 40),
         expiration: null,
       ),
     );
@@ -232,7 +232,7 @@ class MyGeofenceService {
           studentId: rollNo,
           date: formatDate(date: date),
           isPresent: true,
-          day: DateFormat("E").format(date),
+          day: DateFormat("EEEE").format(date),
         );
       }
     } catch (e) {

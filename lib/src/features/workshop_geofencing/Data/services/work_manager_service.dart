@@ -144,11 +144,6 @@ class WorkManagerService {
     SharePreferenceRepository sharePreferenceRepository,
     NotificationService notificationService,
   ) async {
-    notificationService.showNotification(
-      4,
-      "Service Stopped",
-      "You are considered exited from CAS.",
-    );
     await MyGeofenceService.onExit(
       hiveRepo,
       sharePreferenceRepository,
