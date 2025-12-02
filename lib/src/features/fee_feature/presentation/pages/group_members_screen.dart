@@ -120,7 +120,7 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
                           MaterialPageRoute(
                             builder:
                                 (_) => StudentTimeTrackerPage(
-                                  rollNo: widget.groupId,
+                                  rollNo: _selectedStudent!.rollNum,
                                 ),
                           ),
                         );
