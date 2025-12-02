@@ -17,8 +17,8 @@ import '../widgets/shadow_container.dart';
 import '../widgets/title_text.dart';
 
 class StudentTimeTrackerPage extends StatefulWidget {
-  const StudentTimeTrackerPage({super.key, this.rollNo});
-  final String? rollNo;
+  const StudentTimeTrackerPage({super.key, required this.rollNo});
+  final String rollNo;
 
   @override
   State<StudentTimeTrackerPage> createState() => _StudentTimeTrackerPageState();
@@ -112,7 +112,7 @@ class _StudentTimeTrackerPageState extends State<StudentTimeTrackerPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    context.read<TimeGraphPageBloc>().add(const ThisWeekEvent());
+    context.read<TimeGraphPageBloc>().add(ThisWeekEvent(rollNo: widget.rollNo));
     update();
   }
 

@@ -198,6 +198,7 @@ class _GroupItem extends StatelessWidget {
                 (_) => GroupMembersScreen(
                   groupId: group.groupName,
                   isNavigateToAttendence: isNavigateToAttendence,
+                  isNavigateToStudentFeeDetails: false,
                 ),
           ),
         );

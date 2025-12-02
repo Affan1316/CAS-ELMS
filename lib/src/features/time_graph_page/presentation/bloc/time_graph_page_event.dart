@@ -7,7 +7,7 @@ abstract class TimeGraphPageEvent {
 
 class ThisWeekEvent extends TimeGraphPageEvent {
   final String? rollNo;
-  const ThisWeekEvent({this.rollNo});
+  const ThisWeekEvent({required this.rollNo});
 }
 
 class LastWeekEvent extends TimeGraphPageEvent {

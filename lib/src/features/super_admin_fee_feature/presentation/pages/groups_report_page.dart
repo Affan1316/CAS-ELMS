@@ -640,6 +640,7 @@ class ResponsiveGroupCard extends StatelessWidget {
                             (_) => GroupMembersScreen(
                               groupId: groupName,
                               isNavigateToAttendence: false,
+                              isNavigateToStudentFeeDetails: true,
                             ),
                       ),
                     );

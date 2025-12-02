@@ -133,7 +133,7 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.system,
-          home: AdminHomePage(),
+          home: SplashScreen(),
           // home: StudentTimeTrackerPage(),
         ),
       ),

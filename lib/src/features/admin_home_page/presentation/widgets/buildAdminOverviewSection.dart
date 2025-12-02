@@ -109,8 +109,8 @@ Widget buildFeaturesGrid(
       'icon': Icons.timer_outlined,
     },
     {
-      'title': 'Update Group Data',
-      'subtitle': 'Time management',
+      'title': 'View Attendence',
+      'subtitle': 'Attendence management',
       'icon': Icons.schedule_outlined,
     },
     {
