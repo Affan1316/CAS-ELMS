@@ -108,11 +108,11 @@ Widget buildFeaturesGrid(
       'subtitle': 'Track workshop hours',
       'icon': Icons.timer_outlined,
     },
-    // {
-    //   'title': 'Update Group Data',
-    //   'subtitle': 'Time management',
-    //   'icon': Icons.schedule_outlined,
-    // },
+    {
+      'title': 'Update Group Data',
+      'subtitle': 'Time management',
+      'icon': Icons.schedule_outlined,
+    },
     {
       'title': 'Leave Management System',
       'subtitle': 'Manage absences',

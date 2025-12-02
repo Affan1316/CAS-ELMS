@@ -636,7 +636,11 @@ class ResponsiveGroupCard extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => GroupMembersScreen(groupId: groupName),
+                        builder:
+                            (_) => GroupMembersScreen(
+                              groupId: groupName,
+                              isNavigateToAttendence: false,
+                            ),
                       ),
                     );
                   },

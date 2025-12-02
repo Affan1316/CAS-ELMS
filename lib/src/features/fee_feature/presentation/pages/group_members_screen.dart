@@ -13,11 +13,18 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widge
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/search_field.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/group_student_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_side_fee_details_screen%20.dart';
+import 'package:flutter_cas_app_main/src/features/time_graph_page/presentation/pages/time_track_graph_page.dart';
 import 'fee_details_screen.dart';
 
 class GroupMembersScreen extends StatefulWidget {
   final String groupId;
-  const GroupMembersScreen({super.key, required this.groupId});
+  final bool isNavigateToAttendence;
+
+  const GroupMembersScreen({
+    super.key,
+    required this.groupId,
+    required this.isNavigateToAttendence,
+  });
 
   @override
   State<GroupMembersScreen> createState() => _GroupMembersScreenState();
@@ -105,16 +112,25 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
                           groupId: widget.groupId,
                         ),
                       );
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (_) => StudentSideFeeDetailsScreen(
-                                key: ValueKey(_selectedStudent!.rollNum),
-                                studentId: _selectedStudent!.rollNum,
-                              ),
-                        ),
-                      );
+                      if (widget.isNavigateToAttendence) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => StudentTimeTrackerPage(),
+                          ),
+                        );
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => StudentSideFeeDetailsScreen(
+                                  key: ValueKey(_selectedStudent!.rollNum),
+                                  studentId: _selectedStudent!.rollNum,
+                                ),
+                          ),
+                        );
+                      }
                     }
                   },
                   child: BlocBuilder<FeeAdminBloc, FeeAdminState>(

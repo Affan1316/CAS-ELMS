@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_cas_app_main/src/features/add_courses/presentation/pages/add_course_page.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/group_members_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/groups_list_screen.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/create_group_page.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/read_group_page.dart';
@@ -434,7 +435,9 @@ void _navigateToScreen(BuildContext context, int index) {
         print('Navigating to Pay Fee');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => GroupsListScreen()),
+          MaterialPageRoute(
+            builder: (_) => GroupsListScreen(isNavigateToAttendence: false),
+          ),
         );
         break;
 
@@ -510,6 +513,14 @@ void _navigateToScreen(BuildContext context, int index) {
         break;
 
       case 10:
+        print('Navigating to Admin Leave Management System');
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder:
+                (context) => GroupsListScreen(isNavigateToAttendence: true),
+          ),
+        );
+      case 11:
         print('Navigating to Admin Leave Management System');
         Navigator.of(context).push(
           MaterialPageRoute(
