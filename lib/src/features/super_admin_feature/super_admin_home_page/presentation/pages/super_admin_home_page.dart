@@ -695,17 +695,17 @@ class SuperAdminDashboard extends StatelessWidget {
 
   void _navigateToScreen(BuildContext context, String screenName) {
     // Show a snackbar for demonstration
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Navigating to $screenName"),
-        backgroundColor: const Color(0xFF667eea),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: EdgeInsets.all(
-          _getResponsivePadding(MediaQuery.of(context).size.width),
-        ),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text("Navigating to $screenName"),
+    //     backgroundColor: const Color(0xFF667eea),
+    //     behavior: SnackBarBehavior.floating,
+    //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    //     margin: EdgeInsets.all(
+    //       _getResponsivePadding(MediaQuery.of(context).size.width),
+    //     ),
+    //   ),
+    // );
 
     // Here you would implement actual navigation
     if (screenName == "Notifications") {
