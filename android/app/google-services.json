@@ -7,15 +7,15 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1080283537133:android:8ed90c67a8b135f2bab6e4",
+        "mobilesdk_app_id": "1:1080283537133:android:931ea3cac7bd7098bab6e4",
         "android_client_info": {
-          "package_name": "com.example.flutter_cas_app_main"
+          "package_name": "com.cas.elms"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAkiQ-Aio6DqRZVh8adc8HLC9FZZebRfuc"
+          "current_key": "AIzaSyDJIk1j5HcPG16MKAlDBKxg-vn-RGNmpkU"
         }
       ],
       "services": {

@@ -1,4 +1,4 @@
-package com.example.flutter_cas_app_main
+package com.cas.elms
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
