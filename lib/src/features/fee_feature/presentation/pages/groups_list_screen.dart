@@ -14,7 +14,8 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widge
 import 'package:flutter_cas_app_main/src/features/group/domain/entities/group_entity.dart';
 
 class GroupsListScreen extends StatefulWidget {
-  const GroupsListScreen({super.key});
+  const GroupsListScreen({super.key, required this.isNavigateToAttendence});
+  final bool isNavigateToAttendence;
 
   @override
   State<GroupsListScreen> createState() => _GroupsListScreenState();
@@ -146,16 +147,22 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
                                     ),
                                 itemCount: groups.length,
                                 itemBuilder:
-                                    (context, i) =>
-                                        _GroupItem(group: groups[i]),
+                                    (context, i) => _GroupItem(
+                                      group: groups[i],
+                                      isNavigateToAttendence:
+                                          widget.isNavigateToAttendence,
+                                    ),
                               )
                               : ListView.separated(
                                 itemCount: groups.length,
                                 separatorBuilder:
                                     (_, __) => const SizedBox(height: 16),
                                 itemBuilder:
-                                    (context, i) =>
-                                        _GroupItem(group: groups[i]),
+                                    (context, i) => _GroupItem(
+                                      group: groups[i],
+                                      isNavigateToAttendence:
+                                          widget.isNavigateToAttendence,
+                                    ),
                               ),
                     );
                   },
@@ -172,8 +179,9 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
 // Extracted Group Item Widget to optimize rebuilds
 class _GroupItem extends StatelessWidget {
   final GroupEntity group;
+  final bool isNavigateToAttendence;
 
-  const _GroupItem({required this.group});
+  const _GroupItem({required this.group, required this.isNavigateToAttendence});
 
   @override
   Widget build(BuildContext context) {
@@ -186,7 +194,12 @@ class _GroupItem extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => GroupMembersScreen(groupId: group.groupName),
+            builder:
+                (_) => GroupMembersScreen(
+                  groupId: group.groupName,
+                  isNavigateToAttendence: isNavigateToAttendence,
+                  isNavigateToStudentFeeDetails: false,
+                ),
           ),
         );
       },

@@ -41,7 +41,7 @@ Widget buildQuickActions(String studentName, String section, String studentId) {
       'color': const Color(0xFF8B5CF6),
       'count': '6 Today',
       'isUrgent': false,
-      'screen': const StudentTimeTrackerPage(),
+      'screen': StudentTimeTrackerPage(rollNo: studentId),
     },
     {
       'title': 'Leave Request',

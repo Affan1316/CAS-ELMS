@@ -31,8 +31,8 @@ class StudentAttendenceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     Emitter<AttendanceState> emit,
   ) async {
     try {
-      final user = await authService.getSavedEmail();
-      final userId = await authService.getSavedStudentId();
+      final user = event.name ??await authService.getSavedEmail();
+      final userId =  event.rollNo ??await authService.getSavedStudentId();
 
       if (user != null && userId != null) {
         //TODO: add real student data

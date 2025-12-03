@@ -82,7 +82,7 @@ class StudentInfoCard extends StatelessWidget {
                 ),
               ),
               Text(
-                student.rollno,
+                student.rollno??"",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF3D4C5F),

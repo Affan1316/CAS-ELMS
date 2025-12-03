@@ -16,46 +16,51 @@ class GroupsContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Neumorphic(
-      style: NeumorphicStyle(
-        color: AppColors.bgColor,
-        depth: 6,
-        boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(16)),
-      ),
-      child: Container(
-        // margin: EdgeInsets.all(12),
-        child: Column(
-          children: [
-            SizedBox(height: 12),
-            FittedBox(
-              child: SizedBox(
-                height: 120,
-                width: 120,
-                child: Image.asset("assets/images/group_illustration.png"),
-              ),
-            ),
-            SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: FittedBox(
-                child: Row(
-                  children: [
-                    _getIcons(courseName),
-                    SizedBox(width: 6),
-                    Text(
-                      groupName,
-                      style: TextStyle(
-                        fontSize: TextSizes.titleMedium,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
+    return GestureDetector(
+      onTap: () {
+        
+      },
+      child: Neumorphic(
+        style: NeumorphicStyle(
+          color: AppColors.bgColor,
+          depth: 6,
+          boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(16)),
+        ),
+        child: Container(
+          // margin: EdgeInsets.all(12),
+          child: Column(
+            children: [
+              SizedBox(height: 12),
+              FittedBox(
+                child: SizedBox(
+                  height: 120,
+                  width: 120,
+                  child: Image.asset("assets/images/group_illustration.png"),
                 ),
               ),
-            ),
-            Expanded(child: SizedBox()),
-          ],
+              SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: FittedBox(
+                  child: Row(
+                    children: [
+                      _getIcons(courseName),
+                      SizedBox(width: 6),
+                      Text(
+                        groupName,
+                        style: TextStyle(
+                          fontSize: TextSizes.titleMedium,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(child: SizedBox()),
+            ],
+          ),
         ),
       ),
     );

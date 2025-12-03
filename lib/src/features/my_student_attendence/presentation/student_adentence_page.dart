@@ -15,7 +15,9 @@ import 'bloc/student_attendence_bloc_bloc.dart';
 /// - Precise 8dp grid system (metrological accuracy)
 /// - Circular hit areas (minimum 48x48dp per Material Design)
 class StudentAdentencePage extends StatefulWidget {
-  const StudentAdentencePage({super.key});
+  const StudentAdentencePage({super.key, this.name, this.rollNo});
+  final String? rollNo;
+  final String? name;
 
   @override
   State<StudentAdentencePage> createState() => _StudentAdentencePageState();
@@ -39,7 +41,9 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
   @override
   void initState() {
     super.initState();
-    context.read<StudentAttendenceBloc>().add(LoadAttendance());
+    context.read<StudentAttendenceBloc>().add(
+      LoadAttendance(name: widget.name, rollNo: widget.rollNo),
+    );
 
     // Initialize location pulse animation
     _locationAnimController = AnimationController(
@@ -88,7 +92,7 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldLightThemeBackground,
-      appBar: _buildGeometricAppBar(context),
+      appBar: _buildGeometricAppBar(context, widget.rollNo),
       body: BlocBuilder<StudentAttendenceBloc, AttendanceState>(
         builder: (context, state) {
           return AnimatedSwitcher(
@@ -103,7 +107,10 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
   }
 
   /// Builds AppBar with geometric precision and proper spacing
-  PreferredSizeWidget _buildGeometricAppBar(BuildContext context) {
+  PreferredSizeWidget _buildGeometricAppBar(
+    BuildContext context,
+    String? rollNo,
+  ) {
     return AppBar(
       toolbarHeight: _appBarHeight,
       elevation: 2,
@@ -119,9 +126,17 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
       ),
       centerTitle: true,
       actions: [
-        Padding(
-          padding: EdgeInsets.only(right: _baseUnit),
-          child: _buildLocationButton(),
+        Builder(
+          builder: (context) {
+            if (rollNo == null) {
+              return Padding(
+                padding: EdgeInsets.only(right: _baseUnit),
+                child: _buildLocationButton(),
+              );
+            } else {
+              return const SizedBox();
+            }
+          },
         ),
       ],
     );
@@ -150,34 +165,33 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
   }
 
   /// Location button with pulse animation feedback
-  Widget _buildLocationButton() {
-    return AnimatedBuilder(
-      animation: _pulseAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _pulseAnimation.value,
-          child: Container(
-            width: _minTouchTarget,
-            height: _minTouchTarget,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.transparent,
-            ),
-            child: IconButton(
-              icon: Icon(
-                Icons.location_on_rounded,
-                size: _iconSize,
-                color: AppColors.buttonText,
-              ),
-              onPressed: _onLocationPressed,
-              tooltip: 'Check Location',
-              splashRadius: _minTouchTarget / 2,
-            ),
+
+  Widget _buildLocationButton() => AnimatedBuilder(
+    animation: _pulseAnimation,
+    builder: (context, child) {
+      return Transform.scale(
+        scale: _pulseAnimation.value,
+        child: Container(
+          width: _minTouchTarget,
+          height: _minTouchTarget,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.transparent,
           ),
-        );
-      },
-    );
-  }
+          child: IconButton(
+            icon: Icon(
+              Icons.location_on_rounded,
+              size: _iconSize,
+              color: AppColors.buttonText,
+            ),
+            onPressed: _onLocationPressed,
+            tooltip: 'Check Location',
+            splashRadius: _minTouchTarget / 2,
+          ),
+        ),
+      );
+    },
+  );
 
   /// Builds content based on state with smooth transitions
   Widget _buildStateContent(

@@ -17,15 +17,15 @@ import '../widgets/shadow_container.dart';
 import '../widgets/title_text.dart';
 
 class StudentTimeTrackerPage extends StatefulWidget {
-  const StudentTimeTrackerPage({super.key, this.rollNo});
-  final String? rollNo;
+  const StudentTimeTrackerPage({super.key, required this.rollNo});
+  final String rollNo;
 
   @override
   State<StudentTimeTrackerPage> createState() => _StudentTimeTrackerPageState();
 }
 
 typedef DummyStudent =
-    ({String name, String courseName, String batchName, String rollno});
+    ({String name, String courseName, String batchName, String? rollno});
 
 class _StudentTimeTrackerPageState extends State<StudentTimeTrackerPage> {
   DateTimeRange? _selectedDateRange;
@@ -40,8 +40,8 @@ class _StudentTimeTrackerPageState extends State<StudentTimeTrackerPage> {
   );
   final double studentMaxHours = 8;
 
-  update() async {
-    getStudentData().then((value) {
+  update(String? rollNo) async {
+    getStudentData(givenNullableRollno: rollNo).then((value) {
       setState(() {
         value != null ? studentData = value : studentData;
       });
@@ -112,8 +112,8 @@ class _StudentTimeTrackerPageState extends State<StudentTimeTrackerPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    context.read<TimeGraphPageBloc>().add(const ThisWeekEvent());
-    update();
+    context.read<TimeGraphPageBloc>().add(ThisWeekEvent(rollNo: widget.rollNo));
+    update(widget.rollNo);
   }
 
   @override
@@ -133,7 +133,7 @@ class _StudentTimeTrackerPageState extends State<StudentTimeTrackerPage> {
               // Date range selector
               const TitleText(data: 'Select Time Range'),
               const SizedBox(height: 12),
-              MyChoiceChips(selectedFilter: selectedFilter),
+              MyChoiceChips(selectedFilter: selectedFilter,rollNo: widget.rollNo,),
               const SizedBox(height: 12),
               InkWell(
                 onTap: () => _selectDateRange(context),
