@@ -82,18 +82,21 @@ class AuthService {
         user: result.user,
         success: true,
         message: 'Account created successfully!',
+        uid: result.user?.uid, // ✅ Added uid
       );
     } on FirebaseAuthException catch (e) {
       return AuthResult(
         user: null,
         success: false,
         message: _getErrorMessage(e.code),
+        uid: null,
       );
     } catch (e) {
       return AuthResult(
         user: null,
         success: false,
         message: 'An unexpected error occurred. Please try again.',
+        uid: null,
       );
     }
   }
@@ -117,18 +120,21 @@ class AuthService {
         user: result.user,
         success: true,
         message: 'Signed in successfully!',
+        uid: result.user?.uid,
       );
     } on FirebaseAuthException catch (e) {
       return AuthResult(
         user: null,
         success: false,
         message: _getErrorMessage(e.code),
+        uid: null,
       );
     } catch (e) {
       return AuthResult(
         user: null,
         success: false,
         message: 'An unexpected error occurred. Please try again.',
+        uid: null,
       );
     }
   }
@@ -185,10 +191,12 @@ class AuthResult {
   final User? user;
   final bool success;
   final String message;
+  final String? uid; // ✅ Added uid field
 
   AuthResult({
     required this.user,
     required this.success,
     required this.message,
+    this.uid, // ✅ Added uid parameter
   });
 }

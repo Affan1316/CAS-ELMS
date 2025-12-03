@@ -19,7 +19,7 @@ class CeoCardWidget extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final cardWidth = width * 0.9;
-    final cardHeight = height * 0.22;
+    final cardHeight = height * 0.19;
     final imageSizeWidth = width * 0.37;
     final imageSizeHeight = height * 0.22;
 
@@ -127,7 +127,7 @@ class CeoCardWidget extends AnimatedWidget {
                   // CEO Image
                   Positioned(
                     top: position,
-                    right: 0,
+                    right: 8,
                     child: Image.asset(
                       'assets/images/sir.png',
                       width: imageSizeWidth,

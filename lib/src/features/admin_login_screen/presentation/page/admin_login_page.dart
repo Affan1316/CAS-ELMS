@@ -120,8 +120,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
               Future.delayed(Duration(milliseconds: 500), () {
                 if (mounted) {
-                  Navigator.of(context).pushReplacement(
+                  Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(builder: (context) => destinationPage),
+                    (route) => false,
                   );
                 }
               });
