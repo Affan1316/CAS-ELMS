@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,10 +6,8 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widge
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/neu_card.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_padding.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_text.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/screen_header.dart';
 
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_installment_entity_class.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/student_fee_feature_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';

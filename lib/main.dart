@@ -14,6 +14,7 @@ import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentatio
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_state.dart';
+import 'package:flutter_cas_app_main/src/features/courses_detail_page/presentation/pages/course_catalog.dart';
 
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
 
@@ -24,9 +25,6 @@ import 'package:flutter_cas_app_main/src/features/group/presentation/bloc/group_
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/bloc/inquiry_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/leave_request/presentation/bloc/leave_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
-import 'package:flutter_cas_app_main/src/features/student_assignment_page/presentation/pages/assignments_detail_page.dart';
-import 'package:flutter_cas_app_main/src/features/student_assignment_page/presentation/pages/assignments_list_page.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
 
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/get_groups_names_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
@@ -130,7 +128,7 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.system,
-          home: OnboardingScreen(),
+          home: CourseCatalog(),
         ),
       ),
     );
