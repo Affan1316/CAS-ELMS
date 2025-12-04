@@ -64,3 +64,5 @@ class StudentFeeLoadedState extends StudentFeatureState {
 
   StudentFeeLoadedState({required this.student});
 }
+
+class StudentSigInOutState extends StudentFeatureState {}

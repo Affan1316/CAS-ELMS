@@ -10,14 +10,14 @@ import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/bloc/ch
 import 'package:flutter_cas_app_main/src/features/add_courses/presentation/bloc/add_course_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/add_instructor_screen/presentation/bloc/add_instructor_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/bloc/admin_home_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/admin_home_page/presentation/pages/admin_home_page.dart';
 import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/admin_login_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/data/service/admin_storage_service.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_state.dart';
-import 'package:flutter_cas_app_main/src/features/courses_detail_page/presentation/pages/course_catalog.dart';
-
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/pages/OnboardingScreen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
-
 import 'package:flutter_cas_app_main/src/features/group/data/repositories/group_repository_implementation.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/usecases/add_group_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/usecases/update_group_usecase.dart';
@@ -25,17 +25,19 @@ import 'package:flutter_cas_app_main/src/features/group/presentation/bloc/group_
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/bloc/inquiry_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/leave_request/presentation/bloc/leave_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/onboarding_screen.dart';
-
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/get_groups_names_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_home_page.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_feature/super_admin_home_page/presentation/pages/super_admin_home_page.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/data/data_source/SuperAdminFeeRepositoryImpl.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/confirm_super_admin_fee_payment_use_case.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/fetch_group_fee_history_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/get_groups_names_super_admin_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/get_super_admin_fee_notifications_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_bloc.dart';
-
+import 'package:flutter_cas_app_main/src/features/time_graph_page/presentation/bloc/time_graph_page_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/time_graph_page/presentation/pages/time_track_graph_page.dart';
+import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/bloc/group_time_tracker_bloc.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 
 import 'src/features/my_student_attendence/presentation/bloc/student_attendence_bloc_bloc.dart';
@@ -122,32 +124,22 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(create: (context) => FeeAdminBloc()),
           BlocProvider(create: (context) => StudentAttendenceBloc()),
+          BlocProvider(create: (context) => GroupTimeTrackerBloc()),
+          BlocProvider(create: (context) => TimeGraphPageBloc()),
         ],
         child: MaterialApp(
+          debugShowCheckedModeBanner: false,
           title: 'CAS ELMS',
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.system,
-          home: CourseCatalog(),
+          home: SplashScreen(),
+          // home: StudentTimeTrackerPage(),
         ),
       ),
     );
   }
 }
-
-// class MyHomePage extends StatefulWidget {
-//   const MyHomePage({super.key});
-
-//   @override
-//   State<MyHomePage> createState() => _MyHomePageState();
-// }
-
-// class _MyHomePageState extends State<MyHomePage> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return StudentAttendanceScreen();
-//   }
-// }
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -168,6 +160,39 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _checkLoginStatus() async {
     // Wait a bit for splash effect (optional)
     await Future.delayed(const Duration(seconds: 1));
+
+    final isAdminLoggedIn = await AdminStorageService.isAdminLoggedIn();
+
+    if (isAdminLoggedIn) {
+      if (!mounted) return;
+
+      // Get admin role
+      final role = await AdminStorageService.getCurrentRole();
+      final adminId = await AdminStorageService.getLoggedInAdminId();
+
+      print('✅ Admin already logged in: $adminId with role $role');
+
+      // ✅ NAVIGATE BASED ON ROLE (same logic as your login screen)
+      Widget destinationPage;
+      if (role == AdminRole.superAdmin) {
+        print('🎯 Navigating to SUPER ADMIN home');
+        destinationPage = SuperAdminDashboard(); // Your super admin page
+      } else if (role == AdminRole.admin) {
+        print('🎯 Navigating to ADMIN home');
+        destinationPage = AdminHomePage(); // Your regular admin page
+      } else {
+        // If role is 'none' or corrupted, logout and go to onboarding
+        print('⚠️ Invalid role, logging out');
+        await AdminStorageService.logout();
+        _navigateToOnboarding();
+        return;
+      }
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => destinationPage),
+      );
+      return;
+    }
 
     final isLoggedIn = await _authService.isLoggedIn();
 

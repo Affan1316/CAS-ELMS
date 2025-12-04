@@ -6,22 +6,25 @@ abstract class TimeGraphPageEvent {
 }
 
 class ThisWeekEvent extends TimeGraphPageEvent {
-  const ThisWeekEvent();
+  final String? rollNo;
+  const ThisWeekEvent({required this.rollNo});
 }
 
 class LastWeekEvent extends TimeGraphPageEvent {
-  const LastWeekEvent();
-  
+  final String? rollNo;
+  const LastWeekEvent({this.rollNo});
 }
 
 class ThisMonthEvent extends TimeGraphPageEvent {
   const ThisMonthEvent();
-  
 }
+
 class SelectiveRangeEvent extends TimeGraphPageEvent {
-  
   final DateTimeRange dateRange;
-  const SelectiveRangeEvent(this.dateRange);
-  
+  final String? rollNo;
+  const SelectiveRangeEvent({required this.dateRange, this.rollNo});
 }
- 
+
+class InitStudentData extends TimeGraphPageEvent {
+  const InitStudentData();
+}

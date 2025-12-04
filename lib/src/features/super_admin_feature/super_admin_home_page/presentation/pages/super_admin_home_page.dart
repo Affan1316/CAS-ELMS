@@ -1,5 +1,13 @@
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/admin_login_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/admin_login_event.dart';
+import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/admin_login_state.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/pages/OnboardingScreen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
+import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/inquiry_detail_page.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/groups_report_page.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/super_admin_fee_notifications_screen.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 
@@ -31,7 +39,7 @@ class SuperAdminDashboard extends StatelessWidget {
                     child: Column(
                       children: [
                         // Header Section
-                        _buildHeader(constraints.maxWidth),
+                        _buildHeader(constraints.maxWidth, context),
                         SizedBox(
                           height: _getResponsiveSpacing(constraints.maxWidth),
                         ),
@@ -110,7 +118,7 @@ class SuperAdminDashboard extends StatelessWidget {
     return 14.0; // Mobile
   }
 
-  Widget _buildHeader(double screenWidth) {
+  Widget _buildHeader(double screenWidth, BuildContext context) {
     final bool isDesktop = screenWidth > 1200;
     final bool isTablet = screenWidth > 800;
     final bool isMobile = screenWidth <= 600;
@@ -130,18 +138,100 @@ class SuperAdminDashboard extends StatelessWidget {
       ),
       child:
           isMobile
-              ? _buildMobileHeader(screenWidth)
+              ? _buildMobileHeader(screenWidth, context)
               : _buildDesktopTabletHeader(screenWidth),
     );
   }
 
-  Widget _buildMobileHeader(double screenWidth) {
+  Widget _buildMobileHeader(double screenWidth, BuildContext context) {
     return Column(
       children: [
-        // Top row with logo and profile
+        // Top row with logo, profile, and logout
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [_buildLogo(screenWidth)],
+          children: [
+            _buildLogo(screenWidth),
+
+            // Right side: Notification and Logout buttons
+            Row(
+              children: [
+                // Notification Button
+                // GestureDetector(
+                //   onTap: () {
+                //     HapticFeedback.lightImpact();
+                //     // Add notification functionality here
+                //   },
+                //   child: Neumorphic(
+                //     style: NeumorphicStyle(
+                //       depth: 3,
+                //       boxShape: NeumorphicBoxShape.circle(),
+                //     ),
+                //     padding: EdgeInsets.all(10),
+                //     child: Stack(
+                //       children: [
+                //         Icon(
+                //           Icons.notifications_outlined,
+                //           color: Color(0xFF6B7280),
+                //           size: 20,
+                //         ),
+                //         // Notification dot
+                //         Positioned(
+                //           right: 0,
+                //           top: 0,
+                //           child: Container(
+                //             width: 6,
+                //             height: 6,
+                //             decoration: BoxDecoration(
+                //               color: Color(0xFF3B82F6),
+                //               borderRadius: BorderRadius.circular(3),
+                //             ),
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
+
+                // SizedBox(width: 10),
+
+                // Logout Button
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    _showLogoutDialog(context);
+                  },
+                  child: Neumorphic(
+                    style: NeumorphicStyle(
+                      depth: 3,
+                      boxShape: NeumorphicBoxShape.roundRect(
+                        BorderRadius.circular(10),
+                      ),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.logout_outlined,
+                          color: Color(0xFFEF4444),
+                          size: 18,
+                        ),
+                        SizedBox(width: 5),
+                        Text(
+                          'Logout',
+                          style: TextStyle(
+                            color: Color(0xFF374151),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
         const SizedBox(height: 15),
 
@@ -179,6 +269,137 @@ class SuperAdminDashboard extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  // LOGOUT CONFIRMATION DIALOG
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return BlocProvider.value(
+          value: context.read<AdminLoginBloc>(),
+          child: BlocConsumer<AdminLoginBloc, AdminLoginState>(
+            listener: (context, state) {
+              if (state is AdminLoginInitial) {
+                // Close dialog
+                Navigator.of(dialogContext).pop();
+
+                // Navigate to login screen and remove all previous routes
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (context) => const RoleSelectionScreen(),
+                  ), // ⚠️ REPLACE WITH YOUR LOGIN ROUTE, // ⚠️ REPLACE WITH YOUR ACTUAL LOGIN ROUTE
+                  (route) => false,
+                );
+
+                // Show success message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Logged out successfully'),
+                    backgroundColor: Colors.green,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              } else if (state is AdminLoginFailure) {
+                Navigator.of(dialogContext).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                title: Row(
+                  children: [
+                    Icon(Icons.logout, color: Color(0xFF3B82F6), size: 24),
+                    SizedBox(width: 12),
+                    Text(
+                      'Confirm Logout',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1F2937),
+                      ),
+                    ),
+                  ],
+                ),
+                content: Text(
+                  'Are you sure you want to logout?',
+                  style: TextStyle(fontSize: 16, color: Color(0xFF6B7280)),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed:
+                        state is AdminLoginLoading
+                            ? null
+                            : () => Navigator.of(dialogContext).pop(),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: Color(0xFF6B7280),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed:
+                        state is AdminLoginLoading
+                            ? null
+                            : () {
+                              HapticFeedback.mediumImpact();
+                              context.read<AdminLoginBloc>().add(
+                                const AdminLogoutRequested(),
+                              );
+                            },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF3B82F6),
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
+                    ),
+                    child:
+                        state is AdminLoginLoading
+                            ? SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                            : Text(
+                              'Logout',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -308,47 +529,53 @@ class SuperAdminDashboard extends StatelessWidget {
         color: const Color(0xFFf093fb),
         onTap: () => _navigateToScreen(context, "Fee Defaulter"),
       ),
-      DashboardItem(
-        title: "Inquiry",
-        icon: Icons.help_outline,
-        color: const Color(0xFF4facfe),
-        onTap: () => _navigateToScreen(context, "Inquiry"),
-      ),
-      DashboardItem(
-        title: "Student Management",
-        icon: Icons.school,
-        color: const Color(0xFF43e97b),
-        onTap: () => _navigateToScreen(context, "Student Management"),
-      ),
-      DashboardItem(
-        title: "Course Management",
-        icon: Icons.book,
-        color: const Color(0xFFfa709a),
-        onTap: () => _navigateToScreen(context, "Course Management"),
-      ),
+      // DashboardItem(
+      //   title: "Inquiry",
+      //   icon: Icons.help_outline,
+      //   color: const Color(0xFF4facfe),
+      //   onTap: () => _navigateToScreen(context, "Inquiry"),
+      // ),
+      // DashboardItem(
+      //   title: "Student Management",
+      //   icon: Icons.school,
+      //   color: const Color(0xFF43e97b),
+      //   onTap: () => _navigateToScreen(context, "Student Management"),
+      // ),
+      // DashboardItem(
+      //   title: "Course Management",
+      //   icon: Icons.book,
+      //   color: const Color(0xFFfa709a),
+      //   onTap: () => _navigateToScreen(context, "Course Management"),
+      // ),
       DashboardItem(
         title: "Reports",
         icon: Icons.assessment,
         color: const Color(0xFFffecd2),
         onTap: () => _navigateToScreen(context, "Reports"),
       ),
-      DashboardItem(
-        title: "Settings",
-        icon: Icons.settings,
-        color: const Color(0xFFa8edea),
-        onTap: () => _navigateToScreen(context, "Settings"),
-      ),
-      DashboardItem(
-        title: "Analytics",
-        icon: Icons.analytics,
-        color: const Color(0xFFd299c2),
-        onTap: () => _navigateToScreen(context, "Analytics"),
-      ),
+      // DashboardItem(
+      //   title: "Settings",
+      //   icon: Icons.settings,
+      //   color: const Color(0xFFa8edea),
+      //   onTap: () => _navigateToScreen(context, "Settings"),
+      // ),
+      // DashboardItem(
+      //   title: "Analytics",
+      //   icon: Icons.analytics,
+      //   color: const Color(0xFFd299c2),
+      //   onTap: () => _navigateToScreen(context, "Analytics"),
+      // ),
       DashboardItem(
         title: "Notifications",
         icon: Icons.notifications,
         color: const Color(0xFFfed6e3),
         onTap: () => _navigateToScreen(context, "Notifications"),
+      ),
+      DashboardItem(
+        title: "Inquiry",
+        icon: Icons.info_outline,
+        color: const Color.fromARGB(255, 0, 0, 0),
+        onTap: () => _navigateToScreen(context, "Inquiry"),
       ),
     ];
 
@@ -468,17 +695,17 @@ class SuperAdminDashboard extends StatelessWidget {
 
   void _navigateToScreen(BuildContext context, String screenName) {
     // Show a snackbar for demonstration
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Navigating to $screenName"),
-        backgroundColor: const Color(0xFF667eea),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: EdgeInsets.all(
-          _getResponsivePadding(MediaQuery.of(context).size.width),
-        ),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text("Navigating to $screenName"),
+    //     backgroundColor: const Color(0xFF667eea),
+    //     behavior: SnackBarBehavior.floating,
+    //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    //     margin: EdgeInsets.all(
+    //       _getResponsivePadding(MediaQuery.of(context).size.width),
+    //     ),
+    //   ),
+    // );
 
     // Here you would implement actual navigation
     if (screenName == "Notifications") {
@@ -505,6 +732,26 @@ class SuperAdminDashboard extends StatelessWidget {
         MaterialPageRoute(
           builder: (context) {
             return FeeHistoryScreen();
+          },
+        ),
+      );
+    }
+    if (screenName == "Reports") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return GroupsReportPage();
+          },
+        ),
+      );
+    }
+    if (screenName == "Inquiry") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return InquiryDetailPage();
           },
         ),
       );

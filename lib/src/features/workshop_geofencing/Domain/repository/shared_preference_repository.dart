@@ -19,11 +19,14 @@ class SharePreferenceRepository {
 
   Future<bool> setCheckInTime(DateTime? dateTime) async {
     var prefs = await SharedPreferences.getInstance();
-    bool? boolean = await prefs.setString(
+    bool boolean = await prefs.setString(
       SharedPreferenceKeys.checkInTime,
       dateTime?.toIso8601String() ?? "",
     );
-    log(boolean.toString(), name: "setting CheckIn Time");
+    log(
+      "${boolean.toString()} time is ${dateTime?.toIso8601String() ?? ""}",
+      name: "setting CheckIn Time",
+    );
     return boolean;
   }
 
@@ -34,14 +37,17 @@ class SharePreferenceRepository {
     log(dateTimeString.toString(), name: "getting CheckIn Time");
     if (dateTimeString != null && dateTimeString.isNotEmpty) {
       return DateTime.tryParse(dateTimeString);
-    } else  {
+    } else {
       return null;
     }
   }
 
-  Future<bool> setRollNo(String rollNo) async {
+  Future<bool> setRollNo(String? rollNo) async {
     var prefs = await SharedPreferences.getInstance();
-    bool boolean = await prefs.setString(SharedPreferenceKeys.rollNo, rollNo);
+    bool boolean = await prefs.setString(
+      SharedPreferenceKeys.rollNo,
+      rollNo ?? "",
+    );
     log(boolean.toString(), name: "setting RollNo");
     return boolean;
   }

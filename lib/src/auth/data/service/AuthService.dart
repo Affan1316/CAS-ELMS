@@ -2,6 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Domain/repository/shared_preference_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../features/workshop_geofencing/Data/services/geofence_sevice.dart';
+import '../../../features/workshop_geofencing/Data/services/work_manager_service.dart';
+
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -15,6 +18,12 @@ class AuthService {
 
   // Auth state changes stream
   Stream<User?> get authStateChanges => _auth.authStateChanges();
+
+  Future<void> sigInOut() async {
+    await WorkManagerService.cancelWorkManger();
+    await MyGeofenceService.dispose();
+    await _auth.signOut();
+  }
 
   // Check if user is logged in
   Future<bool> isLoggedIn() async {
@@ -73,18 +82,21 @@ class AuthService {
         user: result.user,
         success: true,
         message: 'Account created successfully!',
+        uid: result.user?.uid, // ✅ Added uid
       );
     } on FirebaseAuthException catch (e) {
       return AuthResult(
         user: null,
         success: false,
         message: _getErrorMessage(e.code),
+        uid: null,
       );
     } catch (e) {
       return AuthResult(
         user: null,
         success: false,
         message: 'An unexpected error occurred. Please try again.',
+        uid: null,
       );
     }
   }
@@ -108,18 +120,21 @@ class AuthService {
         user: result.user,
         success: true,
         message: 'Signed in successfully!',
+        uid: result.user?.uid,
       );
     } on FirebaseAuthException catch (e) {
       return AuthResult(
         user: null,
         success: false,
         message: _getErrorMessage(e.code),
+        uid: null,
       );
     } catch (e) {
       return AuthResult(
         user: null,
         success: false,
         message: 'An unexpected error occurred. Please try again.',
+        uid: null,
       );
     }
   }
@@ -176,10 +191,12 @@ class AuthResult {
   final User? user;
   final bool success;
   final String message;
+  final String? uid; // ✅ Added uid field
 
   AuthResult({
     required this.user,
     required this.success,
     required this.message,
+    this.uid, // ✅ Added uid parameter
   });
 }

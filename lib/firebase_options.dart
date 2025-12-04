@@ -51,8 +51,8 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAkiQ-Aio6DqRZVh8adc8HLC9FZZebRfuc',
-    appId: '1:1080283537133:android:8ed90c67a8b135f2bab6e4',
+    apiKey: 'AIzaSyDJIk1j5HcPG16MKAlDBKxg-vn-RGNmpkU',
+    appId: '1:1080283537133:android:931ea3cac7bd7098bab6e4',
     messagingSenderId: '1080283537133',
     projectId: 'cas-elms-new-data',
     storageBucket: 'cas-elms-new-data.firebasestorage.app',

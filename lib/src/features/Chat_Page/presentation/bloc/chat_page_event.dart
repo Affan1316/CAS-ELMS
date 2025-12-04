@@ -2,11 +2,11 @@ part of 'chat_page_bloc.dart';
 
 @immutable
 abstract class ChatPageEvent {
-const ChatPageEvent();
+  const ChatPageEvent();
 }
 
 class SendMessageEvent extends ChatPageEvent {
- final String text;
+  final String text;
 
   const SendMessageEvent({required this.text});
 
@@ -21,3 +21,4 @@ class SendMessageEvent extends ChatPageEvent {
   int get hashCode => text.hashCode;
 }
 
+class InitializeChatEvent extends ChatPageEvent {}

@@ -2,7 +2,7 @@ name: flutter_cas_app_main
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -45,13 +45,13 @@ dependencies:
   url_launcher: ^6.3.2
   lucide_icons_flutter: ^3.0.7
   flutter_carousel_widget: ^3.1.0
-  firebase_core: ^3.15.2
-  firebase_ai: ^2.3.0
+  firebase_core: ^4.2.1
+  firebase_ai: ^3.6.0
   responsive_ui_kit: ^0.0.3
   flutter_markdown_plus: ^1.0.3
   intl: ^0.20.2
   flutter_slidable: ^4.0.0
-  cloud_firestore: ^5.6.12
+  cloud_firestore: ^6.1.0
   fl_chart: ^1.1.0
   animated_text_kit: ^4.2.3
   image_picker: ^1.2.0
@@ -73,8 +73,9 @@ dependencies:
   hive_flutter: ^1.1.0
   path_provider: ^2.1.5
   time_config_checker: ^0.0.15
-  
-  
+  webview_flutter: ^4.13.0
+  google_generative_ai: ^0.4.7
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -92,7 +93,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -103,8 +103,9 @@ flutter:
     - assets/
     - assets/images/
     - assets/icons/
+    - assets/markDown/
   shaders:
-    - shaders/avatar_glow.frag        
+    - shaders/avatar_glow.frag
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -131,3 +132,9 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_logo.png"
+  min_sdk_android: 21

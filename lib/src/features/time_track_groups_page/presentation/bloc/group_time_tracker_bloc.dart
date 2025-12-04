@@ -1,7 +1,5 @@
-
 import 'package:bloc/bloc.dart';
-import 'package:flutter_cas_app_main/src/features/time_graph_page/data/app_color.dart';
-import 'package:flutter_cas_app_main/src/features/time_graph_page/data/dummy_data.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:meta/meta.dart';
 
 part 'group_time_tracker_event.dart';
@@ -12,24 +10,24 @@ class GroupTimeTrackerBloc
   GroupTimeTrackerBloc() : super(GroupTimeTrackerInitial()) {
     on<SelectCourseEvent>((event, emit) async {
       emit(GroupTimeTrackerLoading());
-      await Future.delayed(Duration(seconds: 2));
-      if (event.courseName == CourseNames.ai) {
-        emit(GroupLoaded(groupNames: aiGroups, courseName: CourseNames.ai));
-      } else if (event.courseName == CourseNames.android) {
-        emit(
-          GroupLoaded(
-            groupNames: androidGroups,
-            courseName: CourseNames.android,
-          ),
-        );
-      } else if (event.courseName == CourseNames.flutter) {
-        emit(
-          GroupLoaded(
-            groupNames: flutterGroups,
-            courseName: CourseNames.flutter,
-          ),
-        );
-      } else {
+      try {
+        var groups =
+            await FirebaseFirestore.instance
+                .collection("groups")
+                .where("CourseName", isEqualTo: event.courseName)
+                .get();
+        if (groups.docs.isNotEmpty) {
+          List<String> groupNames = [];
+          for (var group in groups.docs) {
+            groupNames.add(group["GroupName"]);
+          }
+          emit(
+            GroupLoaded(groupNames: groupNames, courseName: event.courseName),
+          );
+        } else {
+          emit(GroupTimeTrackerError(error: "No groups found"));
+        }
+      } catch (e) {
         emit(GroupTimeTrackerError());
       }
     });

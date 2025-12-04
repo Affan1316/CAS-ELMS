@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/bloc/chat_page_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/widgets/send_icon.dart';
-
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 
 // final typingMessage = Message(text: '', isUser: false, isTyping: true);
@@ -134,16 +133,6 @@ class _AnimatedsendingMessageState extends State<AnimatedsendingMessage>
   late Animation<double> textfieldScaleAnimation;
   late Animation<double> textfieldOpacityAnimation;
 
-  // void _scrollToBottom() {
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     widget.scrollController.animateTo(
-  //       widget.scrollController.position.maxScrollExtent,
-  //       duration: const Duration(milliseconds: 300),
-  //       curve: Curves.easeOut,
-  //     );
-  //   });
-  // }
-
   void handleSubmitted(String userText) {
     // context.read<ChatPageBloc>().add(SendMessageEvent(text: userText));
     // no response to empty message
@@ -151,29 +140,6 @@ class _AnimatedsendingMessageState extends State<AnimatedsendingMessage>
 
     context.read<ChatPageBloc>().add(SendMessageEvent(text: userText));
     // // no response to empty message
-    // if (userText.isEmpty)
-
-    // // adding to the list of message where  it used in listview builder
-    // ref
-    //     .read(messagesProvider.notifier)
-    //     .add(Message(text: userText, isUser: true));
-
-    // //after adding it  there is a BouncingDotsTypingIndicator  is shown
-    // ref.read(messagesProvider.notifier).add(typingMessage);
-    // // it gives this prompt to api
-    // ref.read(promptProvider.notifier).add(Content.text(userText));
-
-    // // it fetches the response and then is executed in when response is completed
-    // ref.read(responseProvider.future).then((value) {
-    //   // it removes the BouncingDotsTypingIndicator
-    //   ref.read(messagesProvider.notifier).remove(typingMessage);
-
-    //   // and now response is added to user
-    //   ref
-    //       .read(messagesProvider.notifier)
-    //       .add(Message(text: value.text ?? 'no response', isUser: false) );
-    //   _scrollToBottom();
-    // });
 
     widget.textController.clear();
   }

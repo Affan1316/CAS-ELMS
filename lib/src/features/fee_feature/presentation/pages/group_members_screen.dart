@@ -12,11 +12,21 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widge
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/screen_header.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/search_field.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/group_student_entity_class.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_side_fee_details_screen%20.dart';
+import 'package:flutter_cas_app_main/src/features/time_graph_page/presentation/pages/time_track_graph_page.dart';
 import 'fee_details_screen.dart';
 
 class GroupMembersScreen extends StatefulWidget {
   final String groupId;
-  const GroupMembersScreen({super.key, required this.groupId});
+  final bool isNavigateToAttendence;
+  final bool isNavigateToStudentFeeDetails;
+
+  const GroupMembersScreen({
+    super.key,
+    required this.groupId,
+    required this.isNavigateToAttendence,
+    required this.isNavigateToStudentFeeDetails,
+  });
 
   @override
   State<GroupMembersScreen> createState() => _GroupMembersScreenState();
@@ -67,6 +77,7 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
 
     return GradientBackground(
       child: Scaffold(
+        backgroundColor: Colors.white,
         body: SafeArea(
           child: ResponsivePadding(
             child: Column(
@@ -103,18 +114,43 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
                           groupId: widget.groupId,
                         ),
                       );
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (_) => FeeDetailsScreen(
-                                key: ValueKey(_selectedStudent!.rollNum),
-                                studentId: _selectedStudent!.rollNum,
-                                groupId: widget.groupId,
-                                isDefaulter: state.isDefaulter,
-                              ),
-                        ),
-                      );
+                      if (widget.isNavigateToAttendence) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => StudentTimeTrackerPage(
+                                  rollNo: _selectedStudent!.rollNum,
+                                ),
+                          ),
+                        );
+                      } else {
+                        if (widget.isNavigateToStudentFeeDetails) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => StudentSideFeeDetailsScreen(
+                                    key: ValueKey(_selectedStudent!.rollNum),
+                                    studentId: _selectedStudent!.rollNum,
+                                  ),
+                            ),
+                          );
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => FeeDetailsScreen(
+                                    groupId: widget.groupId,
+                                    isDefaulter: false,
+                                    key: ValueKey(_selectedStudent!.rollNum),
+                                    studentId: _selectedStudent!.rollNum,
+                                  ),
+                            ),
+                          );
+                        }
+                      }
                     }
                   },
                   child: BlocBuilder<FeeAdminBloc, FeeAdminState>(
@@ -155,6 +191,8 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
                                       child: MemberCardContent(
                                         student: student,
                                         groupId: widget.groupId,
+                                        isNavigateToAttendence:
+                                            widget.isNavigateToAttendence,
                                         onViewFee: (s) {
                                           _selectedStudent = s;
                                           context.read<FeeAdminBloc>().add(
@@ -178,6 +216,8 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
                                       child: MemberCardContent(
                                         student: student,
                                         groupId: widget.groupId,
+                                        isNavigateToAttendence:
+                                            widget.isNavigateToAttendence,
                                         onViewFee: (s) {
                                           _selectedStudent = s;
                                           context.read<FeeAdminBloc>().add(

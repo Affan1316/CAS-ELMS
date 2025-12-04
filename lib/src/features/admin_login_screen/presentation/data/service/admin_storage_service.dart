@@ -22,6 +22,63 @@ class AdminStorageService {
 
   static const String _isSetupCompleteKey = 'admin_setup_complete';
 
+  static const String _isLoggedInKey = 'admin_is_logged_in';
+  static const String _currentRoleKey = 'admin_current_role';
+  static const String _loggedInAdminIdKey = 'admin_logged_in_id';
+
+  // ADD THIS METHOD - Save login session
+  static Future<void> saveLoginSession({
+    required String adminId,
+    required AdminRole role,
+  }) async {
+    try {
+      await _storage.write(key: _isLoggedInKey, value: 'true');
+      await _storage.write(key: _currentRoleKey, value: role.name);
+      await _storage.write(key: _loggedInAdminIdKey, value: adminId);
+      print('✅ Admin session saved: $adminId with role $role');
+    } catch (e) {
+      print('Error saving login session: $e');
+      throw Exception('Failed to save session');
+    }
+  }
+
+  // ADD THIS METHOD - Check if admin is logged in
+  static Future<bool> isAdminLoggedIn() async {
+    try {
+      String? isLoggedIn = await _storage.read(key: _isLoggedInKey);
+      return isLoggedIn == 'true';
+    } catch (e) {
+      print('Error checking login status: $e');
+      return false;
+    }
+  }
+
+  // ADD THIS METHOD - Get current admin role
+  static Future<AdminRole> getCurrentRole() async {
+    try {
+      String? roleStr = await _storage.read(key: _currentRoleKey);
+      if (roleStr == null) return AdminRole.none;
+
+      return AdminRole.values.firstWhere(
+        (e) => e.name == roleStr,
+        orElse: () => AdminRole.none,
+      );
+    } catch (e) {
+      print('Error getting current role: $e');
+      return AdminRole.none;
+    }
+  }
+
+  // ADD THIS METHOD - Get logged in admin ID
+  static Future<String?> getLoggedInAdminId() async {
+    try {
+      return await _storage.read(key: _loggedInAdminIdKey);
+    } catch (e) {
+      print('Error getting logged in admin ID: $e');
+      return null;
+    }
+  }
+
   static String _hashPassword(String password) {
     var bytes = utf8.encode(password);
     var digest = sha256.convert(bytes);
@@ -183,4 +240,19 @@ class AdminStorageService {
   }
 
   // --- END MODIFIED ---
+  static Future<void> logout() async {
+    try {
+      // Clear session data
+      await _storage.delete(key: _isLoggedInKey);
+      await _storage.delete(key: _currentRoleKey);
+      await _storage.delete(key: _loggedInAdminIdKey);
+      await _storage.delete(key: 'session_token');
+      await _storage.delete(key: 'last_login_time');
+
+      print('✅ Logout successful - session cleared, credentials preserved');
+    } catch (e) {
+      print('Error during logout: $e');
+      throw Exception('Logout failed');
+    }
+  }
 }

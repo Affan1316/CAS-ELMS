@@ -78,37 +78,17 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
         backgroundColor: Colors.white,
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              SizedBox(height: height * 0.05),
               CeoCardWidget(
                 animationController: _animationController,
                 anime: _ceoCardAnimation,
                 height: height,
                 width: width,
               ),
-              Container(
-                width: width * 0.9,
-                padding: EdgeInsets.all(10),
-                child: Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        'Consistency, hardwork and dedication is the key to success.',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text('Noman ameer khan', style: TextStyle()),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+
+              SizedBox(height: height * 0.05),
               AnimatedBuilder(
                 animation: _coursesAnimation,
                 builder:
@@ -136,9 +116,6 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
                             height: height,
                             width: width,
                             ontap: () {
-                              // ScaffoldMessenger.of(
-                              //   context,
-                              // ).showSnackBar(SnackBar(content: Text('data')));
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) => CourseCatalog(),
@@ -196,6 +173,7 @@ class _ElmsLandingPageState extends State<ElmsLandingPage>
                   ),
                 ),
               ),
+              SizedBox(height: 25),
               LoginButton(
                 onTap: () {
                   Navigator.of(context).push(

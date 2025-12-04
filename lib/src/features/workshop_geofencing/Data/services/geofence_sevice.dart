@@ -3,12 +3,11 @@ import 'dart:developer' as dv;
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/services/location_service.dart';
 import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Domain/repository/firestore_repository.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:intl/intl.dart';
 import 'package:native_geofence/native_geofence.dart';
-
-import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/services/location_service.dart';
 
 import '../../Domain/repository/hive_repository.dart';
 import '../../Domain/repository/shared_preference_repository.dart';
@@ -23,9 +22,8 @@ Future<void> handleGeofenceEvent(GeofenceCallbackParams params) async {
   // final hiveRepo = HiveRepository();
   final locationService = LocationServiceManager();
   WidgetsFlutterBinding.ensureInitialized();
-  await locationService.initLocationService();
+  await LocationServiceManager.initLocationService();
   FlutterForegroundTask.initCommunicationPort();
-  
 
   switch (params.event) {
     case GeofenceEvent.enter:
@@ -50,10 +48,10 @@ Future<void> handleGeofenceEvent(GeofenceCallbackParams params) async {
 
     case GeofenceEvent.dwell:
       debugPrint("⌛ Dwell detected inside geofence   and at ${DateTime.now()}");
-       await tryToPromoteToForeground();
+      await tryToPromoteToForeground();
       await locationService.startLocationService();
       await locationService.sendDwellEventTag();
-        await demoteToBackground();
+      await demoteToBackground();
       break;
   }
 }
@@ -99,7 +97,7 @@ class MyGeofenceService {
     await nativeGeofence.initialize();
   }
 
-  Future<void> reCreatefence() {
+  Future<void> reCreateFence() {
     return nativeGeofence.reCreateAfterReboot();
   }
 
@@ -117,10 +115,10 @@ class MyGeofenceService {
       triggers: {GeofenceEvent.enter, GeofenceEvent.exit, GeofenceEvent.dwell},
 
       iosSettings: const IosGeofenceSettings(initialTrigger: true),
-      androidSettings: AndroidGeofenceSettings(
+      androidSettings: const AndroidGeofenceSettings(
         initialTriggers: {GeofenceEvent.enter},
-
-        loiteringDelay: const Duration(minutes: 40),
+        notificationResponsiveness: Duration(minutes: 5),
+        loiteringDelay: Duration(minutes: 40),
         expiration: null,
       ),
     );
@@ -161,6 +159,8 @@ class MyGeofenceService {
   ) async {
     var checkInTime = await sharePreferenceRepository.getCheckInTime();
     if (checkInTime == null) {
+      var time = await getCurrentDate();
+
       dv.log("Entered ForeGround ");
 
       bool isToday = await hiveRepo.isSessionAreFromToday(DateTime.now());
@@ -173,13 +173,9 @@ class MyGeofenceService {
         dv.log("Hive input task completed");
       }
 
-      sharePreferenceRepository.setCheckInTime(await getCurrentDate());
+      sharePreferenceRepository.setCheckInTime(time);
 
-      notificationService.showNotification(
-        3,
-        "Welcome To CAS",
-        "You have entered at ${DateFormat("dd/MM/yy hh:mm a").format(DateTime.now())}",
-      );
+      notificationService.showEnteredNotification(time);
     }
   }
 
@@ -205,17 +201,13 @@ class MyGeofenceService {
       dv.log(session.toString(), name: "session at on exit");
       await hiveRepo.saveSession(session);
 
-      await notificationService.showNotification(
-        1,
-        "Have a nice day",
-        "You have left the CAS at ${DateFormat("dd/MM/yy hh:mm a").format(DateTime.now())} with total time: $totalTime and remember to complete assignments!",
-      );
+      await notificationService.showExitNotification(checkOutTime, totalTime);
 
-      await NotificationService().showNotification(
-        2,
-        "record related ",
-        "record saved a Session $session",
-      );
+      // await NotificationService().showNotification(
+      //   2,
+      //   "record related ",
+      //   "record saved a Session $session",
+      // );
 
       dv.log(
         "${spCheckInTime.day == checkOutTime.day}",
@@ -227,13 +219,10 @@ class MyGeofenceService {
       }
     }
 
-    sharePreferenceRepository.setCheckInTime(null);
+    await sharePreferenceRepository.setCheckInTime(null);
   }
 
-  static Future<void> onDwell(
-    FireStoreRepository firestore,
-    
-  ) async {
+  static Future<void> onDwell(FireStoreRepository firestore) async {
     String? rollNo = await SharePreferenceRepository().getRollNo();
     try {
       DateTime date = await getCurrentDate();
@@ -243,7 +232,7 @@ class MyGeofenceService {
           studentId: rollNo,
           date: formatDate(date: date),
           isPresent: true,
-          day: DateFormat("E").format(date),
+          day: DateFormat("EEEE").format(date),
         );
       }
     } catch (e) {
@@ -251,5 +240,12 @@ class MyGeofenceService {
     }
   }
 
-  void dispose() {}
+  static Future<void> dispose() async {
+    SharePreferenceRepository sharePreferenceRepository =
+        SharePreferenceRepository();
+    await sharePreferenceRepository.setCheckInTime(null);
+    await sharePreferenceRepository.setRollNo(null);
+    await sharePreferenceRepository.setIsCreated(false);
+    await NativeGeofenceManager.instance.removeAllGeofences();
+  }
 }

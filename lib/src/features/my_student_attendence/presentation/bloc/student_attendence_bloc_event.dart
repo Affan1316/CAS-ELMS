@@ -5,5 +5,11 @@ part of 'student_attendence_bloc_bloc.dart';
 abstract class AttendanceEvent {}
 
 /// Event to signal the BLoC to load the attendance data
-class LoadAttendance extends AttendanceEvent {}
+class LoadAttendance extends AttendanceEvent {
+  final String? rollNo;
+  final String? name;
+
+  LoadAttendance({this.rollNo, this.name});
+
+}
 class LocationCheckEvent extends AttendanceEvent {}

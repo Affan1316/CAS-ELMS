@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
+import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/pages/OnboardingScreen.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/StudentDetailPage.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/webview_screen.dart';
+
+import '../../domain/webview_page_type.dart';
+import '../widgets/logOut_dialog.dart';
 
 class StudentProfilePage extends StatefulWidget {
   final String id;
+
   const StudentProfilePage({super.key, required this.id});
 
   @override
@@ -57,63 +65,77 @@ class StudentProfilePageState extends State<StudentProfilePage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _backgroundColor,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            // Media query for responsive design
-            double screenWidth = constraints.maxWidth;
-            double screenHeight = constraints.maxHeight;
-            bool isTablet = screenWidth > 600;
+    return BlocListener<StudentFeatureBloc, StudentFeatureState>(
+      bloc: context.read<StudentFeatureBloc>(),
+      listener: (context, state) {
+        if (state is StudentSigInOutState) {
+          context.read<OnboardingBloc>().add(ResetOnboardingEvent());
 
-            return Column(
-              children: [
-                // Header
-                _buildHeader(isTablet),
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const RoleSelectionScreen()),
+            (route) => false,
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: _backgroundColor,
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Media query for responsive design
+              double screenWidth = constraints.maxWidth;
+              double screenHeight = constraints.maxHeight;
+              bool isTablet = screenWidth > 600;
 
-                // Profile Card Container
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isTablet ? 40.0 : 20.0,
-                      vertical: 20.0,
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: isTablet ? 400 : double.infinity,
-                          maxHeight: screenHeight * 0.8,
-                        ),
+              return Column(
+                children: [
+                  // Header
+                  _buildHeader(isTablet),
 
-                        child: AnimatedBuilder(
-                          animation: _animation,
-                          builder: (context, child) {
-                            return Transform(
-                              alignment: Alignment.center,
-                              transform:
-                                  Matrix4.identity()
-                                    ..setEntry(3, 2, 0.001)
-                                    ..rotateY(_animation.value * 3.14159),
-                              child:
-                                  _animation.value < 0.5
-                                      ? _buildFrontCard(isTablet, screenWidth)
-                                      : Transform(
-                                        alignment: Alignment.center,
-                                        transform:
-                                            Matrix4.identity()
-                                              ..rotateY(3.14159),
-                                      ),
-                            );
-                          },
+                  // Profile Card Container
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isTablet ? 40.0 : 20.0,
+                        vertical: 20.0,
+                      ),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: isTablet ? 400 : double.infinity,
+                            maxHeight: screenHeight * 0.8,
+                          ),
+
+                          child: AnimatedBuilder(
+                            animation: _animation,
+                            builder: (context, child) {
+                              return Transform(
+                                alignment: Alignment.center,
+                                transform:
+                                    Matrix4.identity()
+                                      ..setEntry(3, 2, 0.001)
+                                      ..rotateY(_animation.value * 3.14159),
+                                child:
+                                    _animation.value < 0.5
+                                        ? _buildFrontCard(isTablet, screenWidth)
+                                        : Transform(
+                                          alignment: Alignment.center,
+                                          transform:
+                                              Matrix4.identity()
+                                                ..rotateY(3.14159),
+                                        ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -388,16 +410,37 @@ class StudentProfilePageState extends State<StudentProfilePage>
                       SizedBox(height: 16),
                       _buildNeomorphicMenuItem(
                         Icons.settings_outlined,
-                        'Profile Settings',
+                        'Privacy policy',
                         isTablet,
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => const WebViewScreen(
+                                    pageType: WebViewPageType.privacyPolicy,
+                                  ),
+                            ),
+                          );
+                        },
                       ),
                       SizedBox(height: 16),
                       _buildNeomorphicMenuItem(
                         Icons.lock_outline,
-                        'Change Password',
+                        'Terms and Conditions',
                         isTablet,
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => const WebViewScreen(
+                                    pageType:
+                                        WebViewPageType.termsAndConditions,
+                                  ),
+                            ),
+                          );
+                        },
                       ),
                       SizedBox(height: 16),
                       _buildNeomorphicMenuItem(
@@ -405,33 +448,35 @@ class StudentProfilePageState extends State<StudentProfilePage>
                         'Logout',
                         isTablet,
                         isLogout: true,
-                        onTap: () {},
+                        onTap: () async {
+                          showLogoutDialog(context);
+                        },
                       ),
 
                       SizedBox(height: isTablet ? 24 : 16),
 
                       // Flip indicator
-                      _buildNeomorphicContainer(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.flip, size: 16, color: _accentColor),
-                            SizedBox(width: 8),
-                            Text(
-                              'Tap to flip',
-                              style: TextStyle(
-                                color: _accentColor,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      // _buildNeomorphicContainer(
+                      //   padding: EdgeInsets.symmetric(
+                      //     horizontal: 16,
+                      //     vertical: 8,
+                      //   ),
+                      //   child: Row(
+                      //     mainAxisSize: MainAxisSize.min,
+                      //     children: [
+                      //       Icon(Icons.flip, size: 16, color: _accentColor),
+                      //       SizedBox(width: 8),
+                      //       Text(
+                      //         'Tap to flip',
+                      //         style: TextStyle(
+                      //           color: _accentColor,
+                      //           fontSize: 12,
+                      //           fontWeight: FontWeight.w500,
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),

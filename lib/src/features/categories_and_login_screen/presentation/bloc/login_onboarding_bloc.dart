@@ -7,6 +7,9 @@ import 'package:flutter_cas_app_main/src/features/student_feature/domain/read_st
 
 class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
   OnboardingBloc() : super(const OnboardingInitial()) {
+    on<ResetOnboardingEvent>((event, emit) {
+      emit(const OnboardingInitial());
+    });
     on<ReadStudentNameFromFireBaseEvent>(_handleReadingStudentName);
     on<NextPageEvent>((event, emit) {
       final currentState = state as OnboardingInitial;

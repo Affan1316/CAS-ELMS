@@ -53,11 +53,90 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return null;
   }
 
+  /// ✅ Check if student ID exists in pre-registered list
+  Future<bool> _isStudentIdValid(String studentId) async {
+    try {
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('students')
+              .doc(studentId)
+              .get();
+
+      return doc.exists;
+    } catch (e) {
+      print('Error validating student ID: $e');
+      return false;
+    }
+  }
+
+  /// ✅ Check if student ID is already registered (has a uid field)
+  Future<bool> _isStudentIdAlreadyRegistered(String studentId) async {
+    try {
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('students')
+              .doc(studentId)
+              .get();
+
+      if (doc.exists) {
+        final data = doc.data();
+        // Check if uid field exists and is not null/empty
+        return data != null &&
+            data.containsKey('uid') &&
+            data['uid'] != null &&
+            data['uid'].toString().isNotEmpty;
+      }
+      return false;
+    } catch (e) {
+      print('Error checking student ID registration: $e');
+      return false;
+    }
+  }
+
   Future<void> _handleSignUp() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
       try {
+        // ✅ STEP 1: Validate if student ID exists in pre-registered list
+        final isValidId = await _isStudentIdValid(widget.id);
+        if (!isValidId) {
+          setState(() => _isLoading = false);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Invalid Student ID. Please contact administration.',
+                ),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 4),
+              ),
+            );
+          }
+          return;
+        }
+
+        // ✅ STEP 2: Check if student ID is already registered
+        final isAlreadyRegistered = await _isStudentIdAlreadyRegistered(
+          widget.id,
+        );
+        if (isAlreadyRegistered) {
+          setState(() => _isLoading = false);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'This Student ID is already registered with another account.',
+                ),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 4),
+              ),
+            );
+          }
+          return;
+        }
+
+        // ✅ STEP 3: Proceed with Firebase Auth signup
         final result = await _authService.signUpWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text,
@@ -66,14 +145,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         setState(() => _isLoading = false);
 
-        if (result.success) {
-          // ✅ Update Firestore student record with the entered email
+        if (!mounted) return;
+
+        if (result.success && result.uid != null) {
+          // ✅ STEP 4: Update Firestore student record with uid and email
           await FirebaseFirestore.instance
-              .collection('students') // change to your actual collection name
-              .doc(
-                widget.id,
-              ) // assuming admin saved student with id as documentId
-              .update({'email': _emailController.text.trim()});
+              .collection('students')
+              .doc(widget.id)
+              .update({
+                'email': _emailController.text.trim(),
+                'uid': result.uid,
+                'registeredAt': FieldValue.serverTimestamp(),
+              });
 
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
@@ -84,6 +167,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
           );
 
+          // Navigate back or to home screen
           Navigator.of(context).pop();
         } else {
           // Show error message
@@ -98,12 +182,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
       } catch (e) {
         setState(() => _isLoading = false);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('An unexpected error occurred. Please try again.'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('An unexpected error occurred: ${e.toString()}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
       }
     }
   }

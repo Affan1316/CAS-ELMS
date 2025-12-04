@@ -5,12 +5,13 @@ import 'dart:async';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/domain/usecases/FeeAdminReadInstalmentUsecase.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/actual_implementation_firebase_repo.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/cached_data.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
-import 'package:flutter_cas_app_main/src/features/student_feature/domain/firestore_repositry.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/add_student_use_case.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/domain/firestore_repositry.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/read_student_use_case.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';
@@ -42,6 +43,7 @@ class StudentFeatureBloc
     on<CreateGeofenceEvent>(onCreateGeofenceEvent);
     on<ReCreateGeofenceEvent>(onReCreateGeofenceEvent);
     on<GetStudentSideFeeEvent>(_handleGettingFee);
+    on<SignOutEvent>(onSignOutEvent);
   }
   final FirestoreRepositry _firestoreRepositry =
       ActualImplementationFirebaseRepo();
@@ -212,7 +214,7 @@ class StudentFeatureBloc
         await permissionService.hasLocationPermission();
 
     if (isLocationPermissionGranted && isLocationAlwaysPermissionGranted) {
-      await geofenceService.reCreatefence();
+      await geofenceService.reCreateFence();
       await sharePreferenceRepository.setIsCreated(true);
 
       //To Trigger Geofence event Quicker
@@ -250,5 +252,14 @@ class StudentFeatureBloc
     } catch (e) {
       emit(StudentFeeLoadFailureState(error: e.toString()));
     }
+  }
+
+  FutureOr<void> onSignOutEvent(
+    SignOutEvent event,
+    Emitter<StudentFeatureState> emit,
+  ) async {
+    AuthService authService = AuthService();
+    await authService.sigInOut();
+    emit(StudentSigInOutState());
   }
 }

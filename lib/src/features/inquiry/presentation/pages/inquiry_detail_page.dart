@@ -66,39 +66,33 @@ class _InquiryPageState extends State<InquiryDetailPage> {
                       );
                     } else if (state is InquiryLoaded) {
                       return SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final inquiry = state.inquiries[index];
-                            final thisItemExpanded =
-                                state.selectedIndex == index &&
-                                state.isExpanded;
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final inquiry = state.inquiries[index];
+                          final thisItemExpanded =
+                              state.selectedIndex == index && state.isExpanded;
 
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: GestureDetector(
-                                onTap: () {
-                                  context
-                                      .read<InquiryBloc>()
-                                      .add(InquiryTapEvent(index: index));
-                                },
-                                child: NeumorphicAnimatedContainer(
-                                  inquiry: inquiry,
-                                  isExpanded: thisItemExpanded,
-                                ),
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: GestureDetector(
+                              onTap: () {
+                                context.read<InquiryBloc>().add(
+                                  InquiryTapEvent(index: index),
+                                );
+                              },
+                              child: NeumorphicAnimatedContainer(
+                                inquiry: inquiry,
+                                isExpanded: thisItemExpanded,
                               ),
-                            );
-                          },
-                          childCount: state.inquiries.length,
-                        ),
+                            ),
+                          );
+                        }, childCount: state.inquiries.length),
                       );
                     } else if (state is InquiryError) {
                       return SliverToBoxAdapter(
                         child: Center(child: Text(state.message)),
                       );
                     }
-                    return const SliverToBoxAdapter(
-                      child: SizedBox.shrink(),
-                    );
+                    return const SliverToBoxAdapter(child: SizedBox.shrink());
                   },
                 ),
               ),
@@ -128,7 +122,6 @@ class NeumorphicAnimatedContainer extends StatefulWidget {
 
 class _NeumorphicAnimatedContainerState
     extends State<NeumorphicAnimatedContainer> {
-
   bool get isExpanded => widget.isExpanded;
   Duration duration = const Duration(milliseconds: 300);
 
@@ -138,15 +131,17 @@ class _NeumorphicAnimatedContainerState
       style: NeumorphicStyle(
         depth: isExpanded ? -4 : 4,
         intensity: 0.8,
-        boxShape: isExpanded
-            ? NeumorphicBoxShape.roundRect(BorderRadius.circular(22))
-            : const NeumorphicBoxShape.stadium(),
+        boxShape:
+            isExpanded
+                ? NeumorphicBoxShape.roundRect(BorderRadius.circular(22))
+                : const NeumorphicBoxShape.stadium(),
       ),
       child: AnimatedContainer(
         duration: duration,
-        child: isExpanded
-            ? ExpandedColumn(inquiry: widget.inquiry) // 🔹 show details
-            : MyListTile(inquiry: widget.inquiry),   // 🔹 show summary
+        child:
+            isExpanded
+                ? ExpandedColumn(inquiry: widget.inquiry) // 🔹 show details
+                : MyListTile(inquiry: widget.inquiry), // 🔹 show summary
       ),
     );
   }

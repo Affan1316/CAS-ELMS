@@ -7,6 +7,13 @@ abstract class AdminLoginEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class AdminLogoutRequested extends AdminLoginEvent {
+  const AdminLogoutRequested();
+
+  @override
+  List<Object> get props => [];
+}
+
 class AdminLoginInitialized extends AdminLoginEvent {}
 
 class AdminLoginSubmitted extends AdminLoginEvent {

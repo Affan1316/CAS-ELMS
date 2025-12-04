@@ -12,7 +12,7 @@ import 'geofence_sevice.dart';
 import 'notification_service.dart';
 
 @pragma('vm:entry-point')
-void callbackDispatcher() async{
+void callbackDispatcher() async {
   log("WorkManager Callback Dispatcher Registered", name: "WorkManager");
 
   Workmanager().executeTask((task, inputData) async {
@@ -36,13 +36,16 @@ void callbackDispatcher() async{
       log("WorkManager Task Started: $task", name: "WorkManager");
 
       if (task == WorkManagerService.exitTask) {
-       await WorkManagerService.exitTaskFunc(
+        await WorkManagerService.exitTaskFunc(
           hiveRepo,
           sharePreferenceRepository,
           notificationService,
         );
-      }else if (task == WorkManagerService.periodicLocationUpdateAndReCreateFenceTask) {
-      await  WorkManagerService.checkLocationEnabledAndReCreateFence(notificationService);
+      } else if (task ==
+          WorkManagerService.periodicLocationUpdateAndReCreateFenceTask) {
+        await WorkManagerService.checkLocationEnabledAndReCreateFence(
+          notificationService,
+        );
       }
 
       // Add logic for other tasks like periodicLocationUpdateTask here if needed.
@@ -67,20 +70,16 @@ class WorkManagerService {
 
   Workmanager workmanager = Workmanager();
 
-
   static const String simpleTaskKey = "simpleTask";
   static const String exitTask = "exitTask";
-  static const String periodicLocationUpdateAndReCreateFenceTask = "periodicLocationUpdateAndReCreateFenceTask";
+  static const String periodicLocationUpdateAndReCreateFenceTask =
+      "periodicLocationUpdateAndReCreateFenceTask";
   static const String isPeriodicTaskRegisteredKey = "isPeriodicTaskRegistered";
-
 
   // static const String simplePeriodicTaskKey = "simplePeriodicTask";
 
   static Future<void> initialize() async {
-    await Workmanager().initialize(
-      callbackDispatcher,
-     
-    );
+    await Workmanager().initialize(callbackDispatcher);
   }
 
   Future<void> registerOneOfTask({
@@ -126,27 +125,25 @@ class WorkManagerService {
     await Workmanager().cancelByUniqueName(taskName);
   }
 
-  static Future<void> checkLocationEnabledAndReCreateFence(NotificationService notificationService) async {
-     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-     if (!serviceEnabled) {
-       notificationService.showNotification(111, "Enable Location Services", "Location will always be on So your can be tracked effienciently");
-     }
-     MyGeofenceService().reCreatefence();
+  static Future<void> checkLocationEnabledAndReCreateFence(
+    NotificationService notificationService,
+  ) async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      notificationService.showNotification(
+        111,
+        "Enable Location Services",
+        "Location will always be on So your can be tracked effienciently",
+      );
+    }
+    MyGeofenceService().reCreateFence();
   }
-
-
-
 
   static Future<void> exitTaskFunc(
     HiveRepository hiveRepo,
     SharePreferenceRepository sharePreferenceRepository,
     NotificationService notificationService,
   ) async {
-    notificationService.showNotification(
-      4,
-      "Service Stopped",
-      "You are considered exited from CAS.",
-    );
     await MyGeofenceService.onExit(
       hiveRepo,
       sharePreferenceRepository,
@@ -155,35 +152,43 @@ class WorkManagerService {
     log("Exit task completed successfully", name: "WorkManager");
   }
 
+  static Future<void>
+  registerPeriodicLocationCheckAndReCreateFenceOnce() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isRegistered = prefs.getBool(isPeriodicTaskRegisteredKey) ?? false;
 
+    if (!isRegistered) {
+      // This is the first time the app is running (or after a clear data)
+      print("WorkManager: Registering periodic task for the first time.");
 
- static Future<void> registerPeriodicLocationCheckAndReCreateFenceOnce() async {
-  final prefs = await SharedPreferences.getInstance();
-  final isRegistered = prefs.getBool(isPeriodicTaskRegisteredKey) ?? false;
+      // --- Register the Periodic Task ---
+      Workmanager().registerPeriodicTask(
+        periodicLocationUpdateAndReCreateFenceTask, // Unique name for the task
+        periodicLocationUpdateAndReCreateFenceTask, // Name to identify the task in callbackDispatcher
+        frequency: const Duration(
+          days: 2,
+        ), // Minimum frequency is 15 minutes (Android OS enforced)
+        initialDelay: const Duration(seconds: 10), // Optional initial delay
+        // Use Constraints for efficiency and system compliance
+        constraints: Constraints(
+          networkType:
+              NetworkType.connected, // Run only when network is available
+          requiresBatteryNotLow: true, // Avoid running in low battery
+        ),
+        // IMPORTANT: Replace the old task if it somehow exists
+        existingWorkPolicy: ExistingPeriodicWorkPolicy.replace,
+      );
 
-  if (!isRegistered) {
-    // This is the first time the app is running (or after a clear data)
-    print("WorkManager: Registering periodic task for the first time.");
-    
-    // --- Register the Periodic Task ---
-    Workmanager().registerPeriodicTask(
-      periodicLocationUpdateAndReCreateFenceTask,       // Unique name for the task
-      periodicLocationUpdateAndReCreateFenceTask,             // Name to identify the task in callbackDispatcher
-      frequency: const Duration(days: 2), // Minimum frequency is 15 minutes (Android OS enforced)
-      initialDelay: const Duration(seconds: 10), // Optional initial delay
-      // Use Constraints for efficiency and system compliance
-      constraints: Constraints(
-        networkType: NetworkType.connected, // Run only when network is available
-        requiresBatteryNotLow: true,        // Avoid running in low battery
-      ),
-      // IMPORTANT: Replace the old task if it somehow exists
-      existingWorkPolicy: ExistingPeriodicWorkPolicy.replace, 
-    );
-    
-    // Set the flag so it doesn't register again
-    await prefs.setBool(isPeriodicTaskRegisteredKey, true);
-  } else {
-    print("WorkManager: Periodic task already registered.");
+      // Set the flag so it doesn't register again
+      await prefs.setBool(isPeriodicTaskRegisteredKey, true);
+    } else {
+      print("WorkManager: Periodic task already registered.");
+    }
   }
-}
+
+  static Future<void> cancelWorkManger() async {
+    await Workmanager().cancelByUniqueName(
+      periodicLocationUpdateAndReCreateFenceTask,
+    );
+  }
 }

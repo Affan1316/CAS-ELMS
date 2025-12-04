@@ -199,7 +199,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
               group: state.studentEntityClass.group,
             );
             try {
-              Navigator.of(context).pushReplacement(
+              Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(
                   builder:
                       (context) => StudentHomePage(
@@ -207,6 +207,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                         studentEntityClass: studentEntityClass,
                       ),
                 ),
+                (route) => false,
               );
             } catch (e) {
               debugPrint("navigation failed due to $e  ");

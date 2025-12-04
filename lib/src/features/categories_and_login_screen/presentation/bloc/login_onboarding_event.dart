@@ -11,6 +11,8 @@ class NextPageEvent extends OnboardingEvent {}
 
 class PreviousPageEvent extends OnboardingEvent {}
 
+class ResetOnboardingEvent extends OnboardingEvent {}
+
 class SelectRoleEvent extends OnboardingEvent {
   final String role;
   const SelectRoleEvent(this.role);

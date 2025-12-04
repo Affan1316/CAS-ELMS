@@ -6,11 +6,12 @@ class AppTheme {
     primaryColor: AppColors.primaryColor,
     scaffoldBackgroundColor: AppColors.scaffoldLightThemeBackground,
     brightness: Brightness.light,
-    appBarTheme:  AppBarTheme(
+    appBarTheme: AppBarTheme(
       backgroundColor: AppColors.primaryColor,
       foregroundColor: Colors.white,
       elevation: 0,
     ),
+    dialogTheme: DialogThemeData(backgroundColor: AppColors.containerColor),
     textTheme: Typography.material2021().black,
     useMaterial3: true,
   );
@@ -19,11 +20,12 @@ class AppTheme {
     primaryColor: AppColors.primaryColor,
     scaffoldBackgroundColor: AppColors.scaffoldDarkThemeBackground,
     brightness: Brightness.dark,
-    appBarTheme:  AppBarTheme(
+    appBarTheme: AppBarTheme(
       backgroundColor: AppColors.primaryColor,
       foregroundColor: Colors.white,
       elevation: 0,
     ),
+    dialogTheme: DialogThemeData(backgroundColor: AppColors.containerColor),
     textTheme: Typography.material2021().white,
     useMaterial3: true,
   );

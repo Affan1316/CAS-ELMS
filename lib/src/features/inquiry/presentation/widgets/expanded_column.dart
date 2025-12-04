@@ -13,15 +13,39 @@ class ExpandedColumn extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("👤 ${inquiry.studentName}",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(
+            "👤 ${inquiry.studentName}",
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
           const SizedBox(height: 6),
-          Text("📞 ${inquiry.phoneNo}"),
-          Text("📧 ${inquiry.emailAddress}"),
-          Text("👨 Father: ${inquiry.fatherName}"),
-          Text("📚 Course: ${inquiry.courseIntersted}"),
-          Text("👥 Group: ${inquiry.groupName}"),
-          Text("⚧ Gender: ${inquiry.gender}"),
+          Text(
+            "📞 ${inquiry.phoneNo}",
+            style: const TextStyle(color: Colors.black),
+          ),
+          Text(
+            "📧 ${inquiry.emailAddress}",
+            style: const TextStyle(color: Colors.black),
+          ),
+          Text(
+            "👨 Father: ${inquiry.fatherName}",
+            style: const TextStyle(color: Colors.black),
+          ),
+          Text(
+            "📚 Course: ${inquiry.courseIntersted}",
+            style: const TextStyle(color: Colors.black),
+          ),
+          Text(
+            "👥 Group: ${inquiry.groupName}",
+            style: const TextStyle(color: Colors.black),
+          ),
+          Text(
+            "⚧ Gender: ${inquiry.gender}",
+            style: const TextStyle(color: Colors.black),
+          ),
         ],
       ),
     );
