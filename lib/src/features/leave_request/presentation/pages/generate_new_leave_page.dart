@@ -5,10 +5,10 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:intl/intl.dart';
 
 class GenerateNewLeaveRequestPage extends StatefulWidget {
-  final String groupName;
+  final String section;
   final String studentName;
   const GenerateNewLeaveRequestPage({
-    required this.groupName,
+    required this.section,
     required this.studentName,
     super.key});
     
@@ -18,6 +18,7 @@ class GenerateNewLeaveRequestPage extends StatefulWidget {
 
 class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
     with TickerProviderStateMixin {
+  bool _isSubmitting = false;
   final TextEditingController leaveTypeController = TextEditingController();
   final TextEditingController fromDateController = TextEditingController();
   final TextEditingController toDateController = TextEditingController();
@@ -96,44 +97,54 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
     }
   }
 
-  void _submitForm() {
-    if (leaveTypeController.text.isNotEmpty &&
-        fromDateController.text.isNotEmpty) {
-      context.read<LeaveBloc>().add(
-        SubmitLeaveRequest(
-          status: 'Pending',
-          section: widget.groupName,
-          studentName: widget.studentName,
-          leaveType: leaveTypeController.text,
-          fromDate: fromDateController.text,
-          toDate: toDateController.text,
-          reason: reasonController.text,
-          currentDate: DateFormat('dd MMM, yyyy').format(DateTime.now()),
-        ),
-      );
-    } else {
-      final size = MediaQuery.of(context).size;
-      final screenWidth = size.width;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Please fill in both Cause and From Date',
-            style: TextStyle(
-              fontSize: screenWidth * 0.035,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          backgroundColor: const Color(0xFFFF3B30),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(screenWidth * 0.03),
-          ),
-          margin: EdgeInsets.all(screenWidth * 0.04),
-        ),
-      );
-    }
+void _submitForm() {
+  
+  if (_isSubmitting) {
+    return;
   }
+
+  if (leaveTypeController.text.isNotEmpty &&
+      fromDateController.text.isNotEmpty) {
+    
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    context.read<LeaveBloc>().add(
+      SubmitLeaveRequest(
+        status: 'Pending',
+        section: widget.section,
+        studentName: widget.studentName,
+        leaveType: leaveTypeController.text,
+        fromDate: fromDateController.text,
+        toDate: toDateController.text,
+        reason: reasonController.text,
+        currentDate: DateFormat('dd MMM, yyyy').format(DateTime.now()),
+      ),
+    );
+  } else {
+    final size = MediaQuery.of(context).size;
+    final screenWidth = size.width;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Please fill in both Leave Type and From Date',
+          style: TextStyle(
+            fontSize: screenWidth * 0.035,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        backgroundColor: const Color(0xFFFF3B30),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(screenWidth * 0.03),
+        ),
+        margin: EdgeInsets.all(screenWidth * 0.04),
+      ),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {

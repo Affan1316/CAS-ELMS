@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/leave_request/domain/entities/leave.dart';
 import 'package:flutter_cas_app_main/src/features/leave_request/presentation/widgets/leave_details_model.dart';
 import '../widgets/responsive_header.dart';
-import '../widgets/responsive_filters.dart';
 import '../widgets/leave_request_card.dart';
 import '../bloc/leave_bloc.dart';
 import '../shared/enums.dart';
@@ -16,36 +15,23 @@ class AdminLeaveRequestManagement extends StatefulWidget {
 }
 
 class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
-  bool showFilters = false;
-  LeaveStatus? selectedStatus;
-  String? selectedSection;
   List<Leave> allLeaves = [];
 
   @override
   void initState() {
     super.initState();
     // Fetch leaves when the page loads
-    context.read<LeaveBloc>().add(FetchLeaveRequest());
-  }
-
-  List<Leave> get filteredRequests {
-    return allLeaves.where((leave) {
-      if (selectedStatus != null &&
-          LeaveStatusHelper.stringToLeaveStatus(leave.status) !=
-              selectedStatus) {
-        return false;
-      }
-      if (selectedSection != null && leave.section != selectedSection) {
-        return false;
-      }
-      return true;
-    }).toList();
+    context.read<LeaveBloc>().add(
+      FetchLeaveRequest(
+        studentName: null,
+        isAdmin: true,
+      ),
+    );
   }
 
   void updateLeaveStatus(int index, LeaveStatus newStatus) {
-    final filteredList = filteredRequests;
-    if (index >= 0 && index < filteredList.length) {
-      final leaveToUpdate = filteredList[index];
+    if (index >= 0 && index < allLeaves.length) {
+      final leaveToUpdate = allLeaves[index];
 
       // Create updated leave with new status using helper
       final updatedLeave = leaveToUpdate.copyWith(
@@ -55,17 +41,6 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
       // Update in Firebase through BLoC
       context.read<LeaveBloc>().add(LeaveStatusUpdateEvent(updatedLeave));
     }
-  }
-
-  void applyFilters() {
-    setState(() {});
-  }
-
-  void clearFilters() {
-    setState(() {
-      selectedStatus = null;
-      selectedSection = null;
-    });
   }
 
   bool isMobile(BuildContext context) =>
@@ -91,16 +66,15 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
   Widget buildResponsiveLeaveRequestsList(BuildContext context) {
     final crossAxisCount = getCrossAxisCount(context);
     final screenWidth = MediaQuery.of(context).size.width;
-    final filteredList = filteredRequests;
 
     if (crossAxisCount == 1) {
       return ListView.builder(
         padding: EdgeInsets.symmetric(
           horizontal: getHorizontalPadding(context),
         ),
-        itemCount: filteredList.length,
+        itemCount: allLeaves.length,
         itemBuilder: (context, index) {
-          final leave = filteredList[index];
+          final leave = allLeaves[index];
           return LeaveRequestCard(
             leave: leave,
             originalIndex: index,
@@ -122,9 +96,9 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
           mainAxisSpacing: 16,
           childAspectRatio: screenWidth > 1200 ? 1.2 : 1.0,
         ),
-        itemCount: filteredList.length,
+        itemCount: allLeaves.length,
         itemBuilder: (context, index) {
-          final leave = filteredList[index];
+          final leave = allLeaves[index];
           return LeaveRequestCard(
             leave: leave,
             originalIndex: index,
@@ -139,21 +113,21 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
   }
 
   void showRequestDetails(BuildContext context, Leave leave) {
-  final Map<String, dynamic> leaveData = {
-    'type': leave.leaveType,
-    'fromDate': leave.fromDate,          
-    'toDate': leave.toDate,              
-    'status': LeaveStatusHelper.leaveStatusToDisplayString(
-      LeaveStatusHelper.stringToLeaveStatus(leave.status),
-    ),
-    'appliedDate': leave.currentDate,   
-    'reason': leave.reason,
-    'studentName': leave.studentName,
-    'id': leave.id,
-    'section': leave.section,
-  };
-  LeaveDetailsModal.show(context, leaveData);
-}
+    final Map<String, dynamic> leaveData = {
+      'type': leave.leaveType,
+      'fromDate': leave.fromDate,
+      'toDate': leave.toDate,
+      'status': LeaveStatusHelper.leaveStatusToDisplayString(
+        LeaveStatusHelper.stringToLeaveStatus(leave.status),
+      ),
+      'appliedDate': leave.currentDate,
+      'reason': leave.reason,
+      'studentName': leave.studentName,
+      'id': leave.id,
+      'section': leave.section,
+    };
+    LeaveDetailsModal.show(context, leaveData);
+  }
 
   Widget _buildDetailRow(String label, String value) {
     return Padding(
@@ -185,13 +159,10 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
         child: SafeArea(
           child: Column(
             children: [
+              // Using ResponsiveHeader but WITHOUT filter toggle
               ResponsiveHeader(
-                showFilters: showFilters,
-                onFilterToggle: () {
-                  setState(() {
-                    showFilters = !showFilters;
-                  });
-                },
+                showFilters: false, // Always false, no filter toggle
+                onFilterToggle: () {}, // Empty callback, not used
                 isMobile: isMobile(context),
                 isDesktop: isDesktop(context),
                 horizontalPadding: getHorizontalPadding(context),
@@ -199,26 +170,7 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
                   Navigator.pop(context);
                 },
               ),
-              ResponsiveFilters(
-                showFilters: showFilters,
-                selectedStatus: selectedStatus,
-                selectedSection: selectedSection,
-                onStatusChanged: (value) {
-                  setState(() {
-                    selectedStatus = value;
-                  });
-                },
-                onSectionChanged: (value) {
-                  setState(() {
-                    selectedSection = value;
-                  });
-                },
-                onApplyFilters: applyFilters,
-                onClearFilters: clearFilters,
-                isMobile: isMobile(context),
-                isDesktop: isDesktop(context),
-                horizontalPadding: getHorizontalPadding(context),
-              ),
+              // Removed ResponsiveFilters widget entirely
               SizedBox(height: 16),
               Expanded(
                 child: Container(
@@ -256,7 +208,7 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
                             ),
                             BlocBuilder<LeaveBloc, LeaveState>(
                               builder: (context, state) {
-                                final count = filteredRequests.length;
+                                final count = allLeaves.length;
                                 if (count > 0) {
                                   return Container(
                                     padding: EdgeInsets.symmetric(
@@ -287,10 +239,12 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
                         child: BlocConsumer<LeaveBloc, LeaveState>(
                           listener: (context, state) {
                             if (state is LeaveStatusUpdated) {
-                              // Refresh the leave list after status update
                               context.read<LeaveBloc>().add(
-                                FetchLeaveRequest(),
-                              );
+                                    FetchLeaveRequest(
+                                      studentName: null,
+                                      isAdmin: true,
+                                    ),
+                                  );
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
@@ -321,9 +275,8 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
                               );
                             } else if (state is LeaveListLoaded) {
                               allLeaves = state.leaves;
-                              final filteredList = filteredRequests;
 
-                              if (filteredList.isEmpty) {
+                              if (allLeaves.isEmpty) {
                                 return Center(
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -341,14 +294,6 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
                                               isDesktop(context) ? 20 : 18,
                                           fontWeight: FontWeight.w500,
                                           color: Colors.grey[600],
-                                        ),
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text(
-                                        "Try adjusting your filters",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey[500],
                                         ),
                                       ),
                                     ],
@@ -389,8 +334,11 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
                                     ElevatedButton(
                                       onPressed: () {
                                         context.read<LeaveBloc>().add(
-                                          FetchLeaveRequest(),
-                                        );
+                                              FetchLeaveRequest(
+                                                studentName: null,
+                                                isAdmin: true,
+                                              ),
+                                            );
                                       },
                                       child: Text("Retry"),
                                     ),

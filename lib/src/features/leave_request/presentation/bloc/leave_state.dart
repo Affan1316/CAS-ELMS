@@ -27,4 +27,11 @@ class LeaveStatusUpdateFailed extends LeaveState {
   LeaveStatusUpdateFailed(this.error);
 }
 
+// class LeaveDeleted extends LeaveState {}
+
+// class LeaveDeleteFailed extends LeaveState {
+//   final String error;
+//   LeaveDeleteFailed(this.error);
+// }
+
 

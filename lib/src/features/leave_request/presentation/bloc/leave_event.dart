@@ -26,9 +26,22 @@ class SubmitLeaveRequest extends LeaveEvent {
   });
 }
 
-class FetchLeaveRequest extends LeaveEvent {}
+class FetchLeaveRequest extends LeaveEvent {
+  final String? studentName;
+  final bool isAdmin;
+
+  const FetchLeaveRequest({
+    this.studentName,
+    this.isAdmin = false,
+  });
+}
 
 class LeaveStatusUpdateEvent extends LeaveEvent {
   final Leave leave;
   LeaveStatusUpdateEvent(this.leave);
 }
+
+// class DeleteLeaveEvent extends LeaveEvent {
+//   final String leaveId;
+//   const DeleteLeaveEvent(this.leaveId);
+// }

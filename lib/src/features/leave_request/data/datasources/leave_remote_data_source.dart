@@ -59,5 +59,22 @@ class LeaveRemoteDataSource {
     }
   }
 
+//   Future<void> deleteLeave(String leaveId) async {
+//   try {
+//     await firestore
+//         .collection('Request Leave')
+//         .doc(leaveId)
+//         .delete();
+//     if (kDebugMode) {
+//       print("✅ Leave deleted successfully: $leaveId");
+//     }
+//   } catch (e) {
+//     if (kDebugMode) {
+//       print("❌ Failed to delete leave: $e");
+//     }
+//     rethrow;
+//   }
+// }
+
   
 }

@@ -40,12 +40,27 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
   try {
     final List<Leave> requestLeave = await getLeave();
     
+    List<Leave> filteredLeaves;
+    
+    if (event.isAdmin) {
+      // Admin sees all leaves
+      filteredLeaves = requestLeave;
+    } else if (event.studentName != null) {
+      // Student sees only their own leaves
+      filteredLeaves = requestLeave.where((leave) {
+        return leave.studentName == event.studentName;
+      }).toList();
+    } else {
+      // Fallback: show all (should not happen in production)
+      filteredLeaves = requestLeave;
+    }
+    
     // Sort leaves by currentDate in descending order (newest first)
-    requestLeave.sort((a, b) {
+    filteredLeaves.sort((a, b) {
       try {
-        final dateA = DateFormat('dd MMM yyyy').parse(a.currentDate ?? '');
-        final dateB = DateFormat('dd MMM yyyy').parse(b.currentDate ?? '');
-        return dateB.compareTo(dateA); // Descending order (newest first)
+        final dateA = DateFormat('dd MMM, yyyy').parse(a.currentDate ?? '');
+        final dateB = DateFormat('dd MMM, yyyy').parse(b.currentDate ?? '');
+        return dateB.compareTo(dateA);
       } catch (e) {
         final idA = int.tryParse(a.id ?? '0') ?? 0;
         final idB = int.tryParse(b.id ?? '0') ?? 0;
@@ -53,7 +68,7 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
       }
     });
     
-    emit(LeaveListLoaded(requestLeave));
+    emit(LeaveListLoaded(filteredLeaves));
   } catch (e) {
     emit(LeaveFailure(e.toString()));
   }

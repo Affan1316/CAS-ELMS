@@ -11,10 +11,10 @@ import 'package:intl/intl.dart';
 
 class ListOfRequestLeaveScreen extends StatefulWidget {
   final String section;
-  final String name;
+  final String studentName;
   const ListOfRequestLeaveScreen({
     required this.section,
-    required this.name,
+    required this.studentName,
     super.key,
   });
 
@@ -39,8 +39,12 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
     );
     _animationController.forward();
 
-    // Fetch leave requests when screen loads
-    context.read<LeaveBloc>().add(FetchLeaveRequest());
+    context.read<LeaveBloc>().add(
+    FetchLeaveRequest(
+      studentName: widget.studentName,
+      isAdmin: false, // Student view
+    ),
+  );
   }
 
   @override
@@ -55,7 +59,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
       PageRouteBuilder(
         pageBuilder:
             (context, animation, secondaryAnimation) =>
-                GenerateNewLeaveRequestPage(groupName: widget.section, studentName: widget.name,),
+                GenerateNewLeaveRequestPage(section: widget.section, studentName: widget.studentName,),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return SlideTransition(
             position: animation.drive(
@@ -70,11 +74,15 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
       ),
     );
 
-    // Refresh the list after returning from new leave page
+
     if (result != null) {
-      context.read<LeaveBloc>().add(FetchLeaveRequest());
-    }
-  }
+  context.read<LeaveBloc>().add(
+    FetchLeaveRequest(
+      studentName: widget.studentName,
+      isAdmin: false,
+    ),
+  );
+  }}
 
   void _showLeaveDetails(Map<String, dynamic> item) {
     LeaveDetailsModal.show(context, item);
@@ -203,7 +211,12 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
                     }
                     // Listen for successful submission and refresh list
                     if (state is LeaveSuccess) {
-                      context.read<LeaveBloc>().add(FetchLeaveRequest());
+                      context.read<LeaveBloc>().add(
+                                 FetchLeaveRequest(
+                                   studentName: widget.studentName,
+                                   isAdmin: false,
+                                  ),
+                                );
                     }
                   },
                   builder: (context, state) {
@@ -337,7 +350,12 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
             SizedBox(height: isTablet ? 24 : 16),
             ElevatedButton(
               onPressed: () {
-                context.read<LeaveBloc>().add(FetchLeaveRequest());
+                 context.read<LeaveBloc>().add(
+                          FetchLeaveRequest(
+                            studentName: widget.studentName,
+                            isAdmin: false,
+                          ),
+                         );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF6366F1),

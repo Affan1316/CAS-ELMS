@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ResponsiveHeader extends StatelessWidget {
   final bool showFilters;
   final VoidCallback onFilterToggle;
-    final VoidCallback onBackPressed; 
+  final VoidCallback onBackPressed; 
   final bool isMobile;
   final bool isDesktop;
   final double horizontalPadding;
@@ -73,17 +73,7 @@ class ResponsiveHeader extends StatelessWidget {
                       ],
                     ),
                   ),
-                  SizedBox(width: 24),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: Icon(Icons.tune, color: Colors.white, size: 24),
-                      onPressed: onFilterToggle,
-                    ),
-                  ),
+                  // Filter icon removed from here
                 ],
               )
               : Column(
@@ -114,16 +104,7 @@ class ResponsiveHeader extends StatelessWidget {
                         ),
                       ),
                       Spacer(),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          icon: Icon(Icons.tune, color: Colors.white),
-                          onPressed: onFilterToggle,
-                        ),
-                      ),
+                      // Filter icon removed from here
                     ],
                   ),
                   SizedBox(height: 16),

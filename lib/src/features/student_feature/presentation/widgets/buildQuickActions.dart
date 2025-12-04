@@ -17,7 +17,7 @@ import 'dart:math' as math;
 /// - Material Design 3 responsive breakpoints
 /// - Euclidean geometry for card dimensions
 /// - Neumorphic design with proper shadow calculations
-Widget buildQuickActions(String studentName, String section, String studentId) {
+Widget buildQuickActions(String section, String studentName, String studentId) {
   final List<Map<String, dynamic>> studentFeatures = [
     {
       'title': 'My Assignments',
@@ -49,7 +49,7 @@ Widget buildQuickActions(String studentName, String section, String studentId) {
       'color': const Color(0xFFF59E0B),
       'count': '2 Pending',
       'isUrgent': false,
-      'screen': ListOfRequestLeaveScreen(section: section, name: studentName),
+      'screen': ListOfRequestLeaveScreen(section: section, studentName: studentName),
     },
     {
       'title': 'Installments',
