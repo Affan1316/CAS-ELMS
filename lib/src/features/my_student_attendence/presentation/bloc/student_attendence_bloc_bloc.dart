@@ -31,8 +31,8 @@ class StudentAttendenceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     Emitter<AttendanceState> emit,
   ) async {
     try {
-      final user = event.name ??await authService.getSavedEmail();
-      final userId =  event.rollNo ??await authService.getSavedStudentId();
+      final user = event.name ?? await authService.getSavedEmail();
+      final userId = event.rollNo ?? await authService.getSavedStudentId();
 
       if (user != null && userId != null) {
         //TODO: add real student data
@@ -67,6 +67,7 @@ class StudentAttendenceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     LocationCheckEvent event,
     Emitter<AttendanceState> emit,
   ) async {
+    await LocationServiceManager.initLocationService();
     // MyGeofenceService().reCreateFence();
     // getting location trigger event quicker
     HiveRepository hive = HiveRepository();
@@ -74,29 +75,36 @@ class StudentAttendenceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         SharePreferenceRepository();
     NotificationService notificationService = NotificationService();
     bool isLocEnabled = await Geolocator.isLocationServiceEnabled();
+      await LocationServiceManager().startLocationService();
+      print("_onLocationCheckEvent");
     if (isLocEnabled) {
       Position position = await Geolocator.getCurrentPosition();
 
       if (!isInGeofenceMeters(
-        pointLat: position.latitude,
-        pointLon: position.longitude,
-        radiusMeters: 70,
-      )) {
+            pointLat: position.latitude,
+            pointLon: position.longitude,
+            radiusMeters: 70,
+          ) ||
+          position.isMocked) {
         log("exit at location check event");
-        await MyGeofenceService.onExit(
-          hive,
-          sharePreferenceRepository,
-          notificationService,
-        );
-        await LocationServiceManager().stopLocationService();
+
+        await LocationServiceManager().startLocationService();
+        await LocationServiceManager().sendExitEventTag();
+        // await MyGeofenceService.onExit(
+        //   hive,
+        //   sharePreferenceRepository,
+        //   notificationService,
+        // );
+        // await LocationServiceManager().stopLocationService();
       } else {
         log("enter at location check event");
         await LocationServiceManager().startLocationService();
-        await MyGeofenceService.onEnter(
-          hive,
-          sharePreferenceRepository,
-          notificationService,
-        );
+        await LocationServiceManager().sendEnterEventTag();
+        // await MyGeofenceService.onEnter(
+        //   hive,
+        //   sharePreferenceRepository,
+        //   notificationService,
+        // );
       }
     }
   }
