@@ -40,7 +40,7 @@ class LocationTaskHandler extends TaskHandler {
     WorkManagerService.initialize();
     notificationService.initNotification();
     await hiveRepo.initInService();
-    TimerForAttendance.startTimer(FireStoreRepository());
+
     isInCAS = false;
     entryTime = null; // Reset entry time
   }
@@ -48,7 +48,7 @@ class LocationTaskHandler extends TaskHandler {
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
     TimerForAttendance.stopTimer();
-    workManagerService.registerOneOfTask(
+    await workManagerService.registerOneOfTask(
       taskName: WorkManagerService.exitTask,
       uniqueName:
           "${WorkManagerService.exitTask}_${DateTime.now().millisecondsSinceEpoch}",
@@ -111,6 +111,7 @@ class LocationTaskHandler extends TaskHandler {
       dv.log("Received Enter Tag", name: "LocationTaskHandler");
       isInCAS = true;
       await MyGeofenceService.onEnter(hiveRepo, s, notificationService);
+      await TimerForAttendance.startTimer(FireStoreRepository());
 
       // Handle enter event
     } else if (data == exitTag) {
@@ -177,7 +178,7 @@ class LocationServiceManager {
         onlyAlertOnce: true,
       ),
       iosNotificationOptions: const IOSNotificationOptions(
-        showNotification: false,
+        showNotification: true,
         playSound: false,
       ),
       foregroundTaskOptions: ForegroundTaskOptions(
@@ -191,10 +192,6 @@ class LocationServiceManager {
   }
 
   FutureOr<void> startLocationService() async {
-    if (await FlutterForegroundTask.isRunningService) {
-      // Service is already running
-      return;
-    }
     try {
       await FlutterForegroundTask.startService(
         notificationTitle: 'Location Service Running',
@@ -202,6 +199,8 @@ class LocationServiceManager {
         callback: startCallback,
         notificationButtons: [NotificationButton(id: "stop", text: "Stop")],
       );
+    } on ServiceAlreadyStartedException {
+      dv.log("Service is already running", name: "LocationService");
     } catch (e) {
       dv.log("Error starting location service: $e", name: "LocationService");
     }
@@ -219,7 +218,7 @@ class TimerForAttendance {
   static Future<void> startTimer(FireStoreRepository firestore) async {
     _attendanceTimer = Timer.periodic(Duration(minutes: 1), (timer) async {
       _minutesPassed++;
-
+      print("minutes passed $_minutesPassed");
       // ⭐ After 40 minutes → mark attendance
       if (_minutesPassed >= 40) {
         String? rollNo = await SharePreferenceRepository().getRollNo();

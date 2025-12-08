@@ -18,17 +18,24 @@ class SharePreferenceRepository {
   }
 
   Future<bool> setCheckInTime(DateTime? dateTime) async {
-    var prefs = await SharedPreferences.getInstance();
-    bool boolean = await prefs.setString(
-      SharedPreferenceKeys.checkInTime,
-      dateTime?.toIso8601String() ?? "",
-    );
-    log(
-      "${boolean.toString()} time is ${dateTime?.toIso8601String() ?? ""}",
-      name: "setting CheckIn Time",
-    );
-    return boolean;
+  var prefs = await SharedPreferences.getInstance();
+
+  if (dateTime == null) {
+    // proper way to set null: remove the key
+    return prefs.remove(SharedPreferenceKeys.checkInTime);
   }
+
+  bool boolean = await prefs.setString(
+    SharedPreferenceKeys.checkInTime,
+    dateTime.toIso8601String(),
+  );
+
+  log("$boolean time is ${dateTime.toIso8601String()}",
+      name: "setting CheckIn Time");
+
+  return boolean;
+}
+
 
   Future<DateTime?> getCheckInTime() async {
     var prefs = await SharedPreferences.getInstance();
