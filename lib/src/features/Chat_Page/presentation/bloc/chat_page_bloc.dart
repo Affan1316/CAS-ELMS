@@ -45,7 +45,7 @@ class ChatPageBloc extends Bloc<ChatPageEvent, ChatPageState> {
       // CHANGE 2: Direct GenerativeModel initialization
       // Note: Use 'gemini-1.5-flash', there is no 2.5 yet.
       _model = GenerativeModel(
-        model: 'gemini-2.0-flash',
+        model: 'gemini-2.5-flash',
         apiKey: _apiKey,
         systemInstruction: Content.system(systemInstructionText),
       );
@@ -83,6 +83,7 @@ class ChatPageBloc extends Bloc<ChatPageEvent, ChatPageState> {
       // CHANGE 3: Content.text() is the same, but the object structure
       // is slightly cleaner in this package.
       final response = await _chat!.sendMessage(Content.text(event.text));
+      log("response : ${response.text}");
       final responseText = response.text ?? 'An unexpected error occurred.';
 
       final aiMessage = Message(

@@ -6,6 +6,7 @@ import 'package:flutter_cas_app_main/src/features/Chat_Page/presentation/widgets
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ChatMessageBubble extends StatefulWidget {
   const ChatMessageBubble({super.key, required this.message});
@@ -20,9 +21,10 @@ class _ChatMessageBubbleState extends State<ChatMessageBubble> {
   bool isbackBlur = false;
   final Duration duration = const Duration(milliseconds: 250);
   TextStyle get bubbleTextStyle => TextStyle(
-    color: widget.message.isUser
-        ? Colors.white
-        : const Color(0xFF22282B), // Text color contrast
+    color:
+        widget.message.isUser
+            ? Colors.white
+            : const Color(0xFF22282B), // Text color contrast
     fontSize: getRespSize(context, size: 16.0),
     fontWeight: FontWeight.w400,
   );
@@ -30,30 +32,35 @@ class _ChatMessageBubbleState extends State<ChatMessageBubble> {
   BorderRadiusGeometry get bubbleBorderRadius => BorderRadius.only(
     topLeft: const Radius.circular(15.0),
     topRight: const Radius.circular(15.0),
-    bottomLeft: widget.message.isUser
-        ? const Radius.circular(15.0)
-        : const Radius.circular(
-            0.0,
-          ), // Rounded on one side, flat on other for visual direction
-    bottomRight: widget.message.isUser
-        ? const Radius.circular(0.0)
-        : const Radius.circular(15.0),
+    bottomLeft:
+        widget.message.isUser
+            ? const Radius.circular(15.0)
+            : const Radius.circular(
+              0.0,
+            ), // Rounded on one side, flat on other for visual direction
+    bottomRight:
+        widget.message.isUser
+            ? const Radius.circular(0.0)
+            : const Radius.circular(15.0),
   );
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => setState(() {
-        isbackBlur = false;
-      }),
-      onLongPress: () => setState(() {
-        isbackBlur = !isbackBlur;
-      }),
+      onTap:
+          () => setState(() {
+            isbackBlur = false;
+          }),
+      onLongPress:
+          () => setState(() {
+            isbackBlur = !isbackBlur;
+          }),
       child: Align(
-        alignment: widget.message.isUser
-            ? Alignment.centerRight
-            : Alignment.centerLeft,
+        alignment:
+            widget.message.isUser
+                ? Alignment.centerRight
+                : Alignment.centerLeft,
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           blendMode: BlendMode.srcIn,
@@ -77,11 +84,12 @@ class _ChatMessageBubbleState extends State<ChatMessageBubble> {
                     ),
                     ///////////////
                     decoration: BoxDecoration(
-                      color: widget.message.isUser
-                          ? const Color.fromRGBO(42, 142, 181, 0.7)
-                          : const Color(
-                              0x25FFFFFF,
-                            ), // Different colors for user/bot,
+                      color:
+                          widget.message.isUser
+                              ? const Color.fromRGBO(42, 142, 181, 0.7)
+                              : const Color(
+                                0x25FFFFFF,
+                              ), // Different colors for user/bot,
                       border: Border.all(
                         color: Colors.white,
                         strokeAlign: BorderSide.strokeAlignInside,
@@ -90,18 +98,35 @@ class _ChatMessageBubbleState extends State<ChatMessageBubble> {
                       borderRadius: bubbleBorderRadius,
                     ),
                     child: Builder(
-                      builder: (context) => widget.message.isTyping
-                          ? BouncingDotsTypingIndicator()
-                          : MarkdownBody(
-                              data: widget.message.text,
-                              styleSheet: MarkdownStyleSheet(
-                                p: bubbleTextStyle,
-                                strong: bubbleTextStyle.copyWith(
-                                  fontSize: getRespSize(context, size: 20),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
+                      builder:
+                          (context) =>
+                              widget.message.isTyping
+                                  ? BouncingDotsTypingIndicator()
+                                  : MarkdownBody(
+                                    data: widget.message.text,
+                                    styleSheet: MarkdownStyleSheet(
+                                      p: bubbleTextStyle,
+                                      strong: bubbleTextStyle.copyWith(
+                                        fontSize: getRespSize(
+                                          context,
+                                          size: 20,
+                                        ),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    onTapLink: (text, href, title) async {
+                                      if (href != null) {
+                                        final uri = Uri.parse(href);
+                                        if (await canLaunchUrl(uri)) {
+                                          await launchUrl(
+                                            uri,
+                                            mode:
+                                                LaunchMode.externalApplication,
+                                          );
+                                        }
+                                      }
+                                    },
+                                  ),
                     ),
                   ),
                 ),
