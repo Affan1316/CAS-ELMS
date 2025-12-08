@@ -260,6 +260,7 @@ class StudentFeatureBloc
   ) async {
     AuthService authService = AuthService();
     await authService.sigInOut();
+    await authService.signOut();
     emit(StudentSigInOutState());
   }
 }
