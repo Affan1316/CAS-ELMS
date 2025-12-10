@@ -70,7 +70,9 @@ class LocationTaskHandler extends TaskHandler {
       return;
     }
 
-    final Position pos = await Geolocator.getCurrentPosition();
+    final Position pos = await Geolocator.getCurrentPosition(
+      locationSettings: AndroidSettings(accuracy: LocationAccuracy.best),
+    );
     if (pos.isMocked ||
         !isInGeofenceMeters(pointLat: pos.latitude, pointLon: pos.longitude)) {
       dv.log(

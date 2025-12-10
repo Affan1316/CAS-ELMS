@@ -44,6 +44,7 @@ class ChatPageBloc extends Bloc<ChatPageEvent, ChatPageState> {
 
       // CHANGE 2: Direct GenerativeModel initialization
       // Note: Use 'gemini-1.5-flash', there is no 2.5 yet.
+      
       _model = GenerativeModel(
         model: 'gemini-2.5-flash',
         apiKey: _apiKey,
