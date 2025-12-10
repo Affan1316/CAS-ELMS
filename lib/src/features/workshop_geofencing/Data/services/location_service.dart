@@ -216,13 +216,15 @@ class LocationServiceManager {
 class TimerForAttendance {
   static Timer? _attendanceTimer;
   static int _minutesPassed = 0;
+  static bool isMarked = false;
+
 
   static Future<void> startTimer(FireStoreRepository firestore) async {
     _attendanceTimer = Timer.periodic(Duration(minutes: 1), (timer) async {
       _minutesPassed++;
       print("minutes passed $_minutesPassed");
       // ⭐ After 40 minutes → mark attendance
-      if (_minutesPassed >= 40) {
+      if (_minutesPassed >= 40 && !isMarked) {
         String? rollNo = await SharePreferenceRepository().getRollNo();
         try {
           DateTime date = await getCurrentDate();
@@ -234,6 +236,7 @@ class TimerForAttendance {
               isPresent: true,
               day: DateFormat("EEEE").format(date),
             );
+            isMarked = true;
           }
         } catch (e) {
           debugPrint(e.toString());
