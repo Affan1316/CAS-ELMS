@@ -14,9 +14,13 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widge
 import 'package:flutter_cas_app_main/src/features/group/domain/entities/group_entity.dart';
 
 class GroupsListScreen extends StatefulWidget {
-  const GroupsListScreen({super.key, required this.isNavigateToAttendence});
+  const GroupsListScreen({
+    super.key,
+    required this.isNavigateToAttendence,
+    required this.isNavigateToWorkShopGraphPage,
+  });
   final bool isNavigateToAttendence;
-
+  final bool isNavigateToWorkShopGraphPage;
   @override
   State<GroupsListScreen> createState() => _GroupsListScreenState();
 }
@@ -78,6 +82,10 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("isNavigateToAttendence:${widget.isNavigateToAttendence}");
+    debugPrint(
+      "isNavigateToWorkShopGraphPage:${widget.isNavigateToWorkShopGraphPage}",
+    );
     return GradientBackground(
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -151,6 +159,8 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
                                       group: groups[i],
                                       isNavigateToAttendence:
                                           widget.isNavigateToAttendence,
+                                      isNavigateToWorkShopGraphPage:
+                                          widget.isNavigateToWorkShopGraphPage,
                                     ),
                               )
                               : ListView.separated(
@@ -162,6 +172,8 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
                                       group: groups[i],
                                       isNavigateToAttendence:
                                           widget.isNavigateToAttendence,
+                                      isNavigateToWorkShopGraphPage:
+                                          widget.isNavigateToWorkShopGraphPage,
                                     ),
                               ),
                     );
@@ -180,11 +192,17 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
 class _GroupItem extends StatelessWidget {
   final GroupEntity group;
   final bool isNavigateToAttendence;
+  final bool isNavigateToWorkShopGraphPage;
 
-  const _GroupItem({required this.group, required this.isNavigateToAttendence});
+  const _GroupItem({
+    required this.group,
+    required this.isNavigateToAttendence,
+    required this.isNavigateToWorkShopGraphPage,
+  });
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("isNavigateToWorkShopGraphPage:$isNavigateToWorkShopGraphPage");
     final isTablet = MediaQuery.of(context).size.width > 600;
     final groupCode =
         group.groupName.isNotEmpty ? group.groupName.substring(0, 1) : "?";
@@ -199,6 +217,7 @@ class _GroupItem extends StatelessWidget {
                   groupId: group.groupName,
                   isNavigateToAttendence: isNavigateToAttendence,
                   isNavigateToStudentFeeDetails: false,
+                  isNavigateToWorkShopGraphPage: isNavigateToWorkShopGraphPage,
                 ),
           ),
         );

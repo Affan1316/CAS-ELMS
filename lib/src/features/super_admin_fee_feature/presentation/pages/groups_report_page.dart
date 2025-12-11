@@ -641,6 +641,7 @@ class ResponsiveGroupCard extends StatelessWidget {
                               groupId: groupName,
                               isNavigateToAttendence: false,
                               isNavigateToStudentFeeDetails: true,
+                              isNavigateToWorkShopGraphPage: false,
                             ),
                       ),
                     );

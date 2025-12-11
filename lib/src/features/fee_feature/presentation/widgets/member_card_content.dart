@@ -10,6 +10,7 @@ class MemberCardContent extends StatelessWidget {
   /// Callback to trigger fee check/navigation
   final void Function(StudentFeatureGroupStudentEntityClass) onViewFee;
   final bool isNavigateToAttendence;
+  final bool isNavigateToWorkShopGraphPage;
 
   const MemberCardContent({
     super.key,
@@ -17,6 +18,7 @@ class MemberCardContent extends StatelessWidget {
     required this.groupId,
     required this.onViewFee,
     required this.isNavigateToAttendence,
+    required this.isNavigateToWorkShopGraphPage,
   });
 
   @override
@@ -77,7 +79,12 @@ class MemberCardContent extends StatelessWidget {
           ),
           onPressed: () => onViewFee(student),
           child: ResponsiveText(
-            text: isNavigateToAttendence ? "View Attendence" : "View Fee",
+            text:
+                isNavigateToAttendence
+                    ? "View Attendence"
+                    : isNavigateToWorkShopGraphPage
+                    ? "workshop time"
+                    : "View Fee",
             phoneSize: 13,
             tabletSize: 16,
             color: Colors.white,

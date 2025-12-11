@@ -15,7 +15,11 @@ import 'bloc/student_attendence_bloc_bloc.dart';
 /// - Precise 8dp grid system (metrological accuracy)
 /// - Circular hit areas (minimum 48x48dp per Material Design)
 class StudentAdentencePage extends StatefulWidget {
-  const StudentAdentencePage({super.key, this.name, this.rollNo});
+  const StudentAdentencePage({
+    super.key,
+    required this.name,
+    required this.rollNo,
+  });
   final String? rollNo;
   final String? name;
 

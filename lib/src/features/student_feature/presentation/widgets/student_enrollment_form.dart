@@ -522,10 +522,7 @@ class StudentEnrollmentForm extends StatelessWidget {
                                                       fatherOccupationController
                                                           .text
                                                           .trim(),
-                                                  group:
-                                                      groupController.text
-                                                          .toLowerCase()
-                                                        ..trim(),
+                                                  group: groupController.text,
                                                 ),
                                               );
                                         }

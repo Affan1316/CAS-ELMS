@@ -59,9 +59,9 @@ Future<DateTime> getCurrentDate() async {
 bool isInGeofenceMeters({
   required double pointLat,
   required double pointLon,
-  double centerLat = 29.3829577,
-  double centerLon = 71.7154831,
-  double radiusMeters = 50,
+  double centerLat = 29.3829504,
+  double centerLon = 71.7155132,
+  double radiusMeters = 70,
 }) {
   double distanceMeters = Geolocator.distanceBetween(
     centerLat,

@@ -11,6 +11,7 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widge
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_text.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/screen_header.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/search_field.dart';
+import 'package:flutter_cas_app_main/src/features/my_student_attendence/presentation/student_adentence_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/group_student_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_side_fee_details_screen%20.dart';
 import 'package:flutter_cas_app_main/src/features/time_graph_page/presentation/pages/time_track_graph_page.dart';
@@ -20,12 +21,14 @@ class GroupMembersScreen extends StatefulWidget {
   final String groupId;
   final bool isNavigateToAttendence;
   final bool isNavigateToStudentFeeDetails;
+  final bool isNavigateToWorkShopGraphPage;
 
   const GroupMembersScreen({
     super.key,
     required this.groupId,
     required this.isNavigateToAttendence,
     required this.isNavigateToStudentFeeDetails,
+    required this.isNavigateToWorkShopGraphPage,
   });
 
   @override
@@ -114,13 +117,25 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
                           groupId: widget.groupId,
                         ),
                       );
+
+                      debugPrint(
+                        "isNavigateToAttendence:${widget.isNavigateToAttendence}",
+                      );
+                      debugPrint(
+                        "isNavigateToStudentFeeDetails:${widget.isNavigateToStudentFeeDetails}",
+                      );
+                      debugPrint(
+                        "isNavigateToWorkShopGraphPage:${widget.isNavigateToWorkShopGraphPage}",
+                      );
+
                       if (widget.isNavigateToAttendence) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder:
-                                (_) => StudentTimeTrackerPage(
+                                (_) => StudentAdentencePage(
                                   rollNo: _selectedStudent!.rollNum,
+                                  name: _selectedStudent!.name,
                                 ),
                           ),
                         );
@@ -137,18 +152,30 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
                             ),
                           );
                         } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (_) => FeeDetailsScreen(
-                                    groupId: widget.groupId,
-                                    isDefaulter: false,
-                                    key: ValueKey(_selectedStudent!.rollNum),
-                                    studentId: _selectedStudent!.rollNum,
-                                  ),
-                            ),
-                          );
+                          if (widget.isNavigateToWorkShopGraphPage) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => StudentTimeTrackerPage(
+                                      rollNo: _selectedStudent!.rollNum,
+                                    ),
+                              ),
+                            );
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => FeeDetailsScreen(
+                                      groupId: widget.groupId,
+                                      isDefaulter: false,
+                                      key: ValueKey(_selectedStudent!.rollNum),
+                                      studentId: _selectedStudent!.rollNum,
+                                    ),
+                              ),
+                            );
+                          }
                         }
                       }
                     }
@@ -193,6 +220,9 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
                                         groupId: widget.groupId,
                                         isNavigateToAttendence:
                                             widget.isNavigateToAttendence,
+                                        isNavigateToWorkShopGraphPage:
+                                            widget
+                                                .isNavigateToWorkShopGraphPage,
                                         onViewFee: (s) {
                                           _selectedStudent = s;
                                           context.read<FeeAdminBloc>().add(
@@ -218,6 +248,9 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
                                         groupId: widget.groupId,
                                         isNavigateToAttendence:
                                             widget.isNavigateToAttendence,
+                                        isNavigateToWorkShopGraphPage:
+                                            widget
+                                                .isNavigateToWorkShopGraphPage,
                                         onViewFee: (s) {
                                           _selectedStudent = s;
                                           context.read<FeeAdminBloc>().add(
