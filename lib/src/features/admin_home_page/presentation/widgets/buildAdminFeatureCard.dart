@@ -436,7 +436,11 @@ void _navigateToScreen(BuildContext context, int index) {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => GroupsListScreen(isNavigateToAttendence: false),
+            builder:
+                (_) => GroupsListScreen(
+                  isNavigateToAttendence: false,
+                  isNavigateToWorkShopGraphPage: false,
+                ),
           ),
         );
         break;
@@ -517,7 +521,10 @@ void _navigateToScreen(BuildContext context, int index) {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder:
-                (context) => GroupsListScreen(isNavigateToAttendence: true),
+                (context) => GroupsListScreen(
+                  isNavigateToAttendence: true,
+                  isNavigateToWorkShopGraphPage: false,
+                ),
           ),
         );
       case 11:
