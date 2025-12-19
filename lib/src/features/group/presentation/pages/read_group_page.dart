@@ -15,19 +15,33 @@ class GroupMainDetailPage extends StatefulWidget {
 class _GroupMainDetailPageState extends State<GroupMainDetailPage> {
   @override
   Widget build(BuildContext context) {
-    final darkPurple = const Color(0xFF3D0075);
-    final cardColor = Colors.white;
-    final shadowColor = const Color(0xFFB0D6F9);
+    // Colors updated based on palette
+    final darkPurple = const Color(0xFF111827); // Replaced with Primary Text
+    final cardColor = const Color(0xFFFFFFFF); // Component Background
+    final shadowColor = const Color(0xFFE5E7EB); // Border/Shadow Color
     final readgroupUsecase = ReadGroupUsecase(
       abstractGroupRepository: GroupRepositoryImplementation(),
     );
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FD), // App Background
       appBar: AppBar(
         title: const Text('All Groups', style: TextStyle(color: Colors.white)),
         centerTitle: true,
-        backgroundColor: Colors.deepPurple,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF3B82F6), // Gradient Start
+                Color(0xFF5D5FEF), // Gradient End
+              ],
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent, // Transparent to show gradient
+        elevation: 0,
       ),
       body: StreamBuilder<List<GroupEntity>>(
         stream: readgroupUsecase(),
@@ -60,14 +74,14 @@ class _GroupMainDetailPageState extends State<GroupMainDetailPage> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: shadowColor.withOpacity(0.5),
+                          color: shadowColor, // Updated shadow color
                           blurRadius: 15,
-                          offset: const Offset(8, 8),
+                          offset: const Offset(4, 4), // Adjusted offset
                         ),
                         const BoxShadow(
                           color: Colors.white,
                           blurRadius: 15,
-                          offset: Offset(-8, -8),
+                          offset: Offset(-4, -4), // Adjusted offset
                         ),
                       ],
                     ),
@@ -82,14 +96,14 @@ class _GroupMainDetailPageState extends State<GroupMainDetailPage> {
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: darkPurple,
+                                  color: darkPurple, // Primary Text
                                 ),
                               ),
                             ),
                             IconButton(
                               icon: const Icon(
                                 Icons.edit,
-                                color: Colors.deepPurple,
+                                color: Color(0xFF3B82F6), // Primary Color
                               ),
                               tooltip: 'Edit Group',
                               onPressed:
@@ -103,7 +117,6 @@ class _GroupMainDetailPageState extends State<GroupMainDetailPage> {
                                       },
                                     ),
                                   ),
-                              //  _editGroup(index),
                             ),
                           ],
                         ),
@@ -122,7 +135,7 @@ class _GroupMainDetailPageState extends State<GroupMainDetailPage> {
           } else if (snapshot.hasError) {
             return Center(child: Text(snapshot.error.toString()));
           } else {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
         },
       ),
@@ -141,14 +154,17 @@ class _GroupMainDetailPageState extends State<GroupMainDetailPage> {
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
-                color: Colors.black,
+                color: Color(0xFF374151), // Secondary Text (Slate Gray)
               ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 14, color: Colors.black),
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF111827), // Primary Text (Dark Charcoal)
+              ),
             ),
           ),
         ],
@@ -156,160 +172,3 @@ class _GroupMainDetailPageState extends State<GroupMainDetailPage> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// onTap: () {
-//                     final students = getDummyStudents(group.title);
-//                     Navigator.push(
-//                       context,
-//                       MaterialPageRoute(
-//                         builder:
-//                             (_) => StudentsScreen(
-//                               groupTitle: group.title,
-//                               students: students,
-//                             ),
-//                       ),
-//                     );
-//                   },
-
-
-
-
-// List<Student> getDummyStudents(String groupTitle) {
-  //   return [
-  //     Student(name: 'Muzammil Ashraf', rollNumber: 'Ai-24'),
-  //     Student(name: 'Muhammad Abdullah Waqar', rollNumber: 'Ai-08'),
-  //     Student(name: 'Haroon Ashraf', rollNumber: 'Ai-02'),
-  //     Student(name: 'Abdullah Qureshi', rollNumber: 'Ai-11'),
-  //     Student(name: 'Gulraiz Javaid', rollNumber: 'Ai-09'),
-  //     Student(name: 'Mushtaq Ahmed', rollNumber: 'Ai-23'),
-  //   ];
-  // }
-
-  // void _editGroup(int index) {
-  //   final group = _groups[index];
-  //   final titleController = TextEditingController(text: group.title);
-  //   final courseController = TextEditingController(text: group.course);
-  //   final instructorController = TextEditingController(text: group.instructor);
-  //   final feeController = TextEditingController(
-  //     text: group.fee.toStringAsFixed(0),
-  //   );
-  //   final startTimeController = TextEditingController(text: group.startTime);
-  //   final endTimeController = TextEditingController(text: group.endTime);
-
-  //   showDialog(
-  //     context: context,
-  //     builder:
-  //         (_) => AlertDialog(
-  //           title: const Text('Edit Group'),
-  //           content: SingleChildScrollView(
-  //             child: Column(
-  //               children: [
-  //                 _buildTextField(titleController, 'Title'),
-  //                 _buildTextField(courseController, 'Course'),
-  //                 _buildTextField(instructorController, 'Instructor'),
-  //                 _buildTextField(
-  //                   feeController,
-  //                   'Fee',
-  //                   keyboardType: TextInputType.number,
-  //                 ),
-  //                 _buildTextField(startTimeController, 'Start Time'),
-  //                 _buildTextField(endTimeController, 'End Time'),
-  //               ],
-  //             ),
-  //           ),
-  //           actions: [
-  //             TextButton(
-  //               onPressed: () => Navigator.pop(context),
-  //               child: const Text('Cancel'),
-  //             ),
-  //             ElevatedButton(
-  //               onPressed: () {
-  //                 setState(() {
-  //                   _groups[index] = group.copyWith(
-  //                     title: titleController.text,
-  //                     course: courseController.text,
-  //                     instructor: instructorController.text,
-  //                     fee: double.tryParse(feeController.text) ?? group.fee,
-  //                     startTime: startTimeController.text,
-  //                     endTime: endTimeController.text,
-  //                   );
-  //                 });
-  //                 Navigator.pop(context);
-  //               },
-  //               child: const Text('Save'),
-  //             ),
-  //           ],
-  //         ),
-  //   );
-  // }
-
-  // Widget _buildTextField(
-  //   TextEditingController controller,
-  //   String label, {
-  //   TextInputType? keyboardType,
-  // }) {
-  //   return Padding(
-  //     padding: const EdgeInsets.only(bottom: 12),
-  //     child: TextField(
-  //       controller: controller,
-  //       keyboardType: keyboardType,
-  //       decoration: InputDecoration(
-  //         labelText: label,
-  //         filled: true,
-  //         fillColor: const Color(0xFFEAF6FF),
-  //         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-  //       ),
-  //     ),
-  //   );
-  // }

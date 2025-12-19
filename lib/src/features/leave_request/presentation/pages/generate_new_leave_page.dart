@@ -10,8 +10,9 @@ class GenerateNewLeaveRequestPage extends StatefulWidget {
   const GenerateNewLeaveRequestPage({
     required this.section,
     required this.studentName,
-    super.key});
-    
+    super.key,
+  });
+
   @override
   State<GenerateNewLeaveRequestPage> createState() => _NewLeavePageState();
 }
@@ -82,7 +83,7 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFF6366F1),
+              primary: Color(0xFF3B82F6), // Updated to Primary Start
               onPrimary: Colors.white,
             ),
           ),
@@ -97,54 +98,52 @@ class _NewLeavePageState extends State<GenerateNewLeaveRequestPage>
     }
   }
 
-void _submitForm() {
-  
-  if (_isSubmitting) {
-    return;
-  }
+  void _submitForm() {
+    if (_isSubmitting) {
+      return;
+    }
 
-  if (leaveTypeController.text.isNotEmpty &&
-      fromDateController.text.isNotEmpty) {
-    
-    setState(() {
-      _isSubmitting = true;
-    });
+    if (leaveTypeController.text.isNotEmpty &&
+        fromDateController.text.isNotEmpty) {
+      setState(() {
+        _isSubmitting = true;
+      });
 
-    context.read<LeaveBloc>().add(
-      SubmitLeaveRequest(
-        status: 'Pending',
-        section: widget.section,
-        studentName: widget.studentName,
-        leaveType: leaveTypeController.text,
-        fromDate: fromDateController.text,
-        toDate: toDateController.text,
-        reason: reasonController.text,
-        currentDate: DateFormat('dd MMM, yyyy').format(DateTime.now()),
-      ),
-    );
-  } else {
-    final size = MediaQuery.of(context).size;
-    final screenWidth = size.width;
+      context.read<LeaveBloc>().add(
+        SubmitLeaveRequest(
+          status: 'Pending',
+          section: widget.section,
+          studentName: widget.studentName,
+          leaveType: leaveTypeController.text,
+          fromDate: fromDateController.text,
+          toDate: toDateController.text,
+          reason: reasonController.text,
+          currentDate: DateFormat('dd MMM, yyyy').format(DateTime.now()),
+        ),
+      );
+    } else {
+      final size = MediaQuery.of(context).size;
+      final screenWidth = size.width;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Please fill in both Leave Type and From Date',
-          style: TextStyle(
-            fontSize: screenWidth * 0.035,
-            fontWeight: FontWeight.w500,
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please fill in both Leave Type and From Date',
+            style: TextStyle(
+              fontSize: screenWidth * 0.035,
+              fontWeight: FontWeight.w500,
+            ),
           ),
+          backgroundColor: const Color(0xFFFF3B30), // Kept Semantic Error
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(screenWidth * 0.03),
+          ),
+          margin: EdgeInsets.all(screenWidth * 0.04),
         ),
-        backgroundColor: const Color(0xFFFF3B30),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(screenWidth * 0.03),
-        ),
-        margin: EdgeInsets.all(screenWidth * 0.04),
-      ),
-    );
+      );
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +180,7 @@ void _submitForm() {
     final bottomSpacing = screenHeight * 0.025;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: const Color(0xFFF8F9FD), // Updated to App Background
       body: FadeTransition(
         opacity: _fadeAnimation,
         child: Column(
@@ -194,7 +193,10 @@ void _submitForm() {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                  colors: [
+                    Color(0xFF3B82F6),
+                    Color(0xFF5D5FEF),
+                  ], // Updated to Primary Gradient
                 ),
               ),
               child: SafeArea(
@@ -259,7 +261,9 @@ void _submitForm() {
               child: Container(
                 transform: Matrix4.translationValues(0, contentTranslateY, 0),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8F9FA),
+                  color: const Color(
+                    0xFFFFFFFF,
+                  ), // Updated to Component Background
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(borderRadius),
                     topRight: Radius.circular(borderRadius),
@@ -267,14 +271,16 @@ void _submitForm() {
                 ),
                 child: Container(
                   width: double.infinity,
-                  constraints: isTablet 
-                      ? BoxConstraints(maxWidth: screenWidth * 0.7) 
-                      : null,
-                  margin: isTablet && screenWidth > 800
-                      ? EdgeInsets.symmetric(
-                          horizontal: (screenWidth - (screenWidth * 0.7)) / 2,
-                        )
-                      : null,
+                  constraints:
+                      isTablet
+                          ? BoxConstraints(maxWidth: screenWidth * 0.7)
+                          : null,
+                  margin:
+                      isTablet && screenWidth > 800
+                          ? EdgeInsets.symmetric(
+                            horizontal: (screenWidth - (screenWidth * 0.7)) / 2,
+                          )
+                          : null,
                   child: SingleChildScrollView(
                     padding: EdgeInsets.only(
                       top: contentTopSpacing,
@@ -292,7 +298,9 @@ void _submitForm() {
                               width: headerBarWidth,
                               height: headerBarHeight,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF6366F1),
+                                color: const Color(
+                                  0xFF3B82F6,
+                                ), // Updated to Primary Start
                                 borderRadius: BorderRadius.circular(
                                   headerBarWidth * 0.5,
                                 ),
@@ -304,7 +312,9 @@ void _submitForm() {
                               style: TextStyle(
                                 fontSize: sectionTitleSize,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1C1C1E),
+                                color: const Color(
+                                  0xFF111827,
+                                ), // Updated to Primary Text
                               ),
                             ),
                           ],
@@ -315,7 +325,10 @@ void _submitForm() {
                         // Form Fields - Use responsive layout
                         if (isLargeTablet)
                           // Two-column layout for large tablets
-                          _buildTwoColumnLayout(twoColumnSpacing, verticalSpacing)
+                          _buildTwoColumnLayout(
+                            twoColumnSpacing,
+                            verticalSpacing,
+                          )
                         else
                           // Single column layout for mobile and small tablets
                           _buildSingleColumnLayout(verticalSpacing),
@@ -325,15 +338,20 @@ void _submitForm() {
                         // Submit Button
                         Container(
                           width: double.infinity,
-                          constraints: isTablet
-                              ? BoxConstraints(maxWidth: screenWidth * 0.4)
-                              : null,
+                          constraints:
+                              isTablet
+                                  ? BoxConstraints(maxWidth: screenWidth * 0.4)
+                                  : null,
                           alignment: isTablet ? Alignment.center : null,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(contentBorderRadius),
+                            borderRadius: BorderRadius.circular(
+                              contentBorderRadius,
+                            ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF6366F1).withOpacity(0.3),
+                                color: const Color(0xFF3B82F6).withOpacity(
+                                  0.3,
+                                ), // Updated to Primary Start opacity
                                 blurRadius: shadowBlurRadius,
                                 offset: Offset(0, shadowOffset),
                               ),
@@ -350,7 +368,9 @@ void _submitForm() {
                                         fontSize: screenWidth * 0.035,
                                       ),
                                     ),
-                                    backgroundColor: const Color(0xFF10B981),
+                                    backgroundColor: const Color(
+                                      0xFF10B981,
+                                    ), // Kept Semantic Success
                                     behavior: SnackBarBehavior.floating,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(
@@ -370,7 +390,8 @@ void _submitForm() {
                                           fontSize: screenWidth * 0.035,
                                         ),
                                       ),
-                                      backgroundColor: Colors.red,
+                                      backgroundColor:
+                                          Colors.red, // Kept Semantic Failure
                                       behavior: SnackBarBehavior.floating,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(
@@ -386,7 +407,9 @@ void _submitForm() {
                               return NeumorphicButton(
                                 onPressed: _submitForm,
                                 style: NeumorphicStyle(
-                                  color: const Color(0xFF6366F1),
+                                  color: const Color(
+                                    0xFF3B82F6,
+                                  ), // Updated to Primary Start
                                   boxShape: NeumorphicBoxShape.roundRect(
                                     BorderRadius.circular(contentBorderRadius),
                                   ),

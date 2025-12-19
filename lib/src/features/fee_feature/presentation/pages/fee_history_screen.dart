@@ -100,8 +100,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
             const SizedBox(height: 8),
             Text(
               message,
-              style: TextStyle(color: Colors.grey[600], fontSize: 14),
-              textAlign: TextAlign.center,
+              style: const TextStyle(color: Color(0xFF374151), fontSize: 14),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -110,6 +109,8 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
               icon: const Icon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3B82F6),
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -132,10 +133,10 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
             Container(
               padding: const EdgeInsets.all(24),
               decoration: _neoDecoration(radius: 60),
-              child: Icon(
+              child: const Icon(
                 Icons.receipt_long_outlined,
                 size: 64,
-                color: Colors.grey[400],
+                color: Color(0xFF9CA3AF),
               ),
             ),
             const SizedBox(height: 24),
@@ -146,9 +147,9 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'Try adjusting your date range or check back later.',
-              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+              style: TextStyle(color: Color(0xFF374151), fontSize: 16),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -157,6 +158,10 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
                   () => context.read<FeeAdminBloc>().add(FetchTodayFees()),
               icon: const Icon(Icons.today),
               label: const Text('Show Today'),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF3B82F6),
+                foregroundColor: Colors.white,
+              ),
             ),
           ],
         ),
@@ -166,7 +171,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
 
   @override
   Widget build(BuildContext context) {
-    final Color background = const Color(0xFFEAF3FB);
+    final Color background = const Color(0xFFF8F9FD);
     return Scaffold(
       backgroundColor: background,
       appBar: FeeHistoryAppBar(
@@ -194,7 +199,7 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
         onPressed: () => context.read<FeeAdminBloc>().add(FetchTodayFees()),
         icon: const Icon(Icons.today),
         label: const Text('Today'),
-        backgroundColor: Colors.blue[600],
+        backgroundColor: const Color(0xFF3B82F6),
         foregroundColor: Colors.white,
       ),
     );
@@ -278,7 +283,9 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
             onPressed: () => _showSortDialog(context, state),
             icon: Icon(state.sortOption.icon, size: 18),
             label: const Text('Sort'),
-            style: TextButton.styleFrom(foregroundColor: Colors.blue[600]),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFF3B82F6),
+            ),
           ),
         ],
       ),
@@ -296,11 +303,11 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
   /// Neomorphic decoration helper
   BoxDecoration _neoDecoration({double radius = 20}) {
     return BoxDecoration(
-      color: const Color(0xFFEAF3FB),
+      color: const Color(0xFFFFFFFF),
       borderRadius: BorderRadius.circular(radius),
       boxShadow: const [
         BoxShadow(
-          color: Color(0xFFB0D4F1), // soft light-blue shadow
+          color: Color(0xFFE5E7EB), // Border color acting as shadow
           offset: Offset(4, 4),
           blurRadius: 8,
         ),

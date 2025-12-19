@@ -20,10 +20,10 @@ class FeeHistorySummarySection extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Total Amount',
                   style: TextStyle(
-                    color: Colors.blue[700],
+                    color: Color(0xFF374151), // Secondary Text
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -32,7 +32,7 @@ class FeeHistorySummarySection extends StatelessWidget {
                 Text(
                   'Rs ${state.totalAmount.toStringAsFixed(2)}',
                   style: const TextStyle(
-                    color: Colors.blueAccent,
+                    color: Color(0xFF3B82F6), // Primary Color
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -43,16 +43,16 @@ class FeeHistorySummarySection extends StatelessWidget {
           Container(
             height: 40,
             width: 1,
-            color: Colors.blue[300],
+            color: const Color(0xFFE5E7EB), // Border Color
             margin: const EdgeInsets.symmetric(horizontal: 16),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
+              const Text(
                 'Records',
                 style: TextStyle(
-                  color: Colors.blue[700],
+                  color: Color(0xFF374151), // Secondary Text
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -61,7 +61,7 @@ class FeeHistorySummarySection extends StatelessWidget {
               Text(
                 '${state.fees.length}',
                 style: const TextStyle(
-                  color: Colors.blueAccent,
+                  color: Color(0xFF3B82F6), // Primary Color
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -76,11 +76,11 @@ class FeeHistorySummarySection extends StatelessWidget {
   /// Neomorphic decoration helper
   BoxDecoration _neoDecoration({double radius = 20}) {
     return BoxDecoration(
-      color: const Color(0xFFEAF3FB),
+      color: const Color(0xFFFFFFFF), // Component Background
       borderRadius: BorderRadius.circular(radius),
       boxShadow: const [
         BoxShadow(
-          color: Color(0xFFB0D4F1), // soft light-blue shadow
+          color: Color(0xFFE5E7EB), // Very Light Gray shadow
           offset: Offset(4, 4),
           blurRadius: 8,
         ),

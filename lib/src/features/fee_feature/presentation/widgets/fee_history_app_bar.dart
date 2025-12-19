@@ -33,14 +33,19 @@ class FeeHistoryAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color background = Colors.purple.shade900;
+    // Primary Color (Gradient Start) used for Header background
+    final Color background = const Color(0xFF3B82F6);
     return AppBar(
       elevation: 0,
       backgroundColor: background,
       surfaceTintColor: Colors.transparent,
       title: const Text(
         'Fee History',
-        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 22),
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 22,
+          color: Colors.white, // Header Text must be White
+        ),
       ),
       centerTitle: false,
       actions: [
@@ -48,13 +53,19 @@ class FeeHistoryAppBar extends StatelessWidget implements PreferredSizeWidget {
           icon: AnimatedRotation(
             turns: isFilterExpanded ? 0.5 : 0.0,
             duration: const Duration(milliseconds: 300),
-            child: const Icon(Icons.tune),
+            child: const Icon(
+              Icons.tune,
+              color: Colors.white,
+            ), // Header Icon White
           ),
           onPressed: onFilterToggle,
           tooltip: 'Filters',
         ),
         IconButton(
-          icon: const Icon(Icons.refresh_rounded),
+          icon: const Icon(
+            Icons.refresh_rounded,
+            color: Colors.white,
+          ), // Header Icon White
           onPressed: onRefresh,
           tooltip: 'Refresh',
         ),
@@ -62,7 +73,10 @@ class FeeHistoryAppBar extends StatelessWidget implements PreferredSizeWidget {
         BlocBuilder<FeeAdminBloc, FeeAdminState>(
           builder: (context, state) {
             return IconButton(
-              icon: const Icon(Icons.payment),
+              icon: const Icon(
+                Icons.payment,
+                color: Colors.white,
+              ), // Header Icon White
               onPressed:
                   state is FeeHistoryLoaded
                       ? () => _showPaymentMethodsBottomSheet(context, state)

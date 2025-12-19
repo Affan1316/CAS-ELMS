@@ -40,11 +40,11 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
     _animationController.forward();
 
     context.read<LeaveBloc>().add(
-    FetchLeaveRequest(
-      studentName: widget.studentName,
-      isAdmin: false, // Student view
-    ),
-  );
+      FetchLeaveRequest(
+        studentName: widget.studentName,
+        isAdmin: false, // Student view
+      ),
+    );
   }
 
   @override
@@ -59,7 +59,10 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
       PageRouteBuilder(
         pageBuilder:
             (context, animation, secondaryAnimation) =>
-                GenerateNewLeaveRequestPage(section: widget.section, studentName: widget.studentName,),
+                GenerateNewLeaveRequestPage(
+                  section: widget.section,
+                  studentName: widget.studentName,
+                ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return SlideTransition(
             position: animation.drive(
@@ -74,15 +77,12 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
       ),
     );
 
-
     if (result != null) {
-  context.read<LeaveBloc>().add(
-    FetchLeaveRequest(
-      studentName: widget.studentName,
-      isAdmin: false,
-    ),
-  );
-  }}
+      context.read<LeaveBloc>().add(
+        FetchLeaveRequest(studentName: widget.studentName, isAdmin: false),
+      );
+    }
+  }
 
   void _showLeaveDetails(Map<String, dynamic> item) {
     LeaveDetailsModal.show(context, item);
@@ -156,7 +156,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
     final horizontalPadding = isTablet ? 32.0 : 24.0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: const Color(0xFFF8F9FD), // App Background
       body: Column(
         children: [
           // Header
@@ -171,7 +171,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
             child: Container(
               transform: Matrix4.translationValues(0, isTablet ? -32 : -28, 0),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8F9FA),
+                color: const Color(0xFFF8F9FD), // App Background
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(isTablet ? 32 : 28),
                   topRight: Radius.circular(isTablet ? 32 : 28),
@@ -212,11 +212,11 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
                     // Listen for successful submission and refresh list
                     if (state is LeaveSuccess) {
                       context.read<LeaveBloc>().add(
-                                 FetchLeaveRequest(
-                                   studentName: widget.studentName,
-                                   isAdmin: false,
-                                  ),
-                                );
+                        FetchLeaveRequest(
+                          studentName: widget.studentName,
+                          isAdmin: false,
+                        ),
+                      );
                     }
                   },
                   builder: (context, state) {
@@ -229,7 +229,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
                               width: isTablet ? 5 : 4,
                               height: isTablet ? 28 : 24,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF6366F1),
+                                color: const Color(0xFF3B82F6), // Primary Blue
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),
@@ -243,7 +243,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
                                   24,
                                 ),
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1C1C1E),
+                                color: const Color(0xFF111827), // Primary Text
                               ),
                             ),
                             const Spacer(),
@@ -256,7 +256,9 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
                                     14,
                                     16,
                                   ),
-                                  color: const Color(0xFF8E8E93),
+                                  color: const Color(
+                                    0xFF374151,
+                                  ), // Secondary Text
                                   fontWeight: FontWeight.w500,
                                 ),
                               )
@@ -267,7 +269,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    const Color(0xFF6366F1),
+                                    const Color(0xFF3B82F6), // Primary Blue
                                   ),
                                 ),
                               ),
@@ -302,15 +304,15 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
           children: [
             CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(
-                const Color(0xFF6366F1),
+                const Color(0xFF3B82F6), // Primary Blue
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               'Loading leave requests...',
               style: TextStyle(
                 fontSize: _getResponsiveFontSize(screenWidth, 16, 18),
-                color: Colors.grey.shade600,
+                color: const Color(0xFF374151), // Secondary Text
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -343,27 +345,27 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
               state.message,
               style: TextStyle(
                 fontSize: _getResponsiveFontSize(screenWidth, 14, 16),
-                color: Colors.grey.shade500,
+                color: const Color(0xFF9CA3AF), // Placeholder Text
               ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: isTablet ? 24 : 16),
             ElevatedButton(
               onPressed: () {
-                 context.read<LeaveBloc>().add(
-                          FetchLeaveRequest(
-                            studentName: widget.studentName,
-                            isAdmin: false,
-                          ),
-                         );
+                context.read<LeaveBloc>().add(
+                  FetchLeaveRequest(
+                    studentName: widget.studentName,
+                    isAdmin: false,
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6366F1),
+                backgroundColor: const Color(0xFF3B82F6), // Primary Blue
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: Text('Retry'),
+              child: const Text('Retry', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -381,7 +383,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
               Icon(
                 Icons.inbox_outlined,
                 size: isTablet ? 80 : 64,
-                color: Colors.grey.shade400,
+                color: const Color(0xFF9CA3AF), // Placeholder Color
               ),
               SizedBox(height: isTablet ? 24 : 16),
               Text(
@@ -389,7 +391,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
                 style: TextStyle(
                   fontSize: _getResponsiveFontSize(screenWidth, 16, 20),
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade600,
+                  color: const Color(0xFF374151), // Secondary Text
                 ),
               ),
               SizedBox(height: isTablet ? 12 : 8),
@@ -397,7 +399,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
                 'Tap + to create a new request',
                 style: TextStyle(
                   fontSize: _getResponsiveFontSize(screenWidth, 14, 16),
-                  color: Colors.grey.shade500,
+                  color: const Color(0xFF9CA3AF), // Placeholder Text
                 ),
               ),
             ],
@@ -455,7 +457,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
           Icon(
             Icons.inbox_outlined,
             size: isTablet ? 80 : 64,
-            color: Colors.grey.shade400,
+            color: const Color(0xFF9CA3AF), // Placeholder Color
           ),
           SizedBox(height: isTablet ? 24 : 16),
           Text(
@@ -463,7 +465,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
             style: TextStyle(
               fontSize: _getResponsiveFontSize(screenWidth, 16, 20),
               fontWeight: FontWeight.w500,
-              color: Colors.grey.shade600,
+              color: const Color(0xFF374151), // Secondary Text
             ),
           ),
           SizedBox(height: isTablet ? 12 : 8),
@@ -471,7 +473,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
             'Tap + to create a new request',
             style: TextStyle(
               fontSize: _getResponsiveFontSize(screenWidth, 14, 16),
-              color: Colors.grey.shade500,
+              color: const Color(0xFF9CA3AF), // Placeholder Text
             ),
           ),
         ],

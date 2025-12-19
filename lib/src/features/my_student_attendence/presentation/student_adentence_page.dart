@@ -95,7 +95,7 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
     );
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldLightThemeBackground,
+      backgroundColor: Color(0xFFF8F9FD),
       appBar: _buildGeometricAppBar(context, widget.rollNo),
       body: BlocBuilder<StudentAttendenceBloc, AttendanceState>(
         builder: (context, state) {
@@ -119,6 +119,15 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
       toolbarHeight: _appBarHeight,
       elevation: 2,
       shadowColor: Colors.black.withOpacity(0.1),
+      flexibleSpace: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF3B82F6), Color(0xFF5D5FEF)],
+          ),
+        ),
+      ),
       leading: _buildCircularButton(
         icon: Icons.arrow_back_ios_new_rounded,
         onPressed: () => Navigator.pop(context),
@@ -126,7 +135,11 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
       ),
       title: const Text(
         'Attendance',
-        style: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.5),
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+          color: Colors.white,
+        ),
       ),
       centerTitle: true,
       actions: [
@@ -158,7 +171,7 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
         height: _minTouchTarget,
         alignment: Alignment.center,
         child: IconButton(
-          icon: Icon(icon, size: _iconSize),
+          icon: Icon(icon, size: _iconSize, color: Colors.white),
           onPressed: onPressed,
           tooltip: tooltip,
           splashRadius: _minTouchTarget / 2,
@@ -186,7 +199,7 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
             icon: Icon(
               Icons.location_on_rounded,
               size: _iconSize,
-              color: AppColors.buttonText,
+              color: Colors.white,
             ),
             onPressed: _onLocationPressed,
             tooltip: 'Check Location',
@@ -229,7 +242,7 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
             height: _baseUnit * 8,
             child: CircularProgressIndicator(
               strokeWidth: 3.5,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3B82F6)),
             ),
           ),
           SizedBox(height: _baseUnit * 3),
@@ -237,7 +250,7 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
             'Loading attendance data...',
             style: TextStyle(
               fontSize: _baseUnit * 2,
-              color: Colors.grey[600],
+              color: Color(0xFF9CA3AF),
               letterSpacing: 0.3,
             ),
           ),
@@ -273,7 +286,7 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
               style: TextStyle(
                 fontSize: _baseUnit * 2.5,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
+                color: Color(0xFF111827),
               ),
             ),
             SizedBox(height: _baseUnit * 1.5),
@@ -282,7 +295,7 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: _baseUnit * 2,
-                color: Colors.grey[600],
+                color: Color(0xFF9CA3AF),
                 height: 1.5,
               ),
             ),
@@ -291,9 +304,11 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
               onPressed: () {
                 context.read<StudentAttendenceBloc>().add(LoadAttendance());
               },
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Retry'),
+              icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+              label: const Text('Retry', style: TextStyle(color: Colors.white)),
               style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF5D5FEF),
+                foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(
                   horizontal: _baseUnit * 4,
                   vertical: _baseUnit * 2,
@@ -318,14 +333,14 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
           Icon(
             Icons.inbox_outlined,
             size: _baseUnit * 10,
-            color: Colors.grey[400],
+            color: Color(0xFF9CA3AF),
           ),
           SizedBox(height: _baseUnit * 3),
           Text(
             'No attendance data available',
             style: TextStyle(
               fontSize: _baseUnit * 2,
-              color: Colors.grey[600],
+              color: Color(0xFF9CA3AF),
               letterSpacing: 0.3,
             ),
           ),
@@ -343,7 +358,10 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
             Icon(Icons.error_outline, color: Colors.white, size: _iconSize),
             SizedBox(width: _baseUnit * 1.5),
             Expanded(
-              child: Text(message, style: const TextStyle(fontSize: 14)),
+              child: Text(
+                message,
+                style: const TextStyle(fontSize: 14, color: Colors.white),
+              ),
             ),
           ],
         ),
