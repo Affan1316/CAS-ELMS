@@ -70,10 +70,7 @@ class StudentAttendenceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     await LocationServiceManager.initLocationService();
     // MyGeofenceService().reCreateFence();
     // getting location trigger event quicker
-    HiveRepository hive = HiveRepository();
-    SharePreferenceRepository sharePreferenceRepository =
-        SharePreferenceRepository();
-    NotificationService notificationService = NotificationService();
+  
     bool isLocEnabled = await Geolocator.isLocationServiceEnabled();
       await LocationServiceManager().startLocationService();
       print("_onLocationCheckEvent");
@@ -90,21 +87,12 @@ class StudentAttendenceBloc extends Bloc<AttendanceEvent, AttendanceState> {
 
         await LocationServiceManager().startLocationService();
         await LocationServiceManager().sendExitEventTag();
-        // await MyGeofenceService.onExit(
-        //   hive,
-        //   sharePreferenceRepository,
-        //   notificationService,
-        // );
-        // await LocationServiceManager().stopLocationService();
+      
       } else {
         log("enter at location check event");
         await LocationServiceManager().startLocationService();
         await LocationServiceManager().sendEnterEventTag();
-        // await MyGeofenceService.onEnter(
-        //   hive,
-        //   sharePreferenceRepository,
-        //   notificationService,
-        // );
+       
       }
     }
   }

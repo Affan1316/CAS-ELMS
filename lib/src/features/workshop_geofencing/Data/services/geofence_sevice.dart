@@ -48,10 +48,10 @@ Future<void> handleGeofenceEvent(GeofenceCallbackParams params) async {
 
     case GeofenceEvent.dwell:
       debugPrint("⌛ Dwell detected inside geofence   and at ${DateTime.now()}");
-      await tryToPromoteToForeground();
-      await locationService.startLocationService();
-      await locationService.sendDwellEventTag();
-      await demoteToBackground();
+      // await tryToPromoteToForeground();
+      // await locationService.startLocationService();
+      // await locationService.sendDwellEventTag();
+      // await demoteToBackground();
       break;
   }
 }

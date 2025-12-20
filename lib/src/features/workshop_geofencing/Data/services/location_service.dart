@@ -108,7 +108,7 @@ class LocationTaskHandler extends TaskHandler {
     final pos = await Geolocator.getCurrentPosition(
       locationSettings: LocationSettings(accuracy: LocationAccuracy.best),
     );
-    // if (!pos.isMocked) {
+    if (!pos.isMocked) {
     if (data == enterTag) {
       dv.log("Received Enter Tag", name: "LocationTaskHandler");
       isInCAS = true;
@@ -131,9 +131,9 @@ class LocationTaskHandler extends TaskHandler {
       // Handle dwell event
       await MyGeofenceService.onDwell(fireStoreRepository);
     }
-    // } else {
-    //   notificationService.showSpoofedLocNotification();
-    // }
+    } else {
+      notificationService.showSpoofedLocNotification();
+    }
   }
 
   @override
@@ -220,8 +220,8 @@ class TimerForAttendance {
 
 
   static Future<void> startTimer(FireStoreRepository firestore) async {
-    _attendanceTimer = Timer.periodic(Duration(minutes: 1), (timer) async {
-      _minutesPassed++;
+    _attendanceTimer = Timer.periodic(const Duration(minutes: 1), (timer) async {
+      ++_minutesPassed;
       print("minutes passed $_minutesPassed");
       // ⭐ After 40 minutes → mark attendance
       if (_minutesPassed >= 40 && !isMarked) {
