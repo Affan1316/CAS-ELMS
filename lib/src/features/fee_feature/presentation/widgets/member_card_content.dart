@@ -43,7 +43,7 @@ class MemberCardContent extends StatelessWidget {
           },
           child: const CircleAvatar(
             radius: 28,
-            backgroundColor: Color(0xFF009688),
+            backgroundColor: Color(0xFF5D5FEF),
             backgroundImage: AssetImage(
               "assets/images/orignal_student_image_placeholder.jpg",
             ),
@@ -60,19 +60,20 @@ class MemberCardContent extends StatelessWidget {
                 phoneSize: 16,
                 tabletSize: 20,
                 weight: FontWeight.w600,
+                color: Color(0xFF374151),
               ),
               ResponsiveText(
                 text: student.rollNum,
                 phoneSize: 13,
                 tabletSize: 15,
-                color: Colors.grey,
+                color: Color(0xFF374151),
               ),
             ],
           ),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF5B21B6),
+            backgroundColor: const Color(0xFF5D5FEF),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),

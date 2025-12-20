@@ -1,7 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/time_graph_page/data/student_data.dart';
+import 'package:flutter_cas_app_main/src/features/student_workshop_time_tracker/data/student_data.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 
@@ -86,8 +86,7 @@ class _StudentTimeTrackerPageState extends State<StudentTimeTrackerPage> {
               onPrimary: Colors.white,
               surface: const Color(0xFFE6E9EF),
               onSurface: const Color(0xFF3D4C5F),
-            ),
-            dialogBackgroundColor: Colors.white,
+            ), dialogTheme: DialogThemeData(backgroundColor: Colors.white),
           ),
           child: child!,
         );

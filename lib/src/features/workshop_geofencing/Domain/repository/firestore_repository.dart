@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../firebase_options.dart';
-import '../../../time_graph_page/data/dummy_data.dart';
+import '../../../student_workshop_time_tracker/data/dummy_data.dart';
 import '../../Data/getTimeConversions.dart';
 import '../../Data/model/workshoptime_model.dart';
 

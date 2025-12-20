@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/core/theme/app_colors.dart';
-import 'package:flutter_cas_app_main/src/features/time_graph_page/presentation/bloc/time_graph_page_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/student_workshop_time_tracker/presentation/bloc/time_graph_page_bloc.dart';
 
 class _MyChoiceChip extends StatelessWidget {
   const _MyChoiceChip({

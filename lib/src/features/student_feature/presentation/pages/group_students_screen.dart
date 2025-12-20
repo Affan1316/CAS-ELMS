@@ -23,22 +23,38 @@ class GroupStudentsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardColor = Colors.white;
-    final shadowColor = const Color(0xFFB0D6F9);
-    final darkPurple = const Color(0xFF3D0075);
+    final cardColor = const Color(0xFFFFFFFF); // Component Background
+    final shadowColor = const Color(0xFFE5E7EB); // Borders/Shadow
+    final darkPurple = const Color(0xFF111827); // Primary Text
     final ReadWholeGroupStudentsListUsecase readWholeGroupStudentsListUsecase =
         ReadWholeGroupStudentsListUsecase();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FD), // App Background
       appBar: AppBar(
         title: Text(
           "Students of $groupTitle",
-          style: const TextStyle(color: Color(0xFF3D0075)),
+          style: const TextStyle(
+            color: Colors.white,
+          ), // Text on Header must be White
         ),
-        backgroundColor: const Color(0xFFEAF6FF),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF3B82F6), // Gradient Start
+                Color(0xFF5D5FEF), // Gradient End
+              ],
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
         centerTitle: true,
-        iconTheme: const IconThemeData(color: Color(0xFF3D0075)),
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ), // Text/Icons on Header must be White
       ),
       body: BlocConsumer<StudentFeatureBloc, StudentFeatureState>(
         listenWhen: (previous, current) => current is GroupStudentsDatafetched,
@@ -136,8 +152,12 @@ class GroupStudentsScreen extends StatelessWidget {
                                         _buildGroupSelectionDialog(context),
                               );
                             },
-                            backgroundColor: Colors.blue.shade100,
-                            foregroundColor: Colors.blue,
+                            backgroundColor: const Color(
+                              0xFFE5E7EB,
+                            ), // Very Light Gray
+                            foregroundColor: const Color(
+                              0xFF3B82F6,
+                            ), // Primary Color
                             icon: Icons.edit,
                             label: 'Edit',
                           ),
@@ -166,11 +186,11 @@ class GroupStudentsScreen extends StatelessWidget {
                           margin: const EdgeInsets.only(bottom: 18),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: cardColor,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFB0D6F9).withOpacity(0.5),
+                                color: shadowColor,
                                 blurRadius: 12,
                                 offset: const Offset(6, 6),
                               ),
@@ -199,7 +219,9 @@ class GroupStudentsScreen extends StatelessWidget {
                                 },
                                 child: const CircleAvatar(
                                   radius: 28,
-                                  backgroundColor: Color(0xFF009688),
+                                  backgroundColor: Color(
+                                    0xFF3B82F6,
+                                  ), // Primary Color
                                   backgroundImage: AssetImage(
                                     "assets/images/student-male.png",
                                   ),
@@ -213,30 +235,25 @@ class GroupStudentsScreen extends StatelessWidget {
                                   children: [
                                     Text(
                                       student.name,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF3D0075),
+                                        color: darkPurple, // Primary Text
                                       ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       student.rollNum,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 14,
-                                        color: Colors.grey.shade600,
+                                        color: Color(
+                                          0xFF374151,
+                                        ), // Secondary Text (Slate Gray)
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              // Chip(
-                              //   label: const Text("Active"),
-                              //   backgroundColor: Colors.green.shade50,
-                              //   labelStyle: const TextStyle(
-                              //     color: Colors.green,
-                              //   ),
-                              // ),
                             ],
                           ),
                         ),
@@ -270,14 +287,14 @@ class GroupStudentsScreen extends StatelessWidget {
           return Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color(0xFFFFFFFF), // Component Background
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
                   offset: const Offset(0, 1),
                   blurRadius: 3,
                   spreadRadius: 0,
-                  color: Colors.grey.withOpacity(0.1),
+                  color: const Color(0xFFE5E7EB), // Border/Shadow
                 ),
               ],
             ),
@@ -288,7 +305,7 @@ class GroupStudentsScreen extends StatelessWidget {
                 const Text(
                   'Group Selection',
                   style: TextStyle(
-                    color: Color(0xFF4A6FA5),
+                    color: Color(0xFF111827), // Primary Text
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
@@ -305,29 +322,29 @@ class GroupStudentsScreen extends StatelessWidget {
                         offset: const Offset(0, 1),
                         blurRadius: 2,
                         spreadRadius: 0,
-                        color: Colors.grey.withOpacity(0.1),
+                        color: const Color(0xFFE5E7EB), // Border/Shadow
                       ),
                     ],
                   ),
                   child: DropdownButtonFormField<String>(
                     initialValue: selectedGroup ?? groups.first,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(
                         horizontal: 15,
                         vertical: 15,
                       ),
                       border: InputBorder.none,
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.group,
-                        color: Color(0xFF4A6FA5),
+                        color: Color(0xFF6B7280), // Input Icons
                       ),
                     ),
                     icon: const Icon(
                       Icons.arrow_drop_down,
-                      color: Color(0xFF4A6FA5),
+                      color: Color(0xFF6B7280), // Input Icons
                     ),
                     style: const TextStyle(
-                      color: Color(0xFF4A6FA5),
+                      color: Color(0xFF111827), // Primary Text
                       fontSize: 16,
                     ),
                     items:
@@ -355,7 +372,9 @@ class GroupStudentsScreen extends StatelessWidget {
                         content: Text(
                           'Group "${selectedGroup ?? groups.first}" added successfully!',
                         ),
-                        backgroundColor: const Color(0xFF4A6FA5),
+                        backgroundColor: const Color(
+                          0xFF3B82F6,
+                        ), // Primary Color
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -368,7 +387,14 @@ class GroupStudentsScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF4A6FA5),
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF3B82F6), // Gradient Start
+                          Color(0xFF5D5FEF), // Gradient End
+                        ],
+                      ),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(

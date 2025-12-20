@@ -49,9 +49,9 @@ class FeeHistoryFilterSection extends StatelessWidget {
           // Header
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.filter_alt_rounded,
-                color: Theme.of(context).colorScheme.primary,
+                color: Color(0xFF3B82F6), // Primary Gradient Start
                 size: 24,
               ),
               const SizedBox(width: 8),
@@ -164,9 +164,15 @@ class FeeHistoryFilterSection extends StatelessWidget {
                             ),
                           )
                           : null,
-                  icon: const Icon(Icons.search),
-                  label: const Text('Search'),
+                  icon: const Icon(Icons.search, color: Colors.white),
+                  label: const Text(
+                    'Search',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   style: FilledButton.styleFrom(
+                    backgroundColor: const Color(
+                      0xFF3B82F6,
+                    ), // Primary Gradient Start
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     textStyle: const TextStyle(fontWeight: FontWeight.w600),
                   ),
@@ -181,10 +187,14 @@ class FeeHistoryFilterSection extends StatelessWidget {
                     );
                     bloc.add(FetchTodayFees());
                   },
-                  icon: const Icon(Icons.clear),
-                  label: const Text('Clear'),
+                  icon: const Icon(Icons.clear, color: Color(0xFF374151)),
+                  label: const Text(
+                    'Clear',
+                    style: TextStyle(color: Color(0xFF374151)),
+                  ),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: const BorderSide(color: Color(0xFFE5E7EB)),
                     textStyle: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -228,12 +238,13 @@ class FeeHistoryFilterSection extends StatelessWidget {
     VoidCallback onTap,
   ) {
     return ActionChip(
-      avatar: Icon(icon, size: 18),
-      label: Text(label),
+      avatar: Icon(icon, size: 18, color: const Color(0xFF6B7280)),
+      label: Text(label, style: const TextStyle(color: Color(0xFF374151))),
       onPressed: onTap,
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: const Color(0xFFF8F9FD), // App Background
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       labelStyle: const TextStyle(fontWeight: FontWeight.w500),
+      side: const BorderSide(color: Color(0xFFE5E7EB)),
     );
   }
 
@@ -257,13 +268,17 @@ class FeeHistoryFilterSection extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, size: 18, color: Colors.grey[600]),
+                Icon(
+                  icon,
+                  size: 18,
+                  color: const Color(0xFF6B7280),
+                ), // Input Icons
                 const SizedBox(width: 8),
                 Text(
                   label,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: Color(0xFF6B7280), // Input Icons/Label Color
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -271,7 +286,11 @@ class FeeHistoryFilterSection extends StatelessWidget {
                   const Spacer(),
                   GestureDetector(
                     onTap: onClear,
-                    child: Icon(Icons.close, size: 16, color: Colors.grey[400]),
+                    child: const Icon(
+                      Icons.close,
+                      size: 16,
+                      color: Color(0xFF9CA3AF),
+                    ), // Placeholder Color
                   ),
                 ],
               ],
@@ -281,7 +300,12 @@ class FeeHistoryFilterSection extends StatelessWidget {
               value != null ? _formatDate(value) : 'Select date',
               style: TextStyle(
                 fontSize: 16,
-                color: value != null ? Colors.black87 : Colors.grey[500],
+                color:
+                    value != null
+                        ? const Color(0xFF111827)
+                        : const Color(
+                          0xFF9CA3AF,
+                        ), // Primary Text vs Placeholder
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -338,11 +362,12 @@ class FeeHistoryFilterSection extends StatelessWidget {
   /// Neomorphic decoration helper
   BoxDecoration _neoDecoration({double radius = 20}) {
     return BoxDecoration(
-      color: const Color(0xFFEAF3FB),
+      color: const Color(0xFFFFFFFF), // Component Background
       borderRadius: BorderRadius.circular(radius),
+      border: Border.all(color: const Color(0xFFE5E7EB)), // Border
       boxShadow: const [
         BoxShadow(
-          color: Color(0xFFB0D4F1), // soft light-blue shadow
+          color: Color(0xFFE5E7EB), // Very Light Gray shadow
           offset: Offset(4, 4),
           blurRadius: 8,
         ),

@@ -1,6 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/entities/group_entity.dart';
@@ -57,8 +54,10 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: ThemeData.light().copyWith(
-            primaryColor: const Color(0xFF4A6FA5),
-            colorScheme: const ColorScheme.light(primary: Color(0xFF4A6FA5)),
+            primaryColor: const Color(0xFF3B82F6), // Primary Blue
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF3B82F6), // Primary Blue
+            ),
           ),
           child: child!,
         );
@@ -71,7 +70,6 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
     }
   }
 
-
   void _updateGroup() {
     if (_formKey.currentState!.validate()) {
       _showSuccessMessage();
@@ -81,9 +79,26 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FD), // App Background
       appBar: AppBar(
-        title: const Text('Update Group'),
+        title: const Text(
+          'Update Group',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF3B82F6), // Gradient Start
+                Color(0xFF5D5FEF), // Gradient End
+              ],
+            ),
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -154,7 +169,7 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
 
                     // Date picker
                     _buildDatePicker(),
-                    
+
                     const SizedBox(height: 40),
 
                     // Update button
@@ -173,7 +188,9 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 30),
-      decoration: const BoxDecoration(color: Color(0xFFF5F7FA)),
+      decoration: const BoxDecoration(
+        color: Color(0xFFF8F9FD), // App Background
+      ),
       child: Column(
         children: [
           // Subtle neomorphic illustration container
@@ -181,14 +198,14 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
             height: 120,
             width: 120,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color(0xFFFFFFFF), // Component Background
               borderRadius: BorderRadius.circular(60),
               boxShadow: [
                 BoxShadow(
                   offset: const Offset(2, 2),
                   blurRadius: 8,
                   spreadRadius: 1,
-                  color: Colors.grey.withOpacity(0.2),
+                  color: const Color(0xFFE5E7EB), // Border/Shadow Color
                 ),
                 const BoxShadow(
                   offset: Offset(-2, -2),
@@ -198,13 +215,17 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
                 ),
               ],
             ),
-            child: const Icon(Icons.groups, size: 60, color: Color(0xFF4A6FA5)),
+            child: const Icon(
+              Icons.groups,
+              size: 60,
+              color: Color(0xFF3B82F6), // Primary Blue
+            ),
           ),
           const SizedBox(height: 20),
           const Text(
             "Group Information",
             style: TextStyle(
-              color: Color(0xFF4A6FA5),
+              color: Color(0xFF111827), // Primary Text
               fontSize: 22,
               fontWeight: FontWeight.bold,
             ),
@@ -223,14 +244,14 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFFFFFFFF), // Component Background
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             offset: const Offset(2, 2),
             blurRadius: 6,
             spreadRadius: 1,
-            color: Colors.grey.withOpacity(0.15),
+            color: const Color(0xFFE5E7EB), // Border/Shadow Color
           ),
           const BoxShadow(
             offset: Offset(-2, -2),
@@ -244,9 +265,16 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
         controller: controller,
         keyboardType: keyboardType,
         validator: validator,
+        style: const TextStyle(color: Color(0xFF111827)), // Primary Text
         decoration: InputDecoration(
           labelText: label,
-          prefixIcon: Icon(icon, color: const Color(0xFF4A6FA5)),
+          labelStyle: const TextStyle(
+            color: Color(0xFF374151),
+          ), // Secondary Text
+          prefixIcon: Icon(
+            icon,
+            color: const Color(0xFF6B7280), // Input Icons
+          ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 15,
@@ -264,14 +292,14 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color(0xFFFFFFFF), // Component Background
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               offset: const Offset(2, 2),
               blurRadius: 6,
               spreadRadius: 1,
-              color: Colors.grey.withOpacity(0.15),
+              color: const Color(0xFFE5E7EB), // Border/Shadow Color
             ),
             const BoxShadow(
               offset: Offset(-2, -2),
@@ -283,7 +311,10 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today, color: Color(0xFF4A6FA5)),
+            const Icon(
+              Icons.calendar_today,
+              color: Color(0xFF6B7280), // Input Icons
+            ),
             const SizedBox(width: 15),
             Expanded(
               child: Text(
@@ -294,18 +325,20 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
                   fontSize: 16,
                   color:
                       _selectedDate == null
-                          ? Colors.grey.shade500
-                          : const Color(0xFF4A6FA5),
+                          ? const Color(0xFF9CA3AF) // Placeholder Text
+                          : const Color(0xFF111827), // Primary Text
                 ),
               ),
             ),
-            const Icon(Icons.arrow_drop_down, color: Color(0xFF4A6FA5)),
+            const Icon(
+              Icons.arrow_drop_down,
+              color: Color(0xFF6B7280), // Input Icons
+            ),
           ],
         ),
       ),
     );
   }
-
 
   Widget _buildUpdateButton(BuildContext context) {
     return InkWell(
@@ -331,7 +364,14 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
         width: double.infinity,
         height: 55,
         decoration: BoxDecoration(
-          color: const Color(0xFF4A6FA5),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF3B82F6), // Gradient Start
+              Color(0xFF5D5FEF), // Gradient End
+            ],
+          ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
@@ -365,162 +405,10 @@ class _UpdateGroupScreenState extends State<UpdateGroupScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Group updated successfully!'),
-        backgroundColor: const Color(0xFF4A6FA5),
+        backgroundColor: const Color(0xFF3B82F6), // Primary Blue
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//Widget _buildTimeRangePicker() {
-  //   return Row(
-  //     children: [
-  //       Expanded(
-  //         child: InkWell(
-  //           onTap: () => _selectStartTime(context),
-  //           borderRadius: BorderRadius.circular(12),
-  //           child: Container(
-  //             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-  //             decoration: BoxDecoration(
-  //               color: Colors.white,
-  //               borderRadius: BorderRadius.circular(12),
-  //               boxShadow: [
-  //                 BoxShadow(
-  //                   offset: const Offset(2, 2),
-  //                   blurRadius: 6,
-  //                   spreadRadius: 1,
-  //                   color: Colors.grey.withOpacity(0.15),
-  //                 ),
-  //                 const BoxShadow(
-  //                   offset: Offset(-2, -2),
-  //                   blurRadius: 6,
-  //                   spreadRadius: 1,
-  //                   color: Colors.white,
-  //                 ),
-  //               ],
-  //             ),
-  //             child: Row(
-  //               children: [
-  //                 const Icon(Icons.access_time, color: Color(0xFF4A6FA5)),
-  //                 const SizedBox(width: 10),
-  //                 Expanded(
-  //                   child: Text(
-  //                     _startTime == null
-  //                         ? "Start Time"
-  //                         : _startTime!.format(context),
-  //                     style: TextStyle(
-  //                       fontSize: 16,
-  //                       color:
-  //                           _startTime == null
-  //                               ? Colors.grey.shade500
-  //                               : const Color(0xFF4A6FA5),
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         ),
-  //       ),
-  //       const SizedBox(width: 10),
-  //       const Text(
-  //         "To",
-  //         style: TextStyle(fontSize: 16, color: Color(0xFF4A6FA5)),
-  //       ),
-  //       const SizedBox(width: 10),
-  //       Expanded(
-  //         child: InkWell(
-  //           onTap: () => _selectEndTime(context),
-  //           borderRadius: BorderRadius.circular(12),
-  //           child: Container(
-  //             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-  //             decoration: BoxDecoration(
-  //               color: Colors.white,
-  //               borderRadius: BorderRadius.circular(12),
-  //               boxShadow: [
-  //                 BoxShadow(
-  //                   offset: const Offset(2, 2),
-  //                   blurRadius: 6,
-  //                   spreadRadius: 1,
-  //                   color: Colors.grey.withOpacity(0.15),
-  //                 ),
-  //                 const BoxShadow(
-  //                   offset: Offset(-2, -2),
-  //                   blurRadius: 6,
-  //                   spreadRadius: 1,
-  //                   color: Colors.white,
-  //                 ),
-  //               ],
-  //             ),
-  //             child: Row(
-  //               children: [
-  //                 const Icon(Icons.access_time, color: Color(0xFF4A6FA5)),
-  //                 const SizedBox(width: 10),
-  //                 Expanded(
-  //                   child: Text(
-  //                     _endTime == null ? "End Time" : _endTime!.format(context),
-  //                     style: TextStyle(
-  //                       fontSize: 16,
-  //                       color:
-  //                           _endTime == null
-  //                               ? Colors.grey.shade500
-  //                               : const Color(0xFF4A6FA5),
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }

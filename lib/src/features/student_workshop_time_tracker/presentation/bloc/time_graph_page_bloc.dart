@@ -113,7 +113,7 @@ class TimeGraphPageBloc extends Bloc<TimeGraphPageEvent, TimeGraphPageState> {
                   event.dateRange.start.subtract(const Duration(days: 1)),
                 ) &&
                 data.date.isBefore(
-                  event.dateRange!.end.add(const Duration(days: 1)),
+                  event.dateRange.end.add(const Duration(days: 1)),
                 );
           }).toList();
       selectiveFilter = 'Custom';
