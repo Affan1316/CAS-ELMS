@@ -1,21 +1,20 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/student_workshop_time_tracker/data/student_data.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../student_workshop_time_tracker/data/dummy_data.dart';
-import '../../../student_workshop_time_tracker/data/student_data.dart';
-import '../../../student_workshop_time_tracker/presentation/bloc/time_graph_page_bloc.dart';
-import '../../../student_workshop_time_tracker/presentation/widgets/average_time_container.dart';
-import '../../../student_workshop_time_tracker/presentation/widgets/bar_graph_data.dart';
-import '../../../student_workshop_time_tracker/presentation/widgets/info_card.dart';
-import '../../../student_workshop_time_tracker/presentation/widgets/my_appbar.dart';
-import '../../../student_workshop_time_tracker/presentation/widgets/my_choice_chip.dart';
-import '../../../student_workshop_time_tracker/presentation/widgets/shadow_container.dart';
-import '../../../student_workshop_time_tracker/presentation/widgets/title_text.dart';
-
+import '../../data/dummy_data.dart';
+import '../bloc/time_graph_page_bloc.dart';
+import '../widgets/average_time_container.dart';
+import '../widgets/bar_graph_data.dart';
+import '../widgets/info_card.dart';
+import '../widgets/my_appbar.dart';
+import '../widgets/my_choice_chip.dart';
+import '../widgets/shadow_container.dart';
+import '../widgets/title_text.dart';
 
 class StudentTimeTrackerPage extends StatefulWidget {
   const StudentTimeTrackerPage({super.key, required this.rollNo});
@@ -87,8 +86,7 @@ class _StudentTimeTrackerPageState extends State<StudentTimeTrackerPage> {
               onPrimary: Colors.white,
               surface: const Color(0xFFE6E9EF),
               onSurface: const Color(0xFF3D4C5F),
-            ),
-            dialogBackgroundColor: Colors.white,
+            ), dialogTheme: DialogThemeData(backgroundColor: Colors.white),
           ),
           child: child!,
         );

@@ -1,19 +1,15 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/core/theme/app_colors.dart';
 import 'package:flutter_cas_app_main/src/features/my_student_attendence/presentation/widget/attendence_content_view.dart';
+import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 
 import 'bloc/student_attendence_bloc_bloc.dart';
 
-/// StudentAttendancePage with enhanced UI/UX using analytic geometry principles
-///
-/// Geometric Design Principles Applied:
-/// - Golden ratio (φ ≈ 1.618) for spacing hierarchy
-/// - Euclidean distance calculations for touch targets
-/// - Precise 8dp grid system (metrological accuracy)
-/// - Circular hit areas (minimum 48x48dp per Material Design)
+/// StudentAttendancePage with enhanced neumorphic UI
 class StudentAdentencePage extends StatefulWidget {
   const StudentAdentencePage({super.key, this.name, this.rollNo});
   final String? rollNo;
@@ -35,7 +31,6 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
   // Calculated dimensions using geometric principles
   static const double _iconSize = _baseUnit * 3; // 24dp
   static const double _minTouchTarget = _baseUnit * 6; // 48dp
-  static const double _appBarHeight = _baseUnit * 7; // 56dp
   static const double _horizontalPadding = _baseUnit * 2; // 16dp
 
   @override
@@ -81,8 +76,8 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = context.width;
+    final screenHeight = context.height;
 
     // Calculate safe areas using geometric bounds
     final safeHorizontal = math.max(
@@ -91,107 +86,197 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
     );
 
     return Scaffold(
-      backgroundColor: AppColors.scaffoldLightThemeBackground,
-      appBar: _buildGeometricAppBar(context, widget.rollNo),
-      body: BlocBuilder<StudentAttendenceBloc, AttendanceState>(
-        builder: (context, state) {
-          return AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            switchInCurve: Curves.easeInOut,
-            switchOutCurve: Curves.easeInOut,
-            child: _buildStateContent(context, state, safeHorizontal),
-          );
-        },
-      ),
-    );
-  }
+      backgroundColor: const Color(0xFFF8F9FD),
+      body: Column(
+        children: [
+          // Neumorphic Header with SafeArea
+          SafeArea(bottom: false, child: _buildNeumorphicHeader(context)),
 
-  /// Builds AppBar with geometric precision and proper spacing
-  PreferredSizeWidget _buildGeometricAppBar(
-    BuildContext context,
-    String? rollNo,
-  ) {
-    return AppBar(
-      toolbarHeight: _appBarHeight,
-      elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
-      leading: _buildCircularButton(
-        icon: Icons.arrow_back_ios_new_rounded,
-        onPressed: () => Navigator.pop(context),
-        tooltip: 'Back',
-      ),
-      title: const Text(
-        'Attendance',
-        style: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.5),
-      ),
-      centerTitle: true,
-      actions: [
-        Builder(
-          builder: (context) {
-            if (rollNo == null) {
-              return Padding(
-                padding: EdgeInsets.only(right: _baseUnit),
-                child: _buildLocationButton(),
-              );
-            } else {
-              return const SizedBox();
-            }
-          },
-        ),
-      ],
-    );
-  }
-
-  /// Circular button with precise touch target (48x48dp minimum)
-  Widget _buildCircularButton({
-    required IconData icon,
-    required VoidCallback onPressed,
-    required String tooltip,
-  }) {
-    return Center(
-      child: Container(
-        width: _minTouchTarget,
-        height: _minTouchTarget,
-        alignment: Alignment.center,
-        child: IconButton(
-          icon: Icon(icon, size: _iconSize),
-          onPressed: onPressed,
-          tooltip: tooltip,
-          splashRadius: _minTouchTarget / 2,
-          padding: EdgeInsets.all(_baseUnit),
-        ),
-      ),
-    );
-  }
-
-  /// Location button with pulse animation feedback
-
-  Widget _buildLocationButton() => AnimatedBuilder(
-    animation: _pulseAnimation,
-    builder: (context, child) {
-      return Transform.scale(
-        scale: _pulseAnimation.value,
-        child: Container(
-          width: _minTouchTarget,
-          height: _minTouchTarget,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.transparent,
-          ),
-          child: IconButton(
-            icon: Icon(
-              Icons.location_on_rounded,
-              size: _iconSize,
-              color: AppColors.buttonText,
+          // Main Content
+          Expanded(
+            child: BlocBuilder<StudentAttendenceBloc, AttendanceState>(
+              builder: (context, state) {
+                return AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  switchInCurve: Curves.easeInOut,
+                  switchOutCurve: Curves.easeInOut,
+                  child: _buildStateContent(context, state, safeHorizontal),
+                );
+              },
             ),
-            onPressed: _onLocationPressed,
-            tooltip: 'Check Location',
-            splashRadius: _minTouchTarget / 2,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds neumorphic header with back button and location button
+  Widget _buildNeumorphicHeader(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final horizontalPadding = size.width * 0.05;
+    final titleFontSize = size.width * 0.07;
+    final iconSize = size.width * 0.065;
+    final backButtonPadding = size.width * 0.04;
+
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: horizontalPadding * 0.8,
+        vertical: size.height * 0.02,
+      ),
+      child: Neumorphic(
+        style: NeumorphicStyle(
+          depth: 8,
+          intensity: 0.65,
+          boxShape: NeumorphicBoxShape.roundRect(
+            BorderRadius.circular(size.width * 0.06),
+          ),
+          color: const Color(0xFFF8F9FD),
+        ),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding * 1.2,
+            vertical: size.height * 0.025,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(size.width * 0.06),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFFF8F9FD).withOpacity(0.9),
+                const Color(0xFFEBEDF5).withOpacity(0.8),
+              ],
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Back Button
+              FadeInDown(
+                delay: const Duration(milliseconds: 300),
+                child: NeumorphicButton(
+                  onPressed: () {
+                    Navigator.of(context).maybePop();
+                  },
+                  style: NeumorphicStyle(
+                    boxShape: const NeumorphicBoxShape.circle(),
+                    depth: 6,
+                    intensity: 0.8,
+                    shape: NeumorphicShape.flat,
+                    color: const Color(0xFFF8F9FD),
+                  ),
+                  padding: EdgeInsets.all(backButtonPadding),
+                  child: Icon(
+                    Icons.arrow_back_ios_new,
+                    size: iconSize,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              SizedBox(width: size.width * 0.04),
+
+              // Title Section
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FadeInDown(
+                      delay: const Duration(milliseconds: 400),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: size.width * 0.01,
+                            height: titleFontSize * 0.65,
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryDark, // Using AppColors
+                              borderRadius: BorderRadius.circular(
+                                size.width * 0.01,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: size.width * 0.025),
+                          Flexible(
+                            child: Text(
+                              widget.name ?? 'Student',
+                              style: TextStyle(
+                                fontSize: titleFontSize * 0.5,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF111827).withOpacity(0.7),
+                                letterSpacing: 0.5,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: size.height * 0.008),
+                    FadeInDown(
+                      delay: const Duration(milliseconds: 500),
+                      child: ShaderMask(
+                        shaderCallback:
+                            (bounds) => AppColors.primaryGradient.createShader(
+                              bounds,
+                            ), // Using AppColors
+                        child: Text(
+                          'Attendance',
+                          style: TextStyle(
+                            fontSize: titleFontSize * 1.1,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: -0.5,
+                            height: 1.1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: size.width * 0.02),
+              Builder(
+                builder: (context) {
+                  if (widget.rollNo == null) {
+                    return FadeInDown(
+                      delay: const Duration(milliseconds: 600),
+                      child: AnimatedBuilder(
+                        animation: _pulseAnimation,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: _pulseAnimation.value,
+                            child: NeumorphicButton(
+                              onPressed: _onLocationPressed,
+                              style: NeumorphicStyle(
+                                boxShape: const NeumorphicBoxShape.circle(),
+                                depth: 6,
+                                intensity: 0.8,
+                                shape: NeumorphicShape.flat,
+                                color: const Color(0xFFF8F9FD),
+                              ),
+                              padding: EdgeInsets.all(backButtonPadding),
+                              child: Icon(
+                                Icons.location_on_rounded,
+                                size: iconSize,
+                                color: AppColors.accent, // Using AppColors
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  } else {
+                    return const SizedBox();
+                  }
+                },
+              ),
+
+              // Location Button (conditional)
+            ],
           ),
         ),
-      );
-    },
-  );
+      ),
+    );
+  }
 
   /// Builds content based on state with smooth transitions
   Widget _buildStateContent(
@@ -225,7 +310,9 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
             height: _baseUnit * 8,
             child: CircularProgressIndicator(
               strokeWidth: 3.5,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppColors.primary,
+              ), // Using AppColors
             ),
           ),
           SizedBox(height: _baseUnit * 3),
@@ -233,7 +320,7 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
             'Loading attendance data...',
             style: TextStyle(
               fontSize: _baseUnit * 2,
-              color: Colors.grey[600],
+              color: const Color(0xFF9CA3AF),
               letterSpacing: 0.3,
             ),
           ),
@@ -269,7 +356,7 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
               style: TextStyle(
                 fontSize: _baseUnit * 2.5,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
+                color: const Color(0xFF111827),
               ),
             ),
             SizedBox(height: _baseUnit * 1.5),
@@ -278,7 +365,7 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: _baseUnit * 2,
-                color: Colors.grey[600],
+                color: const Color(0xFF9CA3AF),
                 height: 1.5,
               ),
             ),
@@ -287,9 +374,11 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
               onPressed: () {
                 context.read<StudentAttendenceBloc>().add(LoadAttendance());
               },
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Retry'),
+              icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+              label: const Text('Retry', style: TextStyle(color: Colors.white)),
               style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary, // Using AppColors
+                foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(
                   horizontal: _baseUnit * 4,
                   vertical: _baseUnit * 2,
@@ -314,14 +403,14 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
           Icon(
             Icons.inbox_outlined,
             size: _baseUnit * 10,
-            color: Colors.grey[400],
+            color: const Color(0xFF9CA3AF),
           ),
           SizedBox(height: _baseUnit * 3),
           Text(
             'No attendance data available',
             style: TextStyle(
               fontSize: _baseUnit * 2,
-              color: Colors.grey[600],
+              color: const Color(0xFF9CA3AF),
               letterSpacing: 0.3,
             ),
           ),
@@ -339,7 +428,10 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
             Icon(Icons.error_outline, color: Colors.white, size: _iconSize),
             SizedBox(width: _baseUnit * 1.5),
             Expanded(
-              child: Text(message, style: const TextStyle(fontSize: 14)),
+              child: Text(
+                message,
+                style: const TextStyle(fontSize: 14, color: Colors.white),
+              ),
             ),
           ],
         ),

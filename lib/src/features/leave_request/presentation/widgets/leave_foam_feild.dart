@@ -1,4 +1,5 @@
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:flutter_cas_app_main/src/core/theme/app_colors.dart'; // Import AppColors
 
 class LeaveFormField extends StatelessWidget {
   final String label;
@@ -51,7 +52,7 @@ class LeaveFormField extends StatelessWidget {
               style: TextStyle(
                 fontSize: _getResponsiveFontSize(screenWidth, 14, 16),
                 fontWeight: FontWeight.w600,
-                color: isFocused ? const Color(0xFF6366F1) : const Color(0xFF8E8E93),
+                color: isFocused ? AppColors.primary : const Color(0xFF8E8E93), // Using AppColors
               ),
             ),
           ),
@@ -63,7 +64,7 @@ class LeaveFormField extends StatelessWidget {
               boxShadow: [
                 if (isFocused)
                   BoxShadow(
-                    color: const Color(0xFF6366F1).withOpacity(0.15),
+                    color: AppColors.primary.withOpacity(0.15), // Using AppColors
                     blurRadius: isTablet ? 16 : 12,
                     offset: const Offset(0, 4),
                   ),
@@ -91,7 +92,7 @@ class LeaveFormField extends StatelessWidget {
                       padding: EdgeInsets.all(isTablet ? 12 : 8),
                       decoration: BoxDecoration(
                         color: isFocused 
-                            ? const Color(0xFF6366F1).withOpacity(0.1)
+                            ? AppColors.primary.withOpacity(0.1) // Using AppColors
                             : Colors.grey.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(isTablet ? 12 : 8),
                       ),
@@ -99,7 +100,7 @@ class LeaveFormField extends StatelessWidget {
                         icon,
                         size: isTablet ? 24 : 20,
                         color: isFocused 
-                            ? const Color(0xFF6366F1)
+                            ? AppColors.primary // Using AppColors
                             : Colors.grey.shade600,
                       ),
                     ),
@@ -131,7 +132,7 @@ class LeaveFormField extends StatelessWidget {
                             vertical: isTablet ? 16 : 12,
                           ),
                         ),
-                        cursorColor: const Color(0xFF6366F1),
+                        cursorColor: AppColors.primary, // Using AppColors
                         cursorWidth: 2,
                       ),
                     ),

@@ -34,12 +34,13 @@ class LeaveRequestCard extends StatelessWidget {
   static const double _buttonHeightSmall = 44.0;
   static const double _minTouchTarget = 44.0;
 
-  static const Color _primaryColor = Color(0xFF6366F1);
-  static const Color _surfaceColor = Colors.white;
-  static const Color _backgroundColor = Color(0xFFFAFBFF);
-  static const Color _textPrimaryColor = Color(0xFF1A1D29);
-  static const Color _textSecondaryColor = Color(0xFF6B7280);
-  static const Color _borderColor = Color(0xFFE5E7EB);
+  // Updated Colors based on Palette
+  static const Color _primaryColor = Color(0xFF3B82F6); // Primary Start
+  static const Color _surfaceColor = Color(0xFFFFFFFF); // Component Background
+  static const Color _backgroundColor = Color(0xFFF8F9FD); // App Background
+  static const Color _textPrimaryColor = Color(0xFF111827); // Primary Text
+  static const Color _textSecondaryColor = Color(0xFF374151); // Secondary Text
+  static const Color _borderColor = Color(0xFFE5E7EB); // Borders
   static const Color _successColor = Color(0xFF10B981);
   static const Color _errorColor = Color(0xFFEF4444);
 
@@ -48,7 +49,7 @@ class LeaveRequestCard extends StatelessWidget {
       case 'sick':
         return const Color(0xFFEF4444);
       case 'casual':
-        return const Color(0xFF3B82F6);
+        return const Color(0xFF3B82F6); // Updated to Primary Start
       case 'emergency':
         return const Color(0xFFF59E0B);
       case 'maternity':
@@ -411,7 +412,9 @@ class LeaveRequestCard extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(isTablet(screenWidth) ? 8 : 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF6366F1).withOpacity(0.1),
+                color: const Color(
+                  0xFF3B82F6,
+                ).withOpacity(0.1), // Updated to Primary Start
                 borderRadius: BorderRadius.circular(
                   isTablet(screenWidth) ? 10 : 8,
                 ),
@@ -419,7 +422,7 @@ class LeaveRequestCard extends StatelessWidget {
               child: Icon(
                 Icons.access_time_rounded,
                 size: isTablet(screenWidth) ? 16 : 14,
-                color: const Color(0xFF6366F1),
+                color: const Color(0xFF3B82F6), // Updated to Primary Start
               ),
             ),
             SizedBox(width: isTablet(screenWidth) ? 12 : 8),
@@ -428,7 +431,9 @@ class LeaveRequestCard extends StatelessWidget {
                 'Applied on ${leave.currentDate}',
                 style: TextStyle(
                   fontSize: _getResponsiveFontSize(screenWidth, 12, 14),
-                  color: Colors.grey.shade600,
+                  color: const Color(
+                    0xFF6B7280,
+                  ), // Updated to Cool Gray/Input Icons
                   fontWeight: FontWeight.w500,
                 ),
               ),

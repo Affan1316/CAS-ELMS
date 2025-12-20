@@ -9,7 +9,6 @@ import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Domain/rep
 import 'package:geolocator/geolocator.dart';
 
 import '../../../workshop_geofencing/Data/getTimeConversions.dart';
-import '../../../workshop_geofencing/Data/services/geofence_sevice.dart';
 import '../../../workshop_geofencing/Data/services/notification_service.dart';
 import '../../../workshop_geofencing/Domain/repository/shared_preference_repository.dart';
 import '../../data/model/model_classes.dart';

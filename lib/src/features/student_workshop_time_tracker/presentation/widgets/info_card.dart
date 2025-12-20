@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_cas_app_main/src/features/time_graph_page/presentation/pages/time_track_graph_page.dart';
-import 'package:flutter_cas_app_main/src/features/time_graph_page/presentation/widgets/shadow_container.dart';
+import 'package:flutter_cas_app_main/src/features/student_workshop_time_tracker/presentation/pages/student_workshop_time_tracker.dart';
+import 'package:flutter_cas_app_main/src/features/student_workshop_time_tracker/presentation/widgets/shadow_container.dart';
 
 class StudentInfoCard extends StatelessWidget {
   const StudentInfoCard({super.key, required this.student});

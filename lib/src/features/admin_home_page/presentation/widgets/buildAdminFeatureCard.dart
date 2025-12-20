@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_cas_app_main/src/features/add_courses/presentation/pages/add_course_page.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/group_members_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/groups_list_screen.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/create_group_page.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/read_group_page.dart';
@@ -14,9 +13,7 @@ import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/add
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/inquiry_detail_page.dart';
 import 'package:flutter_cas_app_main/src/features/leave_request/presentation/pages/admin_leave_request_management.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_enrollment_screen.dart';
-import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/super_admin_fee_notifications_screen.dart';
 import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/pages/workshop_time_group_page.dart';
-import 'dart:math' as math;
 
 /// Responsive Admin Feature Card with Geometric Design Principles
 ///
@@ -436,7 +433,11 @@ void _navigateToScreen(BuildContext context, int index) {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => GroupsListScreen(isNavigateToAttendence: false),
+            builder:
+                (_) => GroupsListScreen(
+                  isNavigateToAttendence: false,
+                  isNavigateToWorkShopGraphPage: false,
+                ),
           ),
         );
         break;
@@ -517,7 +518,10 @@ void _navigateToScreen(BuildContext context, int index) {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder:
-                (context) => GroupsListScreen(isNavigateToAttendence: true),
+                (context) => GroupsListScreen(
+                  isNavigateToAttendence: true,
+                  isNavigateToWorkShopGraphPage: false,
+                ),
           ),
         );
       case 11:

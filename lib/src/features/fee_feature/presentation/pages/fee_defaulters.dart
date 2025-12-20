@@ -177,7 +177,18 @@ class _FeeDefaultersState extends State<FeeDefaulters> {
               contentPadding: const EdgeInsets.symmetric(vertical: 12),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
+                borderSide: const BorderSide(
+                  color: Colors.black, // Black border
+                  width: 2, // Thickness of border
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.black, width: 2),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.black12, width: 2),
               ),
             ),
           ),
@@ -198,28 +209,28 @@ class _FeeDefaultersState extends State<FeeDefaulters> {
       ),
       child: Column(
         children: [
-          // Month Selector (placeholder)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: Implement month picker
-                  },
-                  icon: const Icon(Icons.arrow_downward_rounded),
-                  label: const Text('Select Month'),
-                  style: const ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(
-                      Color(0xFF0E96C5),
-                    ),
-                    foregroundColor: WidgetStatePropertyAll(Colors.white),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // // Month Selector (placeholder)
+          // Padding(
+          //   padding: const EdgeInsets.all(16.0),
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.start,
+          //     children: [
+          //       ElevatedButton.icon(
+          //         onPressed: () {
+          //           // TODO: Implement month picker
+          //         },
+          //         icon: const Icon(Icons.arrow_downward_rounded),
+          //         label: const Text('Select Month'),
+          //         style: const ButtonStyle(
+          //           backgroundColor: WidgetStatePropertyAll(
+          //             Color(0xFF0E96C5),
+          //           ),
+          //           foregroundColor: WidgetStatePropertyAll(Colors.white),
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
 
           // List of Groups
           Expanded(

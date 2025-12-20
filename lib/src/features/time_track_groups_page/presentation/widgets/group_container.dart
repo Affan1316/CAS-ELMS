@@ -1,5 +1,6 @@
 import 'package:flutter_cas_app_main/src/core/theme/app_colors.dart';
-import 'package:flutter_cas_app_main/src/features/time_graph_page/data/app_color.dart'
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/groups_list_screen.dart';
+import 'package:flutter_cas_app_main/src/features/student_workshop_time_tracker/data/app_color.dart'
     hide AppColors;
 import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/widgets/android_custom_paint.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
@@ -18,7 +19,17 @@ class GroupsContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return GroupsListScreen(
+                isNavigateToAttendence: false,
+                isNavigateToWorkShopGraphPage: true,
+              );
+            },
+          ),
+        );
       },
       child: Neumorphic(
         style: NeumorphicStyle(

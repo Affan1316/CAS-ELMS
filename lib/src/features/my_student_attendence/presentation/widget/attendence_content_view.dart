@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_cas_app_main/src/features/my_student_attendence/presentation/widget/attendence_list_item.dart';
-import 'package:flutter_cas_app_main/src/features/my_student_attendence/presentation/widget/student_infocard.dart';
 import 'package:flutter_cas_app_main/src/features/my_student_attendence/data/model/model_classes.dart';
-
-
+import 'package:flutter_cas_app_main/src/features/my_student_attendence/presentation/widget/attendence_list_item.dart';
 
 class AttendanceContentView extends StatelessWidget {
   final Student student;
@@ -20,7 +17,6 @@ class AttendanceContentView extends StatelessWidget {
     return ListView(
       children: [
         // Use the dedicated StudentInfoCard widget
-        StudentInfoCard(student: student),
         const SizedBox(height: 10),
         // Create a list of widgets from the records
         ...records.map((record) {

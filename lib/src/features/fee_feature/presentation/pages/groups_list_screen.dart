@@ -14,8 +14,13 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widge
 import 'package:flutter_cas_app_main/src/features/group/domain/entities/group_entity.dart';
 
 class GroupsListScreen extends StatefulWidget {
-  const GroupsListScreen({super.key, required this.isNavigateToAttendence});
+  const GroupsListScreen({
+    super.key,
+    required this.isNavigateToAttendence,
+    required this.isNavigateToWorkShopGraphPage,
+  });
   final bool isNavigateToAttendence;
+  final bool isNavigateToWorkShopGraphPage;
 
   @override
   State<GroupsListScreen> createState() => _GroupsListScreenState();
@@ -28,41 +33,15 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch groups when screen initializes
     context.read<FeeAdminBloc>().add(FeeAdminFetchGroupsEvent());
     _searchController.addListener(_onSearchChanged);
   }
 
-  /// Debounced listener for the search TextField.
-  ///
-  /// Behavior:
-  /// 1. This method is attached as a listener to [_searchController].
-  /// 2. It implements a debounce to avoid firing a filter event on every keystroke
-  ///    — instead it waits until the user stops typing for 500ms.
-  /// 3. If a previous debounce timer is still active, it is cancelled and a new
-  ///    timer is started (this restarts the 500ms window).
-  /// 4. When the timer fires we read the latest text from the controller and
-  ///    dispatch `FeeAdminGroupDataFilteringEvent` to the `FeeAdminBloc`.
-  ///
-  /// Notes / rationale:
-  /// - Using a debounce reduces unnecessary state changes and expensive filtering
-  ///   operations while the user is actively typing.
-  /// - We read `_searchController.text` inside the timer callback so the dispatched
-  ///   query is always the latest value (in case the controller changed after
-  ///   the timer was scheduled).
-  /// - `_debounceTimer` is cancelled in `dispose()` to avoid callbacks after the
-  ///   widget is removed from the tree.
   void _onSearchChanged() {
-    // If there is an active debounce timer, cancel it so we restart the debounce window.
     if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
 
-    // Start a new debounce timer. The callback will run only after 500ms of inactivity.
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-      // Capture the latest query text from the controller.
       final String query = _searchController.text;
-
-      // Dispatch the filtering event to the FeeAdminBloc with the current query.
-      // The Bloc should respond by updating state (e.g., producing a filtered list).
       context.read<FeeAdminBloc>().add(
         FeeAdminGroupDataFilteringEvent(query: query),
       );
@@ -80,7 +59,7 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
   Widget build(BuildContext context) {
     return GradientBackground(
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF8F9FD),
         resizeToAvoidBottomInset: false,
         body: SafeArea(
           child: ResponsivePadding(
@@ -88,9 +67,11 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
               children: [
                 ScreenHeader(
                   title: "Groups",
-
                   trailing: IconButton(
-                    icon: const Icon(Icons.refresh, color: Color(0xFF3E206D)),
+                    icon: const Icon(
+                      Icons.refresh,
+                      color: Color(0xFF6B7280), // Input Icon Color
+                    ),
                     onPressed: () {
                       context.read<FeeAdminBloc>().add(
                         FeeAdminFetchGroupsEvent(),
@@ -102,7 +83,6 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
                 SearchField(
                   controller: _searchController,
                   hintText: "Search groups by code or name...",
-                  // onChanged: (value) {},
                 ),
                 const SizedBox(height: 20),
                 BlocBuilder<FeeAdminBloc, FeeAdminState>(
@@ -128,7 +108,7 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
                             text: "No groups found",
                             phoneSize: 16,
                             tabletSize: 20,
-                            color: Colors.grey,
+                            color: Color(0xFF374151), // Secondary Text
                           ),
                         ),
                       );
@@ -151,6 +131,8 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
                                       group: groups[i],
                                       isNavigateToAttendence:
                                           widget.isNavigateToAttendence,
+                                      isNavigateToWorkShopGraphPage:
+                                          widget.isNavigateToWorkShopGraphPage,
                                     ),
                               )
                               : ListView.separated(
@@ -162,6 +144,8 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
                                       group: groups[i],
                                       isNavigateToAttendence:
                                           widget.isNavigateToAttendence,
+                                      isNavigateToWorkShopGraphPage:
+                                          widget.isNavigateToWorkShopGraphPage,
                                     ),
                               ),
                     );
@@ -176,12 +160,16 @@ class _GroupsListScreenState extends State<GroupsListScreen> {
   }
 }
 
-// Extracted Group Item Widget to optimize rebuilds
 class _GroupItem extends StatelessWidget {
   final GroupEntity group;
   final bool isNavigateToAttendence;
+  final bool isNavigateToWorkShopGraphPage;
 
-  const _GroupItem({required this.group, required this.isNavigateToAttendence});
+  const _GroupItem({
+    required this.group,
+    required this.isNavigateToAttendence,
+    required this.isNavigateToWorkShopGraphPage,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -199,6 +187,7 @@ class _GroupItem extends StatelessWidget {
                   groupId: group.groupName,
                   isNavigateToAttendence: isNavigateToAttendence,
                   isNavigateToStudentFeeDetails: false,
+                  isNavigateToWorkShopGraphPage: isNavigateToWorkShopGraphPage,
                 ),
           ),
         );
@@ -208,10 +197,12 @@ class _GroupItem extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: isTablet ? 30 : 24,
-              backgroundColor: const Color(0xFF009688),
+              backgroundColor: const Color(
+                0xFF3B82F6,
+              ), // Primary Gradient Start
               child: Text(
                 groupCode,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Color(0xFFFFFFFF)),
               ),
             ),
             SizedBox(width: isTablet ? 24 : 16),
@@ -221,6 +212,7 @@ class _GroupItem extends StatelessWidget {
                 phoneSize: 16,
                 tabletSize: 20,
                 weight: FontWeight.w600,
+                color: const Color(0xFF111827), // Primary Text
               ),
             ),
           ],

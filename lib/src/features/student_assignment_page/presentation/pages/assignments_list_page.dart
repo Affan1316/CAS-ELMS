@@ -2,6 +2,7 @@ import 'package:flutter_cas_app_main/src/features/student_assignment_page/presen
 import 'package:flutter_cas_app_main/src/features/student_assignment_page/presentation/widgets/assignment_cards.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:flutter_cas_app_main/src/core/theme/app_colors.dart'; // Import AppColors
 
 class AssignmentsListPage extends StatefulWidget {
   const AssignmentsListPage({super.key});
@@ -108,7 +109,7 @@ class _AssignmentsListPageState extends State<AssignmentsListPage> {
                                     width: size.width * 0.01,
                                     height: titleFontSize * 0.65,
                                     decoration: BoxDecoration(
-                                      color: Colors.deepPurple,
+                                      color: AppColors.primaryDark, // Using AppColors
                                       borderRadius: BorderRadius.circular(size.width * 0.01),
                                     ),
                                   ),
@@ -129,10 +130,10 @@ class _AssignmentsListPageState extends State<AssignmentsListPage> {
                             FadeInDown(
                               delay: const Duration(milliseconds: 500),
                               child: ShaderMask(
-                                shaderCallback: (bounds) => const LinearGradient(
+                                shaderCallback: (bounds) => LinearGradient(
                                   colors: [
-                                    Color(0xFF6A11CB),
-                                    Color(0xFF2575FC),
+                                    AppColors.primary,      // Using AppColors
+                                    AppColors.primaryDark,  // Using AppColors
                                   ],
                                 ).createShader(bounds),
                                 child: Text(

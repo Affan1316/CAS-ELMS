@@ -57,6 +57,7 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
 
     return GradientBackground(
       child: Scaffold(
+        backgroundColor: const Color(0xFFF8F9FD), // App Background
         body: BlocConsumer<FeeAdminBloc, FeeAdminState>(
           listener: (context, state) {
             if (state is AddingFeeDefaulterCompleteState) {
@@ -76,7 +77,9 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
               return Container(
                 width: 400,
                 height: 700,
-                color: const Color.fromARGB(255, 101, 232, 19),
+                color: const Color(
+                  0xFFFFFFFF,
+                ), // Component Background (Replacing error green)
               );
             }
 
@@ -198,7 +201,9 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                                 style: ElevatedButton.styleFrom(
                                   splashFactory: InkRipple.splashFactory,
                                   overlayColor: Colors.black.withOpacity(0.2),
-                                  backgroundColor: const Color(0xFF8B0000),
+                                  backgroundColor: const Color(
+                                    0xFF8B0000,
+                                  ), // Semantic Red kept
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 24,
                                     vertical: 12,
@@ -269,7 +274,10 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green.shade700,
+                                  backgroundColor:
+                                      Colors
+                                          .green
+                                          .shade700, // Semantic Green kept
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 20,
                                     vertical: 14,
@@ -347,7 +355,9 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
               });
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3E206D),
+              backgroundColor: const Color(
+                0xFF3B82F6,
+              ), // New Primary Color (Gradient Start)
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),

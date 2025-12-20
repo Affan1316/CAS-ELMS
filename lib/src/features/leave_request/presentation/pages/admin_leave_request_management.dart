@@ -22,10 +22,7 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
     super.initState();
     // Fetch leaves when the page loads
     context.read<LeaveBloc>().add(
-      FetchLeaveRequest(
-        studentName: null,
-        isAdmin: true,
-      ),
+      FetchLeaveRequest(studentName: null, isAdmin: true),
     );
   }
 
@@ -148,12 +145,16 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FD), // App Background
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF3B82F6), // Primary Gradient Start
+              Color(0xFF5D5FEF), // Primary Gradient End
+            ],
           ),
         ),
         child: SafeArea(
@@ -174,8 +175,8 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
               SizedBox(height: 16),
               Expanded(
                 child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey[50],
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF8F9FD), // Pale Cool Gray
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(24),
                       topRight: Radius.circular(24),
@@ -191,7 +192,7 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
                               width: 4,
                               height: 24,
                               decoration: BoxDecoration(
-                                color: Color(0xFF6366F1),
+                                color: const Color(0xFF3B82F6), // Primary Blue
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),
@@ -202,7 +203,9 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
                                 style: TextStyle(
                                   fontSize: isDesktop(context) ? 22 : 18,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.grey[800],
+                                  color: const Color(
+                                    0xFF111827,
+                                  ), // Dark Charcoal
                                 ),
                               ),
                             ),
@@ -216,13 +219,17 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
                                       vertical: 6,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Color(0xFF6366F1).withOpacity(0.1),
+                                      color: const Color(
+                                        0xFF3B82F6,
+                                      ).withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
                                       "$count request${count != 1 ? 's' : ''}",
-                                      style: TextStyle(
-                                        color: Color(0xFF6366F1),
+                                      style: const TextStyle(
+                                        color: Color(
+                                          0xFF3B82F6,
+                                        ), // Primary Blue
                                         fontWeight: FontWeight.w600,
                                         fontSize: 14,
                                       ),
@@ -240,11 +247,11 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
                           listener: (context, state) {
                             if (state is LeaveStatusUpdated) {
                               context.read<LeaveBloc>().add(
-                                    FetchLeaveRequest(
-                                      studentName: null,
-                                      isAdmin: true,
-                                    ),
-                                  );
+                                FetchLeaveRequest(
+                                  studentName: null,
+                                  isAdmin: true,
+                                ),
+                              );
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
@@ -266,11 +273,11 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
                           },
                           builder: (context, state) {
                             if (state is LeaveLoading) {
-                              return Center(
+                              return const Center(
                                 child: CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    Color(0xFF6366F1),
-                                  ),
+                                    Color(0xFF3B82F6),
+                                  ), // Primary Blue
                                 ),
                               );
                             } else if (state is LeaveListLoaded) {
@@ -281,19 +288,22 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.search_off,
-                                        size: isDesktop(context) ? 80 : 60,
-                                        color: Colors.grey[400],
+                                        size: 80,
+                                        color: Color(
+                                          0xFF9CA3AF,
+                                        ), // Placeholder Gray
                                       ),
                                       SizedBox(height: 16),
-                                      Text(
+                                      const Text(
                                         "No leave requests found",
                                         style: TextStyle(
-                                          fontSize:
-                                              isDesktop(context) ? 20 : 18,
+                                          fontSize: 20,
                                           fontWeight: FontWeight.w500,
-                                          color: Colors.grey[600],
+                                          color: Color(
+                                            0xFF374151,
+                                          ), // Slate Gray
                                         ),
                                       ),
                                     ],
@@ -318,15 +328,17 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
                                       style: TextStyle(
                                         fontSize: isDesktop(context) ? 20 : 18,
                                         fontWeight: FontWeight.w500,
-                                        color: Colors.grey[600],
+                                        color: const Color(
+                                          0xFF374151,
+                                        ), // Slate Gray
                                       ),
                                     ),
                                     SizedBox(height: 8),
                                     Text(
                                       state.message,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 14,
-                                        color: Colors.grey[500],
+                                        color: Color(0xFF9CA3AF), // Light Gray
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
@@ -334,12 +346,18 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
                                     ElevatedButton(
                                       onPressed: () {
                                         context.read<LeaveBloc>().add(
-                                              FetchLeaveRequest(
-                                                studentName: null,
-                                                isAdmin: true,
-                                              ),
-                                            );
+                                          FetchLeaveRequest(
+                                            studentName: null,
+                                            isAdmin: true,
+                                          ),
+                                        );
                                       },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(
+                                          0xFF3B82F6,
+                                        ), // Primary Blue
+                                        foregroundColor: Colors.white,
+                                      ),
                                       child: Text("Retry"),
                                     ),
                                   ],
@@ -350,18 +368,20 @@ class _LeaveRequestManagementState extends State<AdminLeaveRequestManagement> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.folder_open,
-                                      size: isDesktop(context) ? 80 : 60,
-                                      color: Colors.grey[400],
+                                      size: 80,
+                                      color: Color(
+                                        0xFF9CA3AF,
+                                      ), // Placeholder Gray
                                     ),
                                     SizedBox(height: 16),
-                                    Text(
+                                    const Text(
                                       "No leave requests available",
                                       style: TextStyle(
-                                        fontSize: isDesktop(context) ? 20 : 18,
+                                        fontSize: 20,
                                         fontWeight: FontWeight.w500,
-                                        color: Colors.grey[600],
+                                        color: Color(0xFF374151), // Slate Gray
                                       ),
                                     ),
                                   ],

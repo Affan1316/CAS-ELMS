@@ -22,12 +22,8 @@ class _InquiryPageState extends State<InquiryDetailPage> {
   @override
   Widget build(BuildContext context) {
     return NeumorphicTheme(
-      theme: const NeumorphicThemeData(
-        baseColor: Color.fromARGB(255, 235, 232, 232),
-      ),
-      darkTheme: const NeumorphicThemeData(
-        baseColor: Color.fromARGB(255, 235, 232, 232),
-      ),
+      theme: const NeumorphicThemeData(baseColor: Color(0xFFF8F9FD)),
+      darkTheme: const NeumorphicThemeData(baseColor: Color(0xFFF8F9FD)),
       themeMode: ThemeMode.system,
       child: NeumorphicBackground(
         child: Scaffold(
@@ -35,11 +31,14 @@ class _InquiryPageState extends State<InquiryDetailPage> {
           body: CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
-                backgroundColor: const Color(0xff0097b2),
+                backgroundColor: Colors.transparent,
                 centerTitle: true,
                 expandedHeight: 70,
                 leading: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                  icon: const Icon(
+                    Icons.arrow_back_ios,
+                    color: Color(0xFFFFFFFF),
+                  ),
                   onPressed: () {
                     Navigator.pop(context);
                   },
@@ -49,7 +48,16 @@ class _InquiryPageState extends State<InquiryDetailPage> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                    color: Color(0xFFFFFFFF),
+                  ),
+                ),
+                flexibleSpace: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF3B82F6), Color(0xFF5D5FEF)],
+                    ),
                   ),
                 ),
               ),
@@ -89,7 +97,12 @@ class _InquiryPageState extends State<InquiryDetailPage> {
                       );
                     } else if (state is InquiryError) {
                       return SliverToBoxAdapter(
-                        child: Center(child: Text(state.message)),
+                        child: Center(
+                          child: Text(
+                            state.message,
+                            style: const TextStyle(color: Color(0xFF111827)),
+                          ),
+                        ),
                       );
                     }
                     return const SliverToBoxAdapter(child: SizedBox.shrink());
@@ -127,21 +140,31 @@ class _NeumorphicAnimatedContainerState
 
   @override
   Widget build(BuildContext context) {
-    return Neumorphic(
-      style: NeumorphicStyle(
-        depth: isExpanded ? -4 : 4,
-        intensity: 0.8,
-        boxShape:
-            isExpanded
-                ? NeumorphicBoxShape.roundRect(BorderRadius.circular(22))
-                : const NeumorphicBoxShape.stadium(),
-      ),
-      child: AnimatedContainer(
-        duration: duration,
+    return AnimatedContainer(
+      duration: duration,
+      padding: const EdgeInsets.all(4),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0xFFB2DFDB),
+              offset: Offset(4, 4),
+              blurRadius: 10,
+            ),
+            BoxShadow(
+              color: Colors.white,
+              offset: Offset(-4, -4),
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(12),
         child:
             isExpanded
-                ? ExpandedColumn(inquiry: widget.inquiry) // 🔹 show details
-                : MyListTile(inquiry: widget.inquiry), // 🔹 show summary
+                ? ExpandedColumn(inquiry: widget.inquiry) // show details
+                : MyListTile(inquiry: widget.inquiry), // show summary
       ),
     );
   }
