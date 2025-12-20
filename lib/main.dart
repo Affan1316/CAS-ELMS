@@ -16,7 +16,6 @@ import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentatio
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_state.dart';
-import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/pages/OnboardingScreen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/group/data/repositories/group_repository_implementation.dart';
 import 'package:flutter_cas_app_main/src/features/group/domain/usecases/add_group_usecase.dart';
@@ -35,8 +34,7 @@ import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/get_groups_names_super_admin_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/get_super_admin_fee_notifications_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/time_graph_page/presentation/bloc/time_graph_page_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/time_graph_page/presentation/pages/time_track_graph_page.dart';
+import 'package:flutter_cas_app_main/src/features/student_workshop_time_tracker/presentation/bloc/time_graph_page_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/bloc/group_time_tracker_bloc.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 

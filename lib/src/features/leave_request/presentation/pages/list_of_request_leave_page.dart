@@ -8,6 +8,7 @@ import 'package:flutter_cas_app_main/src/features/leave_request/presentation/wid
 import 'package:flutter_cas_app_main/src/features/leave_request/presentation/widgets/leave_header.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_cas_app_main/src/core/theme/app_colors.dart'; // Import AppColors
 
 class ListOfRequestLeaveScreen extends StatefulWidget {
   final String section;
@@ -26,6 +27,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -144,6 +146,18 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
     return '$fromDate - $toDate';
   }
 
+  List<Leave> _getFilteredLeaves(List<Leave> leaves) {
+    if (_searchQuery.isEmpty) {
+      return leaves;
+    }
+    return leaves.where((leave) {
+      return leave.leaveType.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+             leave.status.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+             (leave.reason?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false) ||
+             (leave.fromDate?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -152,137 +166,136 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
     final safePadding = MediaQuery.of(context).padding;
 
     // Responsive dimensions
-    final headerHeight = isTablet ? 240.0 : 200.0;
     final horizontalPadding = isTablet ? 32.0 : 24.0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FD), // App Background
+      backgroundColor: Colors.white,
       body: Column(
         children: [
-          // Header
+          // New Neumorphic Header with Search
           LeaveHeader(
-            height: headerHeight,
+            height: 200,
             horizontalPadding: horizontalPadding,
             onBackPressed: () => Navigator.pop(context),
+            onSearchChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
           ),
 
           // Content section
           Expanded(
             child: Container(
-              transform: Matrix4.translationValues(0, isTablet ? -32 : -28, 0),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8F9FD), // App Background
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(isTablet ? 32 : 28),
-                  topRight: Radius.circular(isTablet ? 32 : 28),
-                ),
+              width: double.infinity,
+              constraints:
+                  isTablet ? const BoxConstraints(maxWidth: 1200) : null,
+              margin:
+                  isTablet
+                      ? EdgeInsets.symmetric(
+                        horizontal:
+                            (screenWidth - 1200).clamp(0, double.infinity) /
+                            2,
+                      )
+                      : null,
+              padding: EdgeInsets.only(
+                top: isTablet ? 24 : 20,
+                left: horizontalPadding,
+                right: horizontalPadding,
+                bottom: horizontalPadding,
               ),
-              child: Container(
-                width: double.infinity,
-                constraints:
-                    isTablet ? const BoxConstraints(maxWidth: 1200) : null,
-                margin:
-                    isTablet
-                        ? EdgeInsets.symmetric(
-                          horizontal:
-                              (screenWidth - 1200).clamp(0, double.infinity) /
-                              2,
-                        )
-                        : null,
-                padding: EdgeInsets.only(
-                  top: isTablet ? 40 : 32,
-                  left: horizontalPadding,
-                  right: horizontalPadding,
-                  bottom: horizontalPadding,
-                ),
-                child: BlocConsumer<LeaveBloc, LeaveState>(
-                  listener: (context, state) {
-                    if (state is LeaveFailure) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Error: ${state.message}'),
-                          backgroundColor: Colors.red,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+              child: BlocConsumer<LeaveBloc, LeaveState>(
+                listener: (context, state) {
+                  if (state is LeaveFailure) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error: ${state.message}'),
+                        backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      );
-                    }
-                    // Listen for successful submission and refresh list
-                    if (state is LeaveSuccess) {
-                      context.read<LeaveBloc>().add(
-                        FetchLeaveRequest(
-                          studentName: widget.studentName,
-                          isAdmin: false,
-                        ),
-                      );
-                    }
-                  },
-                  builder: (context, state) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: isTablet ? 5 : 4,
-                              height: isTablet ? 28 : 24,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF3B82F6), // Primary Blue
-                                borderRadius: BorderRadius.circular(2),
+                      ),
+                    );
+                  }
+                  // Listen for successful submission and refresh list
+                  if (state is LeaveSuccess) {
+                    context.read<LeaveBloc>().add(
+                      FetchLeaveRequest(
+                        studentName: widget.studentName,
+                        isAdmin: false,
+                      ),
+                    );
+                  }
+                },
+                builder: (context, state) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: isTablet ? 5 : 4,
+                            height: isTablet ? 28 : 24,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  AppColors.primary,      // Using AppColors
+                                  AppColors.primaryDark,  // Using AppColors
+                                ],
                               ),
+                              borderRadius: BorderRadius.circular(2),
                             ),
-                            SizedBox(width: isTablet ? 16 : 12),
+                          ),
+                          SizedBox(width: isTablet ? 16 : 12),
+                          Text(
+                            'Recent Requests',
+                            style: TextStyle(
+                              fontSize: _getResponsiveFontSize(
+                                screenWidth,
+                                20,
+                                24,
+                              ),
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF111827),
+                            ),
+                          ),
+                          const Spacer(),
+                          if (state is LeaveListLoaded)
                             Text(
-                              'Recent Requests',
+                              '${_getFilteredLeaves(state.leaves).length} items',
                               style: TextStyle(
                                 fontSize: _getResponsiveFontSize(
                                   screenWidth,
-                                  20,
-                                  24,
+                                  14,
+                                  16,
                                 ),
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF111827), // Primary Text
+                                color: const Color(0xFF6B7280),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            )
+                          else if (state is LeaveLoading)
+                            SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.primary, // Using AppColors
+                                ),
                               ),
                             ),
-                            const Spacer(),
-                            if (state is LeaveListLoaded)
-                              Text(
-                                '${state.leaves.length} items',
-                                style: TextStyle(
-                                  fontSize: _getResponsiveFontSize(
-                                    screenWidth,
-                                    14,
-                                    16,
-                                  ),
-                                  color: const Color(
-                                    0xFF374151,
-                                  ), // Secondary Text
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              )
-                            else if (state is LeaveLoading)
-                              SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    const Color(0xFF3B82F6), // Primary Blue
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        SizedBox(height: isTablet ? 28 : 20),
-                        Expanded(
-                          child: _buildContent(state, screenWidth, isTablet),
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                        ],
+                      ),
+                      SizedBox(height: isTablet ? 28 : 20),
+                      Expanded(
+                        child: _buildContent(state, screenWidth, isTablet),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -304,7 +317,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
           children: [
             CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(
-                const Color(0xFF3B82F6), // Primary Blue
+                AppColors.primary, // Using AppColors
               ),
             ),
             const SizedBox(height: 16),
@@ -312,7 +325,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
               'Loading leave requests...',
               style: TextStyle(
                 fontSize: _getResponsiveFontSize(screenWidth, 16, 18),
-                color: const Color(0xFF374151), // Secondary Text
+                color: const Color(0xFF6B7280),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -329,15 +342,15 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
             Icon(
               Icons.error_outline,
               size: isTablet ? 80 : 64,
-              color: Colors.red.shade400,
+              color: const Color(0xFFEF4444),
             ),
             SizedBox(height: isTablet ? 24 : 16),
             Text(
               'Failed to load requests',
               style: TextStyle(
                 fontSize: _getResponsiveFontSize(screenWidth, 16, 20),
-                fontWeight: FontWeight.w500,
-                color: Colors.red.shade600,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1F2937),
               ),
             ),
             SizedBox(height: isTablet ? 12 : 8),
@@ -345,7 +358,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
               state.message,
               style: TextStyle(
                 fontSize: _getResponsiveFontSize(screenWidth, 14, 16),
-                color: const Color(0xFF9CA3AF), // Placeholder Text
+                color: const Color(0xFF9CA3AF),
               ),
               textAlign: TextAlign.center,
             ),
@@ -360,12 +373,14 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF3B82F6), // Primary Blue
+                backgroundColor: AppColors.primary, // Using AppColors
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
-              child: const Text('Retry', style: TextStyle(color: Colors.white)),
+              child: const Text('Retry'),
             ),
           ],
         ),
@@ -373,9 +388,9 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
     }
 
     if (state is LeaveListLoaded) {
-      final leaveRequests = state.leaves;
+      final filteredLeaves = _getFilteredLeaves(state.leaves);
 
-      if (leaveRequests.isEmpty) {
+      if (filteredLeaves.isEmpty) {
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -383,23 +398,25 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
               Icon(
                 Icons.inbox_outlined,
                 size: isTablet ? 80 : 64,
-                color: const Color(0xFF9CA3AF), // Placeholder Color
+                color: const Color(0xFF9CA3AF),
               ),
               SizedBox(height: isTablet ? 24 : 16),
               Text(
-                'No leave requests',
+                _searchQuery.isEmpty ? 'No leave requests' : 'No results found',
                 style: TextStyle(
                   fontSize: _getResponsiveFontSize(screenWidth, 16, 20),
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF374151), // Secondary Text
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF1F2937),
                 ),
               ),
               SizedBox(height: isTablet ? 12 : 8),
               Text(
-                'Tap + to create a new request',
+                _searchQuery.isEmpty 
+                    ? 'Tap + to create a new request'
+                    : 'Try searching with different keywords',
                 style: TextStyle(
                   fontSize: _getResponsiveFontSize(screenWidth, 14, 16),
-                  color: const Color(0xFF9CA3AF), // Placeholder Text
+                  color: const Color(0xFF9CA3AF),
                 ),
               ),
             ],
@@ -419,28 +436,28 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
                 crossAxisSpacing: 24,
                 mainAxisSpacing: 24,
               ),
-              itemCount: leaveRequests.length,
+              itemCount: filteredLeaves.length,
               itemBuilder:
                   (context, index) => LeaveCard(
-                    item: _mapLeaveToItem(leaveRequests[index]),
+                    item: _mapLeaveToItem(filteredLeaves[index]),
                     index: index,
                     onTap:
                         () => _showLeaveDetails(
-                          _mapLeaveToItem(leaveRequests[index]),
+                          _mapLeaveToItem(filteredLeaves[index]),
                         ),
                   ),
             );
           } else {
             return ListView.builder(
               padding: EdgeInsets.zero,
-              itemCount: leaveRequests.length,
+              itemCount: filteredLeaves.length,
               itemBuilder:
                   (context, index) => LeaveCard(
-                    item: _mapLeaveToItem(leaveRequests[index]),
+                    item: _mapLeaveToItem(filteredLeaves[index]),
                     index: index,
                     onTap:
                         () => _showLeaveDetails(
-                          _mapLeaveToItem(leaveRequests[index]),
+                          _mapLeaveToItem(filteredLeaves[index]),
                         ),
                   ),
             );
@@ -457,15 +474,15 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
           Icon(
             Icons.inbox_outlined,
             size: isTablet ? 80 : 64,
-            color: const Color(0xFF9CA3AF), // Placeholder Color
+            color: const Color(0xFF9CA3AF),
           ),
           SizedBox(height: isTablet ? 24 : 16),
           Text(
             'No leave requests',
             style: TextStyle(
               fontSize: _getResponsiveFontSize(screenWidth, 16, 20),
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF374151), // Secondary Text
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF1F2937),
             ),
           ),
           SizedBox(height: isTablet ? 12 : 8),
@@ -473,7 +490,7 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
             'Tap + to create a new request',
             style: TextStyle(
               fontSize: _getResponsiveFontSize(screenWidth, 14, 16),
-              color: const Color(0xFF9CA3AF), // Placeholder Text
+              color: const Color(0xFF9CA3AF),
             ),
           ),
         ],

@@ -4,7 +4,6 @@ import 'package:flutter_cas_app_main/src/features/elms_landing/presentation/page
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/pages/OnboardingPageModel.dart';
 import 'package:flutter_cas_app_main/src/features/onboarding/presentation/widgets/onboarding_screen_widget.dart';
 
-import '../../../my_student_attendence/presentation/student_adentence_page.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});

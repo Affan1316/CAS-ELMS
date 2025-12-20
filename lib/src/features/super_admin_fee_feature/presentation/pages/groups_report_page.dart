@@ -412,10 +412,12 @@ class ResponsiveGroupCard extends StatelessWidget {
     if (remaining <= 0 || percent >= 100) {
       return const Color(0xFF10B981); // success - vibrant green
     }
-    if (percent < 33)
+    if (percent < 33) {
       return const Color(0xFFEF4444); // low progress = danger - vibrant red
-    if (percent < 66)
+    }
+    if (percent < 66) {
       return const Color(0xFFF59E0B); // warning - vibrant orange
+    }
     return const Color(0xFF3B82F6); // approaching completion - vibrant blue
   }
 

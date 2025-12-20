@@ -14,7 +14,7 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widge
 import 'package:flutter_cas_app_main/src/features/my_student_attendence/presentation/student_adentence_page.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/group_student_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_side_fee_details_screen .dart';
-import 'package:flutter_cas_app_main/src/features/time_graph_page/presentation/pages/time_track_graph_page.dart';
+import 'package:flutter_cas_app_main/src/features/student_workshop_time_tracker/presentation/pages/student_workshop_time_tracker.dart';
 import 'fee_details_screen.dart';
 
 class GroupMembersScreen extends StatefulWidget {
