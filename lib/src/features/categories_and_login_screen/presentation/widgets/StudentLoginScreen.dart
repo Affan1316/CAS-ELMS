@@ -61,6 +61,9 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
       return;
     }
 
+    // Prevent multiple simultaneous login attempts
+    if (_isLoading) return;
+
     setState(() => _isLoading = true);
 
     try {
@@ -72,6 +75,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
               .get();
 
       if (!doc.exists) {
+        if (!mounted) return;
         setState(() => _isLoading = false);
         _showErrorMessage("Invalid student ID");
         return;
@@ -81,6 +85,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
 
       // 2. Check if entered email matches Firestore email
       if (firestoreEmail != email) {
+        if (!mounted) return;
         setState(() => _isLoading = false);
         _showErrorMessage("Email does not match this student ID");
         return;
@@ -90,10 +95,12 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
       final result = await _authService.signInWithEmailAndPassword(
         email: email,
         password: password,
-        studentId:
-            widget.studentid, // ✅ Pass student ID to save in SharedPreferences
+        studentId: widget.studentid,
       );
 
+      if (!mounted) return;
+
+      // ✅ CRITICAL FIX: Always reset loading state
       setState(() => _isLoading = false);
 
       if (result.success) {
@@ -119,8 +126,10 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
         _showErrorMessage(result.message);
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoading = false);
       _showErrorMessage("Something went wrong. Please try again.");
+      debugPrint("Login error: $e");
     }
   }
 
@@ -504,7 +513,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
+                                        Color(0xFF4DD0E1),
                                       ),
                                     ),
                                   )

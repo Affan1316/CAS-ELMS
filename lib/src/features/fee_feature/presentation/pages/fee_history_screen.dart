@@ -142,9 +142,10 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
             const SizedBox(height: 24),
             Text(
               'No transactions found',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Color.fromARGB(255, 0, 0, 0),
+              ),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -274,9 +275,10 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
         children: [
           Text(
             'Recent Transactions',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: const Color.fromARGB(255, 0, 0, 0),
+            ),
           ),
           const Spacer(),
           TextButton.icon(
