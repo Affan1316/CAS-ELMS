@@ -20,46 +20,55 @@ class CourseForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Form(
-        key: formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CustomTextField(
-              controller: nameController,
-              label: 'Name',
-              icon: Icons.person_outline,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Please enter a name' : null,
-            ),
-            const SizedBox(height: 20),
-            CustomTextField(
-              controller: descriptionController,
-              label: 'Description',
-              icon: Icons.description_outlined,
-              maxLines: 3,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Please enter a description' : null,
-            ),
-            const SizedBox(height: 32),
-            AddCourseButton(
-              isLoading: isLoading,
-              onPressed: isLoading ? null : onSubmit,
+    // FIX: Wrapped in a Light Theme to force text to be black
+    // because the container background is hardcoded to white.
+    return Theme(
+      data: ThemeData.light(),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
             ),
           ],
+        ),
+        child: Form(
+          key: formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomTextField(
+                controller: nameController,
+                label: 'Name',
+                icon: Icons.person_outline,
+                validator:
+                    (value) =>
+                        value?.isEmpty ?? true ? 'Please enter a name' : null,
+              ),
+              const SizedBox(height: 20),
+              CustomTextField(
+                controller: descriptionController,
+                label: 'Description',
+                icon: Icons.description_outlined,
+                maxLines: 3,
+                validator:
+                    (value) =>
+                        value?.isEmpty ?? true
+                            ? 'Please enter a description'
+                            : null,
+              ),
+              const SizedBox(height: 32),
+              AddCourseButton(
+                isLoading: isLoading,
+                onPressed: isLoading ? null : onSubmit,
+              ),
+            ],
+          ),
         ),
       ),
     );

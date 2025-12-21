@@ -27,8 +27,6 @@ class _CreateGroupPageState extends State<CreateGroupPage>
   final _groupFeeController = TextEditingController();
   final _groupDateController = TextEditingController();
 
-  
-
   @override
   void initState() {
     super.initState();
@@ -292,6 +290,8 @@ class _CreateGroupPageState extends State<CreateGroupPage>
           keyboardType: keyboardType,
           validator: validator,
           maxLines: maxLines,
+          // --- FIX: Force text color to black for Dark Mode visibility ---
+          style: const TextStyle(color: Colors.black),
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: const Color(0xFF6B7280), size: 20),
             hintText: 'Enter $label',
@@ -407,5 +407,4 @@ class _CreateGroupPageState extends State<CreateGroupPage>
       ),
     );
   }
-
 }

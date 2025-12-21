@@ -444,12 +444,12 @@ class ResponsiveGroupCard extends StatelessWidget {
               summary == null
                   ? null
                   : () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder:
-                            (_) => GroupFeeHistoryPage(groupName: groupName),
-                      ),
-                    );
+                    // Navigator.of(context).push(
+                    //   MaterialPageRoute(
+                    //     builder:
+                    //         (_) => GroupFeeHistoryPage(groupName: groupName),
+                    //   ),
+                    // );
                   },
           child: Container(
             padding: const EdgeInsets.all(12),

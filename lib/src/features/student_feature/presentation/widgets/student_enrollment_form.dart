@@ -291,6 +291,9 @@ class StudentEnrollmentForm extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
+                                    color:
+                                        Colors
+                                            .black87, // Fixed color for visibility
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -313,6 +316,10 @@ class StudentEnrollmentForm extends StatelessWidget {
                                           size: 20,
                                         ),
                                         hintText: 'Select Group',
+                                        // Added hint style for visibility
+                                        hintStyle: const TextStyle(
+                                          color: Colors.grey,
+                                        ),
                                         filled: true,
                                         fillColor: const Color(0xFFF9FAFB),
                                         border: OutlineInputBorder(
@@ -344,6 +351,12 @@ class StudentEnrollmentForm extends StatelessWidget {
                                           value: field.value,
                                           isDense: true,
                                           isExpanded: true,
+                                          // Added style to force black text
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 16,
+                                          ),
+                                          dropdownColor: Colors.white,
                                           icon: const Icon(
                                             Icons.arrow_drop_down,
                                             color: Color(0xFF6B7280),
@@ -380,6 +393,7 @@ class StudentEnrollmentForm extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
+                          color: Colors.black87, // Fixed color for visibility
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -457,10 +471,8 @@ class StudentEnrollmentForm extends StatelessWidget {
                                           studentIdController.text
                                               .toLowerCase()
                                               .trim(),
-                                      groupId:
-                                          groupController.text
-                                              .toLowerCase()
-                                              .trim(),
+                                      groupId: groupController.text,
+
                                       name: nameController.text.trim(),
                                     ),
                               ),
@@ -579,7 +591,11 @@ class StudentEnrollmentForm extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87, // Fixed color for visibility
+          ),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -587,9 +603,13 @@ class StudentEnrollmentForm extends StatelessWidget {
           keyboardType: keyboardType,
           maxLines: maxLines,
           validator: validator,
+          // Added Style to force black text inside field
+          style: const TextStyle(color: Colors.black),
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: const Color(0xFF6B7280), size: 20),
             hintText: 'Enter $label',
+            // Ensure Hint is visible
+            hintStyle: const TextStyle(color: Colors.grey),
             filled: true,
             fillColor: const Color(0xFFF9FAFB),
             border: OutlineInputBorder(

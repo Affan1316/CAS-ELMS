@@ -75,9 +75,9 @@ Widget buildHeader(String studentName, BuildContext context, String id) {
               ),
               child: GestureDetector(
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Profile icon clicked")),
-                  );
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   SnackBar(content: Text("Profile icon clicked")),
+                  // );
                   Navigator.push(
                     context,
                     MaterialPageRoute(

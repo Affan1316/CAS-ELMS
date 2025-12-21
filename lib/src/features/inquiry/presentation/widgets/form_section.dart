@@ -28,85 +28,90 @@ class FormSection extends StatelessWidget {
     required this.gender,
     required this.selectedCourse,
     required this.onGenderChanged,
-    required this.onCourseChanged, 
+    required this.onCourseChanged,
     required this.courses,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Form(
-        key: formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CustomTextField(
-              controller: studentNameController,
-              label: 'Student Name',
-              icon: Icons.person_outline,
-              validatorMsg: 'Please enter student name',
-            ),
-            const SizedBox(height: 20),
-            CustomTextField(
-              controller: fatherNameController,
-              label: 'Father Name',
-              icon: Icons.person_2_outlined,
-              validatorMsg: 'Please enter father name',
-            ),
-            const SizedBox(height: 20),
-            CustomTextField(
-              controller: emailAddressController,
-              label: 'Email',
-              icon: Icons.email_outlined,
-              validatorMsg: 'Please enter a valid email',
-              isEmail: true,
-            ),
-            const SizedBox(height: 20),
-            CustomTextField(
-              controller: phoneNoController,
-              label: 'Mobile Number',
-              icon: Icons.phone_outlined,
-              validatorMsg: 'Please enter phone number',
-              isPhone: true,
-            ),
-            const SizedBox(height: 20),
-            CustomTextField(
-              controller: groupNameController,
-              label: 'Group Name',
-              icon: Icons.group_outlined,
-              validatorMsg: 'Please enter group name',
-            ),
-            const SizedBox(height: 20),
-            CourseDropdown(
-              selectedCourse: selectedCourse,
-              onChanged: onCourseChanged, 
-              courses: courses,
-            ),
-            const SizedBox(height: 24),
-            GenderSelection(gender: gender, onChanged: onGenderChanged),
-            const SizedBox(height: 32),
-            SubmitButton(
-              studentNameController: studentNameController,
-              fatherNameController: fatherNameController,
-              emailAddressController: emailAddressController,
-              phoneNoController: phoneNoController,
-              groupNameController: groupNameController,
-              selectedCourse: selectedCourse,
-              gender: gender,
+    // FIX: Wrapped in Theme widget to force light mode (black text)
+    // because the container background is hardcoded to white.
+    return Theme(
+      data: ThemeData.light(),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
             ),
           ],
+        ),
+        child: Form(
+          key: formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomTextField(
+                controller: studentNameController,
+                label: 'Student Name',
+                icon: Icons.person_outline,
+                validatorMsg: 'Please enter student name',
+              ),
+              const SizedBox(height: 20),
+              CustomTextField(
+                controller: fatherNameController,
+                label: 'Father Name',
+                icon: Icons.person_2_outlined,
+                validatorMsg: 'Please enter father name',
+              ),
+              const SizedBox(height: 20),
+              CustomTextField(
+                controller: emailAddressController,
+                label: 'Email',
+                icon: Icons.email_outlined,
+                validatorMsg: 'Please enter a valid email',
+                isEmail: true,
+              ),
+              const SizedBox(height: 20),
+              CustomTextField(
+                controller: phoneNoController,
+                label: 'Mobile Number',
+                icon: Icons.phone_outlined,
+                validatorMsg: 'Please enter phone number',
+                isPhone: true,
+              ),
+              const SizedBox(height: 20),
+              CustomTextField(
+                controller: groupNameController,
+                label: 'Group Name',
+                icon: Icons.group_outlined,
+                validatorMsg: 'Please enter group name',
+              ),
+              const SizedBox(height: 20),
+              CourseDropdown(
+                selectedCourse: selectedCourse,
+                onChanged: onCourseChanged,
+                courses: courses,
+              ),
+              const SizedBox(height: 24),
+              GenderSelection(gender: gender, onChanged: onGenderChanged),
+              const SizedBox(height: 32),
+              SubmitButton(
+                studentNameController: studentNameController,
+                fatherNameController: fatherNameController,
+                emailAddressController: emailAddressController,
+                phoneNoController: phoneNoController,
+                groupNameController: groupNameController,
+                selectedCourse: selectedCourse,
+                gender: gender,
+              ),
+            ],
+          ),
         ),
       ),
     );

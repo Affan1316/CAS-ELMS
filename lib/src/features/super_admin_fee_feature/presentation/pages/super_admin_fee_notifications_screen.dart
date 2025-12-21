@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/widgets/notification_list_widget.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_bloc.dart';
@@ -30,47 +31,69 @@ class _SuperAdminFeeNotificationsScreenState
 
   @override
   Widget build(BuildContext context) {
+    const colorBackground = Color(0xFFE6E8F0);
+
+    // 1. Define the Fixed Neumorphic Theme
+    const kAppNeumorphicTheme = NeumorphicThemeData(
+      baseColor: colorBackground,
+      lightSource: LightSource.topLeft,
+      depth: 4,
+      defaultTextColor: Colors.black, // Force Neumorphic text to black
+    );
+
     return NeumorphicTheme(
-      theme: const NeumorphicThemeData(
-        baseColor: Color(0xFFE6E8F0),
-        lightSource: LightSource.topLeft,
-        depth: 4,
-      ),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFE6E8F0),
-        appBar: NeumorphicAppBar(
-          title: const Text(
-            "Pending Notifications",
-            style: TextStyle(fontWeight: FontWeight.bold),
+      themeMode: ThemeMode.light, // Lock Neumorphic UI to Light
+      theme: kAppNeumorphicTheme,
+      darkTheme: kAppNeumorphicTheme, // Prevent dark override
+      child: Theme(
+        // 2. Lock Standard Material UI (Text/Icons) to Light (Black Text)
+        data: ThemeData.light().copyWith(
+          scaffoldBackgroundColor: colorBackground,
+          textTheme: ThemeData.light().textTheme.apply(
+            bodyColor: Colors.black,
+            displayColor: Colors.black,
           ),
-          centerTitle: true,
-          actions: [
-            NeumorphicButton(
-              tooltip: "Refresh",
-              style: const NeumorphicStyle(
-                boxShape: NeumorphicBoxShape.circle(),
-                depth: 3,
-              ),
-              padding: const EdgeInsets.all(8),
-              onPressed: _refreshNotifications,
-              child: const Icon(Icons.refresh, size: 22),
-            ),
-            const SizedBox(width: 8),
-          ],
+          iconTheme: const IconThemeData(color: Colors.black),
         ),
-        body: BlocBuilder<SuperAdminFeeBloc, SuperAdminFeeState>(
-          builder: (context, state) {
-            return RefreshIndicator(
-              onRefresh: _refreshNotifications,
-              color: Colors.blueGrey,
-              backgroundColor: const Color(0xFFE6E8F0),
-              displacement: 50,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                child: _buildListBody(state),
+        child: Scaffold(
+          backgroundColor: colorBackground,
+          appBar: NeumorphicAppBar(
+            title: const Text(
+              "Pending Notifications",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
-            );
-          },
+            ),
+            centerTitle: true,
+            actions: [
+              NeumorphicButton(
+                tooltip: "Refresh",
+                style: const NeumorphicStyle(
+                  boxShape: NeumorphicBoxShape.circle(),
+                  depth: 3,
+                ),
+                padding: const EdgeInsets.all(8),
+                onPressed: _refreshNotifications,
+                child: const Icon(Icons.refresh, size: 22, color: Colors.black),
+              ),
+              const SizedBox(width: 8),
+            ],
+          ),
+          body: BlocBuilder<SuperAdminFeeBloc, SuperAdminFeeState>(
+            builder: (context, state) {
+              return RefreshIndicator(
+                onRefresh: _refreshNotifications,
+                color: Colors.blueGrey,
+                backgroundColor: colorBackground,
+                displacement: 50,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  child: _buildListBody(state),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -115,7 +138,7 @@ class _SuperAdminFeeNotificationsScreenState
               boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(20)),
             ),
             child: Container(
-              height: 110, // 🔥 Taller = feels more “real”
+              height: 110,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 color: Colors.grey.shade300,
