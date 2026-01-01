@@ -684,7 +684,13 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
         if (paidAmount < total) {
           if (i != installments.length - 1) {
             currentMap = installments.elementAt(i + 1);
-            currentMap["totalAmount"] = total + (total - paidAmount);
+            // FIX: Get the current total of next installment, then add only the remaining amount
+            double nextInstallmentCurrentTotal = currentMap["totalAmount"];
+            currentMap["totalAmount"] =
+                nextInstallmentCurrentTotal + (total - paidAmount);
+            // Update the next installment in the list
+            installments.removeAt(i + 1);
+            installments.insert(i + 1, currentMap);
           } else {
             installments.add({
               "id": "to be set yet",
