@@ -6,8 +6,17 @@ import 'package:intl/intl.dart';
 
 class NotificationCard extends StatefulWidget {
   final Map<dynamic, dynamic> n;
+  final bool isSelectable;
+  final bool isSelected;
+  final Function(bool)? onSelectionChanged;
 
-  const NotificationCard({super.key, required this.n});
+  const NotificationCard({
+    super.key,
+    required this.n,
+    this.isSelectable = false,
+    this.isSelected = false,
+    this.onSelectionChanged,
+  });
 
   @override
   State<NotificationCard> createState() => _NotificationCardState();
@@ -15,7 +24,6 @@ class NotificationCard extends StatefulWidget {
 
 class _NotificationCardState extends State<NotificationCard>
     with SingleTickerProviderStateMixin {
-  // Only the parts that need to react to expand/collapse listen to this.
   final ValueNotifier<bool> _isExpanded = ValueNotifier<bool>(false);
 
   late final String paidDate;
@@ -27,7 +35,6 @@ class _NotificationCardState extends State<NotificationCard>
   void initState() {
     super.initState();
 
-    // compute once to avoid repeated parsing/formatting in build
     final paid = DateTime.tryParse(widget.n["paidDate"]?.toString() ?? '');
     final due = DateTime.tryParse(widget.n["dueDate"]?.toString() ?? '');
 
@@ -63,11 +70,18 @@ class _NotificationCardState extends State<NotificationCard>
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.white, Colors.grey[100]!],
+          colors:
+              widget.isSelected
+                  ? [Colors.green[100]!, Colors.green[50]!]
+                  : [Colors.white, Colors.grey[100]!],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(22),
+        border:
+            widget.isSelected
+                ? Border.all(color: Colors.green, width: 2)
+                : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -85,10 +99,18 @@ class _NotificationCardState extends State<NotificationCard>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row
+          // Header Row with optional checkbox
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              if (widget.isSelectable)
+                Checkbox(
+                  value: widget.isSelected,
+                  onChanged: (value) {
+                    widget.onSelectionChanged?.call(value ?? false);
+                  },
+                  activeColor: Colors.green,
+                ),
               Expanded(
                 child: Text(
                   widget.n["name"]?.toString() ?? '-',
@@ -110,7 +132,7 @@ class _NotificationCardState extends State<NotificationCard>
           ),
           const SizedBox(height: 14),
 
-          // Amount Badge (kept simple and stateless)
+          // Amount Badge
           Center(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -149,7 +171,6 @@ class _NotificationCardState extends State<NotificationCard>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Status chip (stateless)
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
@@ -169,10 +190,9 @@ class _NotificationCardState extends State<NotificationCard>
                 ),
               ),
 
-              // Action buttons (only the details button toggles notifier)
+              // Action buttons (hide confirm if selectable mode)
               Row(
                 children: [
-                  // Details button: toggles expansion. Icon rotation listens to _isExpanded
                   ValueListenableBuilder<bool>(
                     valueListenable: _isExpanded,
                     builder: (context, expanded, _) {
@@ -180,34 +200,32 @@ class _NotificationCardState extends State<NotificationCard>
                         icon: Icons.info_outline_rounded,
                         tooltip: "Details",
                         onPressed: _toggleExpanded,
-                        // optional visual cue when expanded
                         active: expanded,
                       );
                     },
                   ),
-
-                  const SizedBox(width: 10),
-                  _ActionButton(
-                    icon: Icons.check_rounded,
-                    color: Colors.green,
-                    tooltip: "Confirm Payment",
-                    onPressed: () {
-                      context.read<SuperAdminFeeBloc>().add(
-                        ConfirmSuperAdminFeePayment(
-                          studentId: widget.n["studentId"],
-                          id: widget.n["id"],
-                        ),
-                      );
-                    },
-                  ),
+                  if (!widget.isSelectable) ...[
+                    const SizedBox(width: 10),
+                    _ActionButton(
+                      icon: Icons.check_rounded,
+                      color: Colors.green,
+                      tooltip: "Confirm Payment",
+                      onPressed: () {
+                        context.read<SuperAdminFeeBloc>().add(
+                          ConfirmSuperAdminFeePayment(
+                            studentId: widget.n["studentId"],
+                            id: widget.n["id"],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ],
               ),
             ],
           ),
 
           // Expanded Info
-          // AnimatedSize animates the size change. Put expanded content inside ClipRect
-          // and only rebuild that part when _isExpanded changes.
           ClipRect(
             child: AnimatedSize(
               duration: const Duration(milliseconds: 260),
@@ -311,7 +329,6 @@ class _ActionButtonState extends State<_ActionButton> {
     final iconColor =
         widget.color != null ? Colors.white : Colors.grey.shade800;
 
-    // When used as "active" (e.g. details toggled), we slightly change elevation/scale
     final double scale = _isPressed ? 0.97 : (widget.active ? 0.98 : 1.0);
 
     return GestureDetector(
