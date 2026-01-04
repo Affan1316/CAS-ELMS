@@ -10,7 +10,9 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
   static const String _collectionPath3 = "fee_history_group_wise";
 
   late Map<String, dynamic> _currentInstallment;
+
   SuperAdminFeeRepositoryImpl(this._remoteDataSource);
+
   @override
   Future<List<Map<String, dynamic>>> getNotifications() async {
     var a = await _remoteDataSource.collection(_collectionPath1).get();
@@ -49,6 +51,52 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
     }
   }
 
+  @override
+  Future<void> confirmBulkPayments(List<Map<String, String>> payments) async {
+    if (payments.isEmpty) {
+      throw ArgumentError('Payment list cannot be empty');
+    }
+
+    List<String> errors = [];
+    List<Map<String, dynamic>> successfulPaymentHistories = [];
+
+    // Process each payment
+    for (var payment in payments) {
+      try {
+        final id = payment['id']!;
+        final studentId = payment['studentId']!;
+
+        // Update collections and get payment history data
+        final paymentHistoryData = await _updateCollectionsAndGetHistoryData(
+          id,
+          studentId,
+        );
+
+        if (paymentHistoryData != null) {
+          successfulPaymentHistories.add(paymentHistoryData);
+        }
+      } catch (e) {
+        errors.add(
+          'Failed to confirm payment ${payment['id']} for student ${payment['studentId']}: $e',
+        );
+      }
+    }
+
+    // Write all successful payment histories
+    for (var historyData in successfulPaymentHistories) {
+      try {
+        await _writePaymentHistory(historyData);
+      } catch (e) {
+        print('Warning: Failed to log payment history: $e');
+      }
+    }
+
+    // If there were any errors, report them
+    if (errors.isNotEmpty) {
+      throw Exception('Some payments failed:\n${errors.join('\n')}');
+    }
+  }
+
   /// Updates both collections and returns payment history data
   ///
   /// Returns payment history data if found, null otherwise
@@ -72,7 +120,6 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
 
       final data = snapshot.data()!;
 
-      // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
       final installments = _extractInstallments(data);
 
       final result = _processInstallments(installments, installmentId);
@@ -155,7 +202,6 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
     } catch (e) {
       // Log error but don't fail the entire operation since payment is already confirmed
       print('Warning: Failed to log payment history: $e');
-      // Consider implementing a retry mechanism or dead letter queue here
     }
   }
 
@@ -169,21 +215,17 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
         .doc(groupId);
 
     DocumentSnapshot<Map<String, dynamic>> snapshot = await docref.get();
-    // double newRemaining;
+
     if (!snapshot.exists) {
       docref.set({"received": paymentAmount});
     } else {
       Map<String, dynamic>? snapshotData = snapshot.data();
       if (snapshotData != null) {
         paymentAmount = paymentAmount + snapshotData["received"];
-        // newRemaining = snapshotData["remaining"] - paymentAmount;
-        Map<String, dynamic> updatedMap = {
-          "received": paymentAmount,
-          // "remaining": newRemaining,
-        };
+        Map<String, dynamic> updatedMap = {"received": paymentAmount};
         await docref.update(updatedMap);
       } else {
-        throw ("Assertion eror snapshot data did not found");
+        throw ("Assertion error snapshot data did not found");
       }
     }
   }
@@ -220,7 +262,6 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
       throw Exception('Installments field is not a List');
     }
 
-    // Create a deep copy to avoid modifying the snapshot
     return installmentsData
         .map((e) => Map<String, dynamic>.from(e as Map))
         .toList();
@@ -235,16 +276,13 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
     bool updated = false;
 
     for (final installment in installments) {
-      // Safely extract paidAmount
       final paidAmount = (installment['paidAmount'] as num?)?.toDouble() ?? 0.0;
       totalPaidAmount += paidAmount;
 
-      // Check if this is the installment to update
       if (installment['id'] == installmentId) {
         installment['status'] = 'Paid';
         updated = true;
         _currentInstallment = installment;
-        // Don't break - we need to calculate total for all installments
       }
     }
 
@@ -264,9 +302,6 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
       return GroupFeeHistory.fromMap(mapData);
     } else {
       return "No Fee History";
-      throw AssertionError(
-        "mapData is null at line 266 of SuperAdminFeeRepositoryImpl ",
-      );
     }
   }
 }

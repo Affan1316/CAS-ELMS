@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/widgets/notification_card.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_event.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_state.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -24,6 +25,9 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
   Map<String, List<Map>> _cachedGrouped = {};
   String _lastFilterStatus = '';
   final Set<String> _expandedGroups = {};
+
+  // Track selected items per group
+  final Map<String, Set<String>> _selectedItemsByGroup = {};
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +67,6 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
         }
 
         if (state is SuperAdminFeeLoadedState) {
-          // Only recompute if filter status changed
           if (_lastFilterStatus != widget.filterStatus) {
             _lastFilterStatus = widget.filterStatus;
 
@@ -91,6 +94,9 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
                     .toList();
 
             _cachedGrouped = groupBy(filtered, (i) => i["groupId"] as String);
+
+            // Clear selections when filter changes
+            _selectedItemsByGroup.clear();
           }
 
           if (_cachedGrouped.isEmpty) {
@@ -139,12 +145,17 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
                     final groupItems = _cachedGrouped[groupName]!;
                     final isExpanded = _expandedGroups.contains(groupName);
 
+                    // Initialize selection set for this group if it doesn't exist
+                    _selectedItemsByGroup.putIfAbsent(groupName, () => {});
+                    final selectedItems = _selectedItemsByGroup[groupName]!;
+
                     return _GroupCard(
                           key: ValueKey(groupName),
                           groupName: groupName,
                           groupItems: groupItems,
                           filterStatus: widget.filterStatus,
                           isExpanded: isExpanded,
+                          selectedItems: selectedItems,
                           onToggle: () {
                             setState(() {
                               if (isExpanded) {
@@ -153,6 +164,84 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
                                 _expandedGroups.add(groupName);
                               }
                             });
+                          },
+                          onItemSelected: (itemId, selected) {
+                            setState(() {
+                              if (selected) {
+                                selectedItems.add(itemId);
+                              } else {
+                                selectedItems.remove(itemId);
+                              }
+                            });
+                          },
+                          onSelectAll: () {
+                            setState(() {
+                              if (selectedItems.length == groupItems.length) {
+                                // Deselect all
+                                selectedItems.clear();
+                              } else {
+                                // Select all
+                                selectedItems.addAll(
+                                  groupItems.map(
+                                    (item) => item["id"] as String,
+                                  ),
+                                );
+                              }
+                            });
+                          },
+                          onConfirmSelected: () {
+                            if (selectedItems.isEmpty) return;
+
+                            // Build list of payments to confirm
+                            final paymentsToConfirm =
+                                groupItems
+                                    .where(
+                                      (item) =>
+                                          selectedItems.contains(item["id"]),
+                                    )
+                                    .map(
+                                      (item) => {
+                                        'id': item["id"] as String,
+                                        'studentId':
+                                            item["studentId"] as String,
+                                      },
+                                    )
+                                    .toList();
+
+                            // Show confirmation dialog
+                            showDialog(
+                              context: context,
+                              builder:
+                                  (ctx) => AlertDialog(
+                                    title: const Text('Confirm Payments'),
+                                    content: Text(
+                                      'Are you sure you want to confirm ${paymentsToConfirm.length} payment(s) for group $groupName?',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(ctx),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.pop(ctx);
+                                          context.read<SuperAdminFeeBloc>().add(
+                                            ConfirmBulkSuperAdminFeePayments(
+                                              payments: paymentsToConfirm,
+                                            ),
+                                          );
+                                          setState(() {
+                                            selectedItems.clear();
+                                          });
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.green,
+                                        ),
+                                        child: const Text('Confirm'),
+                                      ),
+                                    ],
+                                  ),
+                            );
                           },
                         )
                         .animate()
@@ -180,7 +269,11 @@ class _GroupCard extends StatelessWidget {
   final List<Map> groupItems;
   final String filterStatus;
   final bool isExpanded;
+  final Set<String> selectedItems;
   final VoidCallback onToggle;
+  final Function(String itemId, bool selected) onItemSelected;
+  final VoidCallback onSelectAll;
+  final VoidCallback onConfirmSelected;
 
   const _GroupCard({
     super.key,
@@ -188,11 +281,18 @@ class _GroupCard extends StatelessWidget {
     required this.groupItems,
     required this.filterStatus,
     required this.isExpanded,
+    required this.selectedItems,
     required this.onToggle,
+    required this.onItemSelected,
+    required this.onSelectAll,
+    required this.onConfirmSelected,
   });
 
   @override
   Widget build(BuildContext context) {
+    final allSelected = selectedItems.length == groupItems.length;
+    final someSelected = selectedItems.isNotEmpty;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -268,6 +368,48 @@ class _GroupCard extends StatelessWidget {
               ),
             ),
           ),
+
+          // Action buttons when expanded
+          if (isExpanded)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: allSelected,
+                    tristate: true,
+                    onChanged: (_) => onSelectAll(),
+                  ),
+                  Text(
+                    allSelected
+                        ? 'Deselect All'
+                        : someSelected
+                        ? 'Select All (${selectedItems.length} selected)'
+                        : 'Select All',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                  const Spacer(),
+                  if (someSelected)
+                    ElevatedButton.icon(
+                      onPressed: onConfirmSelected,
+                      icon: const Icon(Icons.check_circle, size: 18),
+                      label: Text('Confirm (${selectedItems.length})'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
           AnimatedSize(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
@@ -280,6 +422,16 @@ class _GroupCard extends StatelessWidget {
                                 (item) => NotificationCard(
                                   key: ValueKey(item["id"]),
                                   n: item,
+                                  isSelectable: true,
+                                  isSelected: selectedItems.contains(
+                                    item["id"],
+                                  ),
+                                  onSelectionChanged: (selected) {
+                                    onItemSelected(
+                                      item["id"] as String,
+                                      selected,
+                                    );
+                                  },
                                 ),
                               )
                               .toList(),

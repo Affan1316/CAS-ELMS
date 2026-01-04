@@ -29,6 +29,7 @@ import 'package:flutter_cas_app_main/src/features/student_feature/presentation/b
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_home_page.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_feature/super_admin_home_page/presentation/pages/super_admin_home_page.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/data/data_source/SuperAdminFeeRepositoryImpl.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/confirm_bulk_super_admin_fee_payment_use_case.dart.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/confirm_super_admin_fee_payment_use_case.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/fetch_group_fee_history_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/usecases/get_groups_names_super_admin_usecase.dart';
@@ -117,7 +118,9 @@ class MyApp extends StatelessWidget {
                   getGroupsNamesSuperAdminUsecase:
                       GetGroupsNamesSuperAdminUsecase(
                         orignalUsecase: GetGroupsNamesUsecase(),
-                      ),
+                      ), confirmBulkPayments:ConfirmBulkSuperAdminFeePaymentUseCase(SuperAdminFeeRepositoryImpl(
+                      FirebaseFirestore.instance,
+                    ),) ,
                 ),
           ),
           BlocProvider(create: (context) => FeeAdminBloc()),
