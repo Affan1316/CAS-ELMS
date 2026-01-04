@@ -34,7 +34,20 @@ class FetchGroupStudentsEvent extends StudentFeatureEvent {
   FetchGroupStudentsEvent({required this.id});
 }
 
+
 class FetchGroupNamesEvent extends StudentFeatureEvent {}
+
+class UpdateStudentGroupEvent extends StudentFeatureEvent {
+  final String studentId;
+  final String newGroupName;
+
+  UpdateStudentGroupEvent({
+    required this.studentId,
+    required this.newGroupName,
+  });
+}
+
+
 
 class CheckPermissionEvent extends StudentFeatureEvent {}
 

@@ -13,6 +13,7 @@ import 'package:flutter_cas_app_main/src/features/student_feature/data/student_e
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/add_student_use_case.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/firestore_repositry.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/read_student_use_case.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/domain/update_student_group_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';
 import 'package:geolocator/geolocator.dart';
@@ -44,6 +45,7 @@ class StudentFeatureBloc
     on<ReCreateGeofenceEvent>(onReCreateGeofenceEvent);
     on<GetStudentSideFeeEvent>(_handleGettingFee);
     on<SignOutEvent>(onSignOutEvent);
+    on<UpdateStudentGroupEvent>(_handleStudentGroupUpdate);
   }
   final FirestoreRepositry _firestoreRepositry =
       ActualImplementationFirebaseRepo();
@@ -263,4 +265,31 @@ class StudentFeatureBloc
     await authService.signOut();
     emit(StudentSigInOutState());
   }
+
+  Future<void> _handleStudentGroupUpdate(
+  UpdateStudentGroupEvent event,
+  Emitter<StudentFeatureState> emit,
+) async {
+  emit(StudentGroupUpdating());
+  
+  final UpdateStudentGroupUseCase updateStudentGroupUseCase = 
+      UpdateStudentGroupUseCase(firestoreRepositry: _firestoreRepositry);
+
+  try {
+    await updateStudentGroupUseCase.updateStudentGroup(
+      studentId: event.studentId,
+      newGroupName: event.newGroupName,
+    );
+    
+    // Clear cache for this student so fresh data is loaded next time
+    CachedData.listOfAlreadyFetchedStudentsData.remove(event.studentId);
+    
+    emit(StudentGroupUpdateSuccess(
+      studentId: event.studentId,
+      newGroupName: event.newGroupName,
+    ));
+  } catch (e) {
+    emit(StudentGroupUpdateFailure(e.toString()));
+  }
+}
 }

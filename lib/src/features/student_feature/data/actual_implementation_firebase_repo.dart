@@ -71,4 +71,58 @@ class ActualImplementationFirebaseRepo implements FirestoreRepositry {
     }
     return list;
   }
+  
+   @override
+  Future<void> updateStudentGroup({
+    required String studentId,
+    required String newGroupName,
+  }) async {
+    try {
+      // Step 1: Get current student data to know the old group
+      DocumentSnapshot<Map<String, dynamic>> studentDoc = await firestore
+          .collection(completeStudentsCollectionName)
+          .doc(studentId)
+          .get();
+
+      if (!studentDoc.exists) {
+        throw Exception('Student not found');
+      }
+
+      Map<String, dynamic>? studentData = studentDoc.data();
+      if (studentData == null) {
+        throw Exception('Student data is null');
+      }
+
+      String oldGroupName = studentData['group'] ?? '';
+      String studentName = studentData['name'] ?? '';
+
+      // Step 2: Update the main students collection with new group
+      await firestore
+          .collection(completeStudentsCollectionName)
+          .doc(studentId)
+          .update({'group': newGroupName});
+
+      // Step 3: Remove student from old group collection (if exists)
+      if (oldGroupName.isNotEmpty) {
+        await firestore
+            .collection("$oldGroupName students")
+            .doc(studentId)
+            .delete();
+      }
+
+      // Step 4: Add student to new group collection
+      await firestore
+          .collection("$newGroupName students")
+          .doc(studentId)
+          .set({
+            "name": studentName,
+            "rollNum": studentId,
+          });
+
+      print("✅ Student $studentId successfully moved from '$oldGroupName' to '$newGroupName'");
+    } catch (e) {
+      print("❌ Error updating student group: $e");
+      throw Exception('Failed to update student group: ${e.toString()}');
+    }
+  }
 }

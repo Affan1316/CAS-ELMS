@@ -9,4 +9,9 @@ abstract class FirestoreRepositry {
     String groupTitle,
   );
   Future<List<String>> getGroupsNames();
+  
+  Future<void> updateStudentGroup({
+    required String studentId,
+    required String newGroupName,
+  });
 }

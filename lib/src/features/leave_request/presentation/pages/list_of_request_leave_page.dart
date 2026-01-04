@@ -153,8 +153,8 @@ class _LeaveScreenState extends State<ListOfRequestLeaveScreen>
     return leaves.where((leave) {
       return leave.leaveType.toLowerCase().contains(_searchQuery.toLowerCase()) ||
              leave.status.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-             (leave.reason?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false) ||
-             (leave.fromDate?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
+             (leave.reason.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false) ||
+             (leave.fromDate.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
     }).toList();
   }
 
