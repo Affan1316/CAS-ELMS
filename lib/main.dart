@@ -118,9 +118,10 @@ class MyApp extends StatelessWidget {
                   getGroupsNamesSuperAdminUsecase:
                       GetGroupsNamesSuperAdminUsecase(
                         orignalUsecase: GetGroupsNamesUsecase(),
-                      ), confirmBulkPayments:ConfirmBulkSuperAdminFeePaymentUseCase(SuperAdminFeeRepositoryImpl(
-                      FirebaseFirestore.instance,
-                    ),) ,
+                      ),
+                  confirmBulkPayments: ConfirmBulkSuperAdminFeePaymentUseCase(
+                    SuperAdminFeeRepositoryImpl(FirebaseFirestore.instance),
+                  ),
                 ),
           ),
           BlocProvider(create: (context) => FeeAdminBloc()),
@@ -259,7 +260,7 @@ class _SplashScreenState extends State<SplashScreen> {
               Icon(Icons.school, size: 100, color: Colors.white),
               const SizedBox(height: 20),
               const Text(
-                'ELMS',
+                'CAS ELMS',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
