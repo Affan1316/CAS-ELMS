@@ -10,7 +10,6 @@ import '../widgets/android_custom_paint.dart';
 import '../widgets/animated_text.dart';
 import '../widgets/group_container.dart';
 import '../widgets/header_background.dart';
-import '../widgets/header_text.dart';
 import '../widgets/lifted_carousel.dart';
 
 class GroupWorkshopTimePage extends StatefulWidget {

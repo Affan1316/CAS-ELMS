@@ -87,8 +87,7 @@ class _StudentTimeTrackerPageState extends State<StudentTimeTrackerPage> {
               onPrimary: Colors.white,
               surface: const Color(0xFFE6E9EF),
               onSurface: const Color(0xFF3D4C5F),
-            ),
-            dialogBackgroundColor: Colors.white,
+            ), dialogTheme: DialogThemeData(backgroundColor: Colors.white),
           ),
           child: child!,
         );

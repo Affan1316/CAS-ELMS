@@ -11,15 +11,27 @@ import 'package:flutter_cas_app_main/src/features/student_feature/presentation/b
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/StudentDetailPage.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-class GroupStudentsScreen extends StatelessWidget {
+class GroupStudentsScreen extends StatefulWidget {
   final String groupTitle;
-  // final List<Student> students;
 
   const GroupStudentsScreen({
     super.key,
     required this.groupTitle,
-    // required this.students,
   });
+
+  @override
+  State<GroupStudentsScreen> createState() => _GroupStudentsScreenState();
+}
+
+class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
+  List<String> listOfGroupNamesForDropDownMenu = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch group names when screen loads
+    context.read<StudentFeatureBloc>().add(FetchGroupNamesEvent());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +45,7 @@ class GroupStudentsScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF8F9FD), // App Background
       appBar: AppBar(
         title: Text(
-          "Students of $groupTitle",
+          "Students of ${widget.groupTitle}",
           style: const TextStyle(
             color: Colors.white,
           ), // Text on Header must be White
@@ -57,9 +69,15 @@ class GroupStudentsScreen extends StatelessWidget {
         ), // Text/Icons on Header must be White
       ),
       body: BlocConsumer<StudentFeatureBloc, StudentFeatureState>(
-        listenWhen: (previous, current) => current is GroupStudentsDatafetched,
-
         listener: (context, state) {
+          // Listen for group names fetching
+          if (state is GroupNamesfetchingCompleted) {
+            setState(() {
+              listOfGroupNamesForDropDownMenu = state.listOfGroupNames;
+            });
+          }
+
+          // Listen for student details navigation
           if (state is GroupStudentsDatafetched) {
             Navigator.push(
               context,
@@ -83,12 +101,42 @@ class GroupStudentsScreen extends StatelessWidget {
               ),
             );
           }
+
+          // ← NEW: Listen for group update success
+          if (state is StudentGroupUpdateSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Student moved to "${state.newGroupName}" successfully!',
+                ),
+                backgroundColor: const Color(0xFF10B981),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            );
+          }
+
+          // ← NEW: Listen for group update failure
+          if (state is StudentGroupUpdateFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to update group: ${state.error}'),
+                backgroundColor: const Color(0xFFEF4444),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            );
+          }
         },
         builder: (context, state) {
           var students = [];
           return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: readWholeGroupStudentsListUsecase.readWholeGroupStudents(
-              groupTitle,
+              widget.groupTitle,
             ),
             builder: (
               context,
@@ -145,19 +193,18 @@ class GroupStudentsScreen extends StatelessWidget {
                         children: [
                           SlidableAction(
                             onPressed: (context) {
+                              // ← UPDATED: Pass student ID to dialog
                               showDialog(
                                 context: context,
-                                builder:
-                                    (context) =>
-                                        _buildGroupSelectionDialog(context),
+                                builder: (context) =>
+                                    _buildGroupSelectionDialog(
+                                  context,
+                                  student.rollNum, // Pass student ID
+                                ),
                               );
                             },
-                            backgroundColor: const Color(
-                              0xFFE5E7EB,
-                            ), // Very Light Gray
-                            foregroundColor: const Color(
-                              0xFF3B82F6,
-                            ), // Primary Color
+                            backgroundColor: const Color(0xFFE5E7EB),
+                            foregroundColor: const Color(0xFF3B82F6),
                             icon: Icons.edit,
                             label: 'Edit',
                           ),
@@ -179,8 +226,8 @@ class GroupStudentsScreen extends StatelessWidget {
                       child: GestureDetector(
                         onTap: () {
                           context.read<StudentFeatureBloc>().add(
-                            FetchGroupStudentsEvent(id: student.rollNum),
-                          );
+                                FetchGroupStudentsEvent(id: student.rollNum),
+                              );
                         },
                         child: Container(
                           margin: const EdgeInsets.only(bottom: 18),
@@ -209,25 +256,21 @@ class GroupStudentsScreen extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder:
-                                          (_) => const FullScreenImage(
-                                            imagePath:
-                                                "assets/images/student-male.png",
-                                          ),
+                                      builder: (_) => const FullScreenImage(
+                                        imagePath:
+                                            "assets/images/student-male.png",
+                                      ),
                                     ),
                                   );
                                 },
                                 child: const CircleAvatar(
                                   radius: 28,
-                                  backgroundColor: Color(
-                                    0xFF3B82F6,
-                                  ), // Primary Color
+                                  backgroundColor: Color(0xFF3B82F6),
                                   backgroundImage: AssetImage(
                                     "assets/images/student-male.png",
                                   ),
                                 ),
                               ),
-
                               const SizedBox(width: 16),
                               Expanded(
                                 child: Column(
@@ -246,9 +289,7 @@ class GroupStudentsScreen extends StatelessWidget {
                                       student.rollNum,
                                       style: const TextStyle(
                                         fontSize: 14,
-                                        color: Color(
-                                          0xFF374151,
-                                        ), // Secondary Text (Slate Gray)
+                                        color: Color(0xFF374151),
                                       ),
                                     ),
                                   ],
@@ -269,15 +310,9 @@ class GroupStudentsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGroupSelectionDialog(BuildContext context) {
+  // ← UPDATED: Added studentId parameter
+  Widget _buildGroupSelectionDialog(BuildContext context, String studentId) {
     String? selectedGroup;
-    final List<String> groups = [
-      'AI Group',
-      'Web Development',
-      'Data Science',
-      'Mobile Development',
-      'UI/UX Design',
-    ];
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -312,115 +347,145 @@ class GroupStudentsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // Dropdown field with minimal shadow
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        offset: const Offset(0, 1),
-                        blurRadius: 2,
-                        spreadRadius: 0,
-                        color: const Color(0xFFE5E7EB), // Border/Shadow
+                // Show loading or dropdown based on data availability
+                listOfGroupNamesForDropDownMenu.isEmpty
+                    ? const CircularProgressIndicator()
+                    : Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              offset: const Offset(0, 1),
+                              blurRadius: 2,
+                              spreadRadius: 0,
+                              color: const Color(0xFFE5E7EB), // Border/Shadow
+                            ),
+                          ],
+                        ),
+                        child: Theme(
+                          data: ThemeData.light().copyWith(
+                            canvasColor: Colors.white,
+                          ),
+                          child: DropdownButtonFormField<String>(
+                            value: selectedGroup ??
+                                listOfGroupNamesForDropDownMenu.first,
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 15,
+                                vertical: 15,
+                              ),
+                              border: InputBorder.none,
+                              prefixIcon: Icon(
+                                Icons.group,
+                                color: Color(0xFF6B7280), // Input Icons
+                              ),
+                            ),
+                            icon: const Icon(
+                              Icons.arrow_drop_down,
+                              color: Color(0xFF6B7280), // Input Icons
+                            ),
+                            style: const TextStyle(
+                              color: Color(0xFF111827), // Primary Text
+                              fontSize: 16,
+                            ),
+                            dropdownColor: Colors.white,
+                            items: listOfGroupNamesForDropDownMenu
+                                .map((String group) {
+                              return DropdownMenuItem<String>(
+                                value: group,
+                                child: Text(group),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                selectedGroup = newValue;
+                              });
+                            },
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                  child: DropdownButtonFormField<String>(
-                    initialValue: selectedGroup ?? groups.first,
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 15,
-                      ),
-                      border: InputBorder.none,
-                      prefixIcon: Icon(
-                        Icons.group,
-                        color: Color(0xFF6B7280), // Input Icons
-                      ),
-                    ),
-                    icon: const Icon(
-                      Icons.arrow_drop_down,
-                      color: Color(0xFF6B7280), // Input Icons
-                    ),
-                    style: const TextStyle(
-                      color: Color(0xFF111827), // Primary Text
-                      fontSize: 16,
-                    ),
-                    items:
-                        groups.map((String group) {
-                          return DropdownMenuItem<String>(
-                            value: group,
-                            child: Text(group),
-                          );
-                        }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedGroup = newValue;
-                      });
-                    },
-                  ),
-                ),
+
                 const SizedBox(height: 24),
 
-                // Add Group button with minimal shadow
-                InkWell(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Group "${selectedGroup ?? groups.first}" added successfully!',
-                        ),
-                        backgroundColor: const Color(
-                          0xFF3B82F6,
-                        ), // Primary Color
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
+                // ← UPDATED: Add Group button now triggers the update event
+                BlocBuilder<StudentFeatureBloc, StudentFeatureState>(
+                  builder: (context, state) {
+                    final isUpdating = state is StudentGroupUpdating;
+
+                    return InkWell(
+                      onTap: (listOfGroupNamesForDropDownMenu.isEmpty ||
+                              isUpdating)
+                          ? null
+                          : () {
+                              final groupToAssign = selectedGroup ??
+                                  listOfGroupNamesForDropDownMenu.first;
+
+                              // ← TRIGGER THE UPDATE EVENT
+                              context.read<StudentFeatureBloc>().add(
+                                    UpdateStudentGroupEvent(
+                                      studentId: studentId,
+                                      newGroupName: groupToAssign,
+                                    ),
+                                  );
+
+                              Navigator.of(context).pop();
+                            },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        width: double.infinity,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: (listOfGroupNamesForDropDownMenu.isEmpty ||
+                                    isUpdating)
+                                ? [Colors.grey, Colors.grey]
+                                : [
+                                    const Color(0xFF3B82F6), // Gradient Start
+                                    const Color(0xFF5D5FEF), // Gradient End
+                                  ],
+                          ),
                           borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              offset: const Offset(0, 2),
+                              blurRadius: 4,
+                              spreadRadius: 0,
+                              color: Colors.black.withOpacity(0.15),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (isUpdating)
+                              const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            else ...[
+                              const Text(
+                                "Add Group",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.add, color: Colors.white),
+                            ],
+                          ],
                         ),
                       ),
                     );
                   },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    width: double.infinity,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFF3B82F6), // Gradient Start
-                          Color(0xFF5D5FEF), // Gradient End
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          offset: const Offset(0, 2),
-                          blurRadius: 4,
-                          spreadRadius: 0,
-                          color: Colors.black.withOpacity(0.15),
-                        ),
-                      ],
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Add Group",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Icon(Icons.add, color: Colors.white),
-                      ],
-                    ),
-                  ),
                 ),
               ],
             ),
