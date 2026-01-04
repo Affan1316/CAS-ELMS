@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:animate_do/animate_do.dart';
@@ -6,7 +5,6 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/gradient_background.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/neu_card.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_padding.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_text.dart';
 
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_installment_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';

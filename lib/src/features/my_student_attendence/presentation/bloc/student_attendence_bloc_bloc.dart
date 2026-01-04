@@ -5,12 +5,9 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
 import 'package:flutter_cas_app_main/src/features/my_student_attendence/data/reposetory/student_attendence_firebase.dart';
 import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/services/location_service.dart';
-import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Domain/repository/hive_repository.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../../workshop_geofencing/Data/getTimeConversions.dart';
-import '../../../workshop_geofencing/Data/services/notification_service.dart';
-import '../../../workshop_geofencing/Domain/repository/shared_preference_repository.dart';
 import '../../data/model/model_classes.dart';
 
 part 'student_attendence_bloc_event.dart';

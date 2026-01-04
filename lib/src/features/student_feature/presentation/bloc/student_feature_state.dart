@@ -51,6 +51,25 @@ class GroupNamesfetchingCompleted extends StudentFeatureState {
   GroupNamesfetchingCompleted({required this.listOfGroupNames});
 }
 
+
+class StudentGroupUpdating extends StudentFeatureState {}
+
+class StudentGroupUpdateSuccess extends StudentFeatureState {
+  final String studentId;
+  final String newGroupName;
+
+  StudentGroupUpdateSuccess({
+    required this.studentId,
+    required this.newGroupName,
+  });
+}
+
+class StudentGroupUpdateFailure extends StudentFeatureState {
+  final String error;
+  StudentGroupUpdateFailure(this.error);
+}
+
+
 class StudentSideFeeLoadingState extends StudentFeatureState {}
 
 class StudentFeeLoadFailureState extends StudentFeatureState {
