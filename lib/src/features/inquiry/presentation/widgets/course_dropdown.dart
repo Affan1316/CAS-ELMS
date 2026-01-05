@@ -33,7 +33,7 @@ class CourseDropdown extends StatelessWidget {
             canvasColor: Colors.white,
           ),
           child: DropdownButtonFormField<String>(
-            value: courses.contains(selectedCourse) ? selectedCourse : null,
+            initialValue: courses.contains(selectedCourse) ? selectedCourse : null,
             hint: Text(
               courses.isEmpty ? 'Loading courses...' : 'Select a course',
               style: const TextStyle(color: Color(0xFF9CA3AF)),

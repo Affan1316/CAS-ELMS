@@ -125,4 +125,93 @@ class ActualImplementationFirebaseRepo implements FirestoreRepositry {
       throw Exception('Failed to update student group: ${e.toString()}');
     }
   }
+  
+  @override
+  Future<void> updateStudentData(StudentEntityClass student) async {
+    try {
+      // Step 1: Get current student data to check if group changed
+      DocumentSnapshot<Map<String, dynamic>> studentDoc = await firestore
+          .collection(completeStudentsCollectionName)
+          .doc(student.id)
+          .get();
+
+      String? oldGroupName;
+      if (studentDoc.exists) {
+        Map<String, dynamic>? oldData = studentDoc.data();
+        oldGroupName = oldData?['group'];
+      }
+
+      // Step 2: Update main student collection
+      await firestore
+          .collection(completeStudentsCollectionName)
+          .doc(student.id)
+          .update({
+            "name": student.name,
+            "fatherName": student.fatherName,
+            "address": student.address,
+            "cnic": student.cnic,
+            "gender": student.gender,
+            "email": student.email,
+            "fatherOccupation": student.fatherOccupation,
+            "group": student.group,
+            "phone": student.phone,
+          });
+
+      // Step 3: If group changed, update group collections
+      if (oldGroupName != null && oldGroupName != student.group) {
+        // Remove from old group
+        await firestore
+            .collection("$oldGroupName students")
+            .doc(student.id)
+            .delete();
+
+        // Add to new group
+        await firestore
+            .collection("${student.group} students")
+            .doc(student.id)
+            .set({
+              "name": student.name,
+              "rollNum": student.id,
+            });
+      } else {
+        // Just update name in current group collection
+        await firestore
+            .collection("${student.group} students")
+            .doc(student.id)
+            .update({
+              "name": student.name,
+            });
+      }
+
+      print("✅ Student ${student.id} updated successfully");
+    } catch (e) {
+      print("❌ Error updating student data: $e");
+      throw Exception('Failed to update student data: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> deleteStudent({
+    required String studentId,
+    required String groupName,
+  }) async {
+    try {
+      // Step 1: Delete from main students collection
+      await firestore
+          .collection(completeStudentsCollectionName)
+          .doc(studentId)
+          .delete();
+
+      // Step 2: Delete from group collection
+      await firestore
+          .collection("$groupName students")
+          .doc(studentId)
+          .delete();
+
+      print("✅ Student $studentId deleted successfully from $groupName");
+    } catch (e) {
+      print("❌ Error deleting student: $e");
+      throw Exception('Failed to delete student: ${e.toString()}');
+    }
+  }
 }

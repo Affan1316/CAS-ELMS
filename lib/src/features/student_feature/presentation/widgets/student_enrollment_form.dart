@@ -6,6 +6,7 @@ import 'package:flutter_cas_app_main/src/features/student_feature/presentation/b
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';
 
 class StudentEnrollmentForm extends StatelessWidget {
+  final bool isEditMode; // ← NEW: Determines if we're editing
   final GlobalKey<FormState> formKey;
   final TextEditingController studentIdController;
   final TextEditingController nameController;
@@ -23,6 +24,7 @@ class StudentEnrollmentForm extends StatelessWidget {
 
   const StudentEnrollmentForm({
     super.key,
+    this.isEditMode = false, // ← NEW: Default to false (enrollment mode)
     required this.listOfGroupsNames,
     required this.formKey,
     required this.studentIdController,
@@ -66,6 +68,20 @@ class StudentEnrollmentForm extends StatelessWidget {
             ),
           );
         }
+        // ← NEW: Listen for update success
+        else if (state is StudentDataUpdateSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Student updated successfully!'),
+              backgroundColor: const Color(0xFF10B981),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+          Navigator.of(context).pop();
+        }
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -95,16 +111,16 @@ class StudentEnrollmentForm extends StatelessWidget {
                     color: Colors.white.withOpacity(0.18),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Icon(
-                    Icons.school,
+                  child: Icon(
+                    isEditMode ? Icons.edit : Icons.school, // ← UPDATED: Dynamic icon
                     size: 44,
                     color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Enroll New Student',
-                  style: TextStyle(
+                Text(
+                  isEditMode ? 'Update Student' : 'Enroll New Student', // ← UPDATED: Dynamic title
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -112,7 +128,9 @@ class StudentEnrollmentForm extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Fill in the details below to register a student',
+                  isEditMode
+                      ? 'Update the student information below'
+                      : 'Fill in the details below to register a student', // ← UPDATED: Dynamic subtitle
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.white.withOpacity(0.9),
@@ -161,6 +179,7 @@ class StudentEnrollmentForm extends StatelessWidget {
                               controller: studentIdController,
                               label: 'Student ID',
                               icon: Icons.badge_outlined,
+                              enabled: !isEditMode, // ← UPDATED: Disable ID in edit mode
                               validator:
                                   (v) =>
                                       (v == null || v.isEmpty)
@@ -291,9 +310,7 @@ class StudentEnrollmentForm extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color:
-                                        Colors
-                                            .black87, // Fixed color for visibility
+                                    color: Colors.black87,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -316,24 +333,19 @@ class StudentEnrollmentForm extends StatelessWidget {
                                           size: 20,
                                         ),
                                         hintText: 'Select Group',
-                                        // Added hint style for visibility
                                         hintStyle: const TextStyle(
                                           color: Colors.grey,
                                         ),
                                         filled: true,
                                         fillColor: const Color(0xFFF9FAFB),
                                         border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
+                                          borderRadius: BorderRadius.circular(12),
                                           borderSide: const BorderSide(
                                             color: Color(0xFFE5E7EB),
                                           ),
                                         ),
                                         focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
+                                          borderRadius: BorderRadius.circular(12),
                                           borderSide: const BorderSide(
                                             color: Color(0xFF3B82F6),
                                             width: 2,
@@ -351,7 +363,6 @@ class StudentEnrollmentForm extends StatelessWidget {
                                           value: field.value,
                                           isDense: true,
                                           isExpanded: true,
-                                          // Added style to force black text
                                           style: const TextStyle(
                                             color: Colors.black,
                                             fontSize: 16,
@@ -393,7 +404,7 @@ class StudentEnrollmentForm extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87, // Fixed color for visibility
+                          color: Colors.black87,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -406,93 +417,97 @@ class StudentEnrollmentForm extends StatelessWidget {
                       ),
 
                       const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF3B82F6),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            elevation: 4,
-                          ),
-                          onPressed: () {
-                            if (studentIdController.text.trim().isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text(
-                                    'Please enter Student ID first',
-                                  ),
-                                  backgroundColor: const Color(0xFFEF4444),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-                            if (nameController.text.trim().isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text(
-                                    'Please enter Student name first',
-                                  ),
-                                  backgroundColor: const Color(0xFFEF4444),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-                            if (groupController.text.trim().isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text(
-                                    'Please enter group  first',
-                                  ),
-                                  backgroundColor: const Color(0xFFEF4444),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => CreateFeePlanPage(
-                                      studentId:
-                                          studentIdController.text
-                                              .toLowerCase()
-                                              .trim(),
-                                      groupId: groupController.text,
 
-                                      name: nameController.text.trim(),
-                                    ),
+                      // ← UPDATED: Hide "Make Installment" button in edit mode
+                      if (!isEditMode) ...[
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF3B82F6),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
                               ),
-                            );
-                          },
-                          child: const Text(
-                            'Make Installment',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                              elevation: 4,
+                            ),
+                            onPressed: () {
+                              if (studentIdController.text.trim().isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text(
+                                      'Please enter Student ID first',
+                                    ),
+                                    backgroundColor: const Color(0xFFEF4444),
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+                              if (nameController.text.trim().isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text(
+                                      'Please enter Student name first',
+                                    ),
+                                    backgroundColor: const Color(0xFFEF4444),
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+                              if (groupController.text.trim().isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text(
+                                      'Please enter group  first',
+                                    ),
+                                    backgroundColor: const Color(0xFFEF4444),
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => CreateFeePlanPage(
+                                        studentId:
+                                            studentIdController.text
+                                                .toLowerCase()
+                                                .trim(),
+                                        groupId: groupController.text,
+                                        name: nameController.text.trim(),
+                                      ),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              'Make Installment',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 25),
+                        const SizedBox(height: 25),
+                      ],
 
                       BlocBuilder<StudentFeatureBloc, StudentFeatureState>(
                         builder: (context, state) {
                           final isLoading =
-                              state is StudentEnrollmentSubmitting;
+                              state is StudentEnrollmentSubmitting ||
+                              state is StudentDataUpdating; // ← UPDATED: Check both states
                           return SizedBox(
                             width: double.infinity,
                             height: 52,
@@ -503,40 +518,78 @@ class StudentEnrollmentForm extends StatelessWidget {
                                       : () {
                                         if (formKey.currentState?.validate() ??
                                             false) {
-                                          context
-                                              .read<StudentFeatureBloc>()
-                                              .add(
-                                                SubmitEnrollmentFormEvent(
-                                                  id:
-                                                      studentIdController.text
-                                                          .toLowerCase()
-                                                          .trim(),
-                                                  name:
-                                                      nameController.text
-                                                          .trim(),
-                                                  email:
-                                                      emailController.text
-                                                          .trim(),
-                                                  cnic:
-                                                      cnicController.text
-                                                          .trim(),
-                                                  phone:
-                                                      phoneController.text
-                                                          .trim(),
-                                                  address:
-                                                      addressController.text
-                                                          .trim(),
-                                                  gender: selectedGender.trim(),
-                                                  fatherName:
-                                                      fatherNameController.text
-                                                          .trim(),
-                                                  fatherOccupation:
-                                                      fatherOccupationController
-                                                          .text
-                                                          .trim(),
-                                                  group: groupController.text,
-                                                ),
-                                              );
+                                          // ← UPDATED: Trigger different events based on mode
+                                          if (isEditMode) {
+                                            context
+                                                .read<StudentFeatureBloc>()
+                                                .add(
+                                                  UpdateStudentDataEvent(
+                                                    id:
+                                                        studentIdController.text
+                                                            .toLowerCase()
+                                                            .trim(),
+                                                    name:
+                                                        nameController.text
+                                                            .trim(),
+                                                    email:
+                                                        emailController.text
+                                                            .trim(),
+                                                    cnic:
+                                                        cnicController.text
+                                                            .trim(),
+                                                    phone:
+                                                        phoneController.text
+                                                            .trim(),
+                                                    address:
+                                                        addressController.text
+                                                            .trim(),
+                                                    gender: selectedGender.trim(),
+                                                    fatherName:
+                                                        fatherNameController.text
+                                                            .trim(),
+                                                    fatherOccupation:
+                                                        fatherOccupationController
+                                                            .text
+                                                            .trim(),
+                                                    group: groupController.text,
+                                                  ),
+                                                );
+                                          } else {
+                                            context
+                                                .read<StudentFeatureBloc>()
+                                                .add(
+                                                  SubmitEnrollmentFormEvent(
+                                                    id:
+                                                        studentIdController.text
+                                                            .toLowerCase()
+                                                            .trim(),
+                                                    name:
+                                                        nameController.text
+                                                            .trim(),
+                                                    email:
+                                                        emailController.text
+                                                            .trim(),
+                                                    cnic:
+                                                        cnicController.text
+                                                            .trim(),
+                                                    phone:
+                                                        phoneController.text
+                                                            .trim(),
+                                                    address:
+                                                        addressController.text
+                                                            .trim(),
+                                                    gender: selectedGender.trim(),
+                                                    fatherName:
+                                                        fatherNameController.text
+                                                            .trim(),
+                                                    fatherOccupation:
+                                                        fatherOccupationController
+                                                            .text
+                                                            .trim(),
+                                                    group: groupController.text,
+                                                  ),
+                                                );
+                                          }
                                         }
                                       },
                               style: ElevatedButton.styleFrom(
@@ -556,9 +609,9 @@ class StudentEnrollmentForm extends StatelessWidget {
                                           color: Colors.white,
                                         ),
                                       )
-                                      : const Text(
-                                        'Submit Enrollment',
-                                        style: TextStyle(
+                                      : Text(
+                                        isEditMode ? 'Update Student' : 'Submit Enrollment', // ← UPDATED: Dynamic button text
+                                        style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -582,6 +635,7 @@ class StudentEnrollmentForm extends StatelessWidget {
     required TextEditingController controller,
     required String label,
     required IconData icon,
+    bool enabled = true, // ← NEW: Allow disabling field
     TextInputType? keyboardType,
     String? Function(String?)? validator,
     int maxLines = 1,
@@ -594,24 +648,23 @@ class StudentEnrollmentForm extends StatelessWidget {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Colors.black87, // Fixed color for visibility
+            color: Colors.black87,
           ),
         ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
+          enabled: enabled, // ← NEW: Apply enabled state
           keyboardType: keyboardType,
           maxLines: maxLines,
           validator: validator,
-          // Added Style to force black text inside field
           style: const TextStyle(color: Colors.black),
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: const Color(0xFF6B7280), size: 20),
             hintText: 'Enter $label',
-            // Ensure Hint is visible
             hintStyle: const TextStyle(color: Colors.grey),
             filled: true,
-            fillColor: const Color(0xFFF9FAFB),
+            fillColor: enabled ? const Color(0xFFF9FAFB) : Colors.grey[200], // ← NEW: Different color when disabled
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
@@ -619,6 +672,10 @@ class StudentEnrollmentForm extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
+            ),
+            disabledBorder: OutlineInputBorder( // ← NEW: Border style when disabled
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,

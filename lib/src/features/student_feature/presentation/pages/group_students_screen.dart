@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +10,8 @@ import 'package:flutter_cas_app_main/src/features/student_feature/presentation/b
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/StudentDetailPage.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_enrollment_screen.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/presentation/widgets/student_card_action.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 class GroupStudentsScreen extends StatefulWidget {
@@ -25,30 +28,307 @@ class GroupStudentsScreen extends StatefulWidget {
 
 class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
   List<String> listOfGroupNamesForDropDownMenu = [];
+  bool _isNavigating = false;
+  bool _isUpdatingGroup = false;
+  bool _isDeletingStudent = false;
 
   @override
   void initState() {
     super.initState();
-    // Fetch group names when screen loads
     context.read<StudentFeatureBloc>().add(FetchGroupNamesEvent());
+  }
+
+  // Show loading dialog
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.5),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF3B82F6),
+                        Color(0xFF5D5FEF),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Loading student data...',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF111827),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Hide loading dialog
+  void _hideLoadingDialog() {
+    if (mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+  }
+
+  // Show loading dialog for group update
+  void _showGroupUpdateLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.5),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF3B82F6),
+                        Color(0xFF5D5FEF),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Moving student to group...',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF111827),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Show loading dialog for delete operation
+  void _showDeleteLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.5),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFFEF4444),
+                        Color(0xFFDC2626),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Deleting student...',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF111827),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Navigate to edit screen with loading dialog
+  Future<void> _navigateToEditScreen(String studentId) async {
+    if (_isNavigating) return;
+    
+    _isNavigating = true;
+    _showLoadingDialog();
+
+    try {
+      // Fetch full student data
+      context.read<StudentFeatureBloc>().add(
+        FetchGroupStudentsEvent(id: studentId),
+      );
+
+      // Wait for the BLoC to emit the data
+      final completer = Completer<StudentEntityClass>();
+      
+      final subscription = context.read<StudentFeatureBloc>().stream.listen((state) {
+        if (state is GroupStudentsDatafetched && !completer.isCompleted) {
+          final studentData = StudentEntityClass(
+            id: state.id,
+            name: state.name,
+            email: state.email,
+            cnic: state.cnic,
+            phone: state.phone,
+            address: state.address,
+            gender: state.gender,
+            fatherName: state.fatherName,
+            fatherOccupation: state.fatherOccupation,
+            group: state.group,
+          );
+          completer.complete(studentData);
+        }
+      });
+
+      // Wait for data with timeout
+      final studentData = await completer.future.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          throw Exception('Timeout fetching student data');
+        },
+      );
+
+      subscription.cancel();
+      _hideLoadingDialog();
+
+      // Navigate to edit screen
+      if (mounted) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => StudentEnrollmentScreen(
+              isEditMode: true,
+              studentData: studentData,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      _hideLoadingDialog();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading student data: $e'),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    } finally {
+      _isNavigating = false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final cardColor = const Color(0xFFFFFFFF); // Component Background
-    final shadowColor = const Color(0xFFE5E7EB); // Borders/Shadow
-    final darkPurple = const Color(0xFF111827); // Primary Text
+    final cardColor = const Color(0xFFFFFFFF);
+    final shadowColor = const Color(0xFFE5E7EB);
+    final darkPurple = const Color(0xFF111827);
     final ReadWholeGroupStudentsListUsecase readWholeGroupStudentsListUsecase =
         ReadWholeGroupStudentsListUsecase();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FD), // App Background
+      backgroundColor: const Color(0xFFF8F9FD),
       appBar: AppBar(
         title: Text(
           "Students of ${widget.groupTitle}",
           style: const TextStyle(
             color: Colors.white,
-          ), // Text on Header must be White
+          ),
         ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -56,8 +336,8 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFF3B82F6), // Gradient Start
-                Color(0xFF5D5FEF), // Gradient End
+                Color(0xFF3B82F6),
+                Color(0xFF5D5FEF),
               ],
             ),
           ),
@@ -66,44 +346,53 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
         centerTitle: true,
         iconTheme: const IconThemeData(
           color: Colors.white,
-        ), // Text/Icons on Header must be White
+        ),
       ),
       body: BlocConsumer<StudentFeatureBloc, StudentFeatureState>(
         listener: (context, state) {
-          // Listen for group names fetching
           if (state is GroupNamesfetchingCompleted) {
             setState(() {
               listOfGroupNamesForDropDownMenu = state.listOfGroupNames;
             });
           }
 
-          // Listen for student details navigation
-          if (state is GroupStudentsDatafetched) {
+          // This listener now ONLY handles card tap (view details)
+          // Ignore if we're navigating
+          if (state is GroupStudentsDatafetched && !_isNavigating) {
+            _isNavigating = true;
+
+            final studentData = StudentEntityClass(
+              id: state.id,
+              name: state.name,
+              email: state.email,
+              cnic: state.cnic,
+              phone: state.phone,
+              address: state.address,
+              gender: state.gender,
+              fatherName: state.fatherName,
+              fatherOccupation: state.fatherOccupation,
+              group: state.group,
+            );
+
+            // Only navigate to detail page from here (when tapping the card)
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) {
-                  return StudentDetailPage(
-                    student: StudentEntityClass(
-                      id: state.id,
-                      name: state.name,
-                      email: state.email,
-                      cnic: state.cnic,
-                      phone: state.phone,
-                      address: state.address,
-                      gender: state.gender,
-                      fatherName: state.fatherName,
-                      fatherOccupation: state.fatherOccupation,
-                      group: state.group,
-                    ),
-                  );
-                },
+                builder: (context) => StudentDetailPage(student: studentData),
               ),
-            );
+            ).then((_) {
+              _isNavigating = false;
+            });
           }
 
-          // ← NEW: Listen for group update success
+          // Handle group update loading dialog
           if (state is StudentGroupUpdateSuccess) {
+            // Close loading dialog if it's open
+            if (_isUpdatingGroup) {
+              Navigator.of(context, rootNavigator: true).pop();
+              _isUpdatingGroup = false;
+            }
+            
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -118,8 +407,13 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
             );
           }
 
-          // ← NEW: Listen for group update failure
           if (state is StudentGroupUpdateFailure) {
+            // Close loading dialog if it's open
+            if (_isUpdatingGroup) {
+              Navigator.of(context, rootNavigator: true).pop();
+              _isUpdatingGroup = false;
+            }
+            
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Failed to update group: ${state.error}'),
@@ -131,9 +425,52 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
               ),
             );
           }
+
+          // Handle delete success
+          if (state is StudentDeleteSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.white),
+                    SizedBox(width: 12),
+                    Text('Student deleted successfully!'),
+                  ],
+                ),
+                backgroundColor: const Color(0xFF10B981),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+
+          // Handle delete failure
+          if (state is StudentDeleteFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.white),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text('Delete failed: ${state.error}'),
+                    ),
+                  ],
+                ),
+                backgroundColor: const Color(0xFFEF4444),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
         },
         builder: (context, state) {
-          var students = [];
           return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: readWholeGroupStudentsListUsecase.readWholeGroupStudents(
               widget.groupTitle,
@@ -147,26 +484,28 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
               }
 
               if (snapshot.hasError) {
-                return Center(child: Text("Error: ${snapshot.error}"));
+                return Center(
+                  child: Scaffold(
+                    body: Center(
+                      child: Text("Error: ${snapshot.error}"),
+                    ),
+                  ),
+                );
               }
 
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return const Center(child: Text("No students found"));
+                return const Center(
+                  child: Text("No students found"),
+                );
               }
-              print("@@@@@@@@@@@@@ we are runing erro line now CAS CAS CAS ");
-              snapshot.data!.docs.map((e) {
-                print(e.data());
-              });
-              // Data  ready to reaad
-              students =
-                  snapshot.data!.docs
-                      .map(
-                        (doc) => StudentFeatureGroupStudentEntityClass.fromMap(
-                          doc.data(),
-                        ),
-                      )
-                      .toList();
-              print(students);
+
+              final students = snapshot.data!.docs
+                  .map(
+                    (doc) => StudentFeatureGroupStudentEntityClass.fromMap(
+                      doc.data(),
+                    ),
+                  )
+                  .toList();
 
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
@@ -188,43 +527,30 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                     },
                     child: Slidable(
                       key: ValueKey(student.rollNum),
-                      startActionPane: ActionPane(
-                        motion: const BehindMotion(),
-                        children: [
-                          SlidableAction(
-                            onPressed: (context) {
-                              // ← UPDATED: Pass student ID to dialog
-                              showDialog(
-                                context: context,
-                                builder: (context) =>
-                                    _buildGroupSelectionDialog(
-                                  context,
-                                  student.rollNum, // Pass student ID
-                                ),
-                              );
-                            },
-                            backgroundColor: const Color(0xFFE5E7EB),
-                            foregroundColor: const Color(0xFF3B82F6),
-                            icon: Icons.edit,
-                            label: 'Edit',
-                          ),
-                          SlidableAction(
-                            onPressed: (context) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Deleted ${student.name}'),
-                                ),
-                              );
-                            },
-                            backgroundColor: Colors.red.shade100,
-                            foregroundColor: Colors.red,
-                            icon: Icons.delete,
-                            label: 'Delete',
-                          ),
-                        ],
+                      startActionPane: StudentCardActions.buildActionPane(
+                        context: context,
+                        studentId: student.rollNum,
+                        studentName: student.name,
+                        groupName: widget.groupTitle,
+                        onEditGroup: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => _buildGroupSelectionDialog(
+                              context,
+                              student.rollNum,
+                            ),
+                          );
+                        },
+                        onUpdateStudent: () {
+                          // Navigate to edit screen with loading dialog
+                          _navigateToEditScreen(student.rollNum);
+                        },
                       ),
                       child: GestureDetector(
                         onTap: () {
+                          // Prevent action if already navigating
+                          if (_isNavigating) return;
+                          
                           context.read<StudentFeatureBloc>().add(
                                 FetchGroupStudentsEvent(id: student.rollNum),
                               );
@@ -252,7 +578,6 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  // Open full screen image on tap
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -281,7 +606,7 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
-                                        color: darkPurple, // Primary Text
+                                        color: darkPurple,
                                       ),
                                     ),
                                     const SizedBox(height: 4),
@@ -310,7 +635,6 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
     );
   }
 
-  // ← UPDATED: Added studentId parameter
   Widget _buildGroupSelectionDialog(BuildContext context, String studentId) {
     String? selectedGroup;
 
@@ -322,32 +646,29 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
           return Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFFFFF), // Component Background
+              color: const Color(0xFFFFFFFF),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
                   offset: const Offset(0, 1),
                   blurRadius: 3,
                   spreadRadius: 0,
-                  color: const Color(0xFFE5E7EB), // Border/Shadow
+                  color: const Color(0xFFE5E7EB),
                 ),
               ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Title
                 const Text(
                   'Group Selection',
                   style: TextStyle(
-                    color: Color(0xFF111827), // Primary Text
+                    color: Color(0xFF111827),
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // Show loading or dropdown based on data availability
                 listOfGroupNamesForDropDownMenu.isEmpty
                     ? const CircularProgressIndicator()
                     : Container(
@@ -359,7 +680,7 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                               offset: const Offset(0, 1),
                               blurRadius: 2,
                               spreadRadius: 0,
-                              color: const Color(0xFFE5E7EB), // Border/Shadow
+                              color: const Color(0xFFE5E7EB),
                             ),
                           ],
                         ),
@@ -378,15 +699,15 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                               border: InputBorder.none,
                               prefixIcon: Icon(
                                 Icons.group,
-                                color: Color(0xFF6B7280), // Input Icons
+                                color: Color(0xFF6B7280),
                               ),
                             ),
                             icon: const Icon(
                               Icons.arrow_drop_down,
-                              color: Color(0xFF6B7280), // Input Icons
+                              color: Color(0xFF6B7280),
                             ),
                             style: const TextStyle(
-                              color: Color(0xFF111827), // Primary Text
+                              color: Color(0xFF111827),
                               fontSize: 16,
                             ),
                             dropdownColor: Colors.white,
@@ -405,87 +726,72 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                           ),
                         ),
                       ),
-
                 const SizedBox(height: 24),
+                InkWell(
+                  onTap: listOfGroupNamesForDropDownMenu.isEmpty
+                      ? null
+                      : () {
+                          final groupToAssign = selectedGroup ??
+                              listOfGroupNamesForDropDownMenu.first;
 
-                // ← UPDATED: Add Group button now triggers the update event
-                BlocBuilder<StudentFeatureBloc, StudentFeatureState>(
-                  builder: (context, state) {
-                    final isUpdating = state is StudentGroupUpdating;
-
-                    return InkWell(
-                      onTap: (listOfGroupNamesForDropDownMenu.isEmpty ||
-                              isUpdating)
-                          ? null
-                          : () {
-                              final groupToAssign = selectedGroup ??
-                                  listOfGroupNamesForDropDownMenu.first;
-
-                              // ← TRIGGER THE UPDATE EVENT
-                              context.read<StudentFeatureBloc>().add(
-                                    UpdateStudentGroupEvent(
-                                      studentId: studentId,
-                                      newGroupName: groupToAssign,
-                                    ),
-                                  );
-
-                              Navigator.of(context).pop();
-                            },
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        width: double.infinity,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: (listOfGroupNamesForDropDownMenu.isEmpty ||
-                                    isUpdating)
-                                ? [Colors.grey, Colors.grey]
-                                : [
-                                    const Color(0xFF3B82F6), // Gradient Start
-                                    const Color(0xFF5D5FEF), // Gradient End
-                                  ],
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              offset: const Offset(0, 2),
-                              blurRadius: 4,
-                              spreadRadius: 0,
-                              color: Colors.black.withOpacity(0.15),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (isUpdating)
-                              const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
+                          // Close the group selection dialog first
+                          Navigator.of(context).pop();
+                          
+                          // Show loading dialog and set flag
+                          setState(() {
+                            _isUpdatingGroup = true;
+                          });
+                          _showGroupUpdateLoadingDialog();
+                          
+                          // Trigger update event
+                          context.read<StudentFeatureBloc>().add(
+                                UpdateStudentGroupEvent(
+                                  studentId: studentId,
+                                  newGroupName: groupToAssign,
                                 ),
-                              )
-                            else ...[
-                              const Text(
-                                "Add Group",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Icon(Icons.add, color: Colors.white),
-                            ],
-                          ],
-                        ),
+                              );
+                        },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: double.infinity,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: listOfGroupNamesForDropDownMenu.isEmpty
+                            ? [Colors.grey, Colors.grey]
+                            : [
+                                const Color(0xFF3B82F6),
+                                const Color(0xFF5D5FEF),
+                              ],
                       ),
-                    );
-                  },
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          offset: const Offset(0, 2),
+                          blurRadius: 4,
+                          spreadRadius: 0,
+                          color: Colors.black.withOpacity(0.15),
+                        ),
+                      ],
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Move Student to",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Icon(Icons.add, color: Colors.white),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),

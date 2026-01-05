@@ -70,6 +70,32 @@ class StudentGroupUpdateFailure extends StudentFeatureState {
 }
 
 
+// / ← NEW STATES ADDED for full student update
+class StudentDataUpdating extends StudentFeatureState {}
+
+class StudentDataUpdateSuccess extends StudentFeatureState {}
+
+class StudentDataUpdateFailure extends StudentFeatureState {
+  final String error;
+  StudentDataUpdateFailure(this.error);
+}
+
+
+// ← NEW STATES ADDED for deleting student
+class StudentDeleting extends StudentFeatureState {}
+
+class StudentDeleteSuccess extends StudentFeatureState {
+  final String studentId;
+  
+  StudentDeleteSuccess({required this.studentId});
+}
+
+class StudentDeleteFailure extends StudentFeatureState {
+  final String error;
+  StudentDeleteFailure(this.error);
+}
+
+
 class StudentSideFeeLoadingState extends StudentFeatureState {}
 
 class StudentFeeLoadFailureState extends StudentFeatureState {

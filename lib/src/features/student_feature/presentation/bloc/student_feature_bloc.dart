@@ -11,8 +11,10 @@ import 'package:flutter_cas_app_main/src/features/student_feature/data/actual_im
 import 'package:flutter_cas_app_main/src/features/student_feature/data/cached_data.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/add_student_use_case.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/domain/delete_student_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/firestore_repositry.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/read_student_use_case.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/domain/student_detail_update_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/update_student_group_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/student_feature_state.dart';
@@ -35,11 +37,14 @@ class StudentFeatureBloc
   bool isLocationAlwaysPermissionGranted = false;
 
   StudentFeatureBloc() : super(StudentEnrollmentInitial()) {
+    on<UpdateStudentDataEvent>(_handleStudentDataUpdate);
     on<SubmitEnrollmentFormEvent>(_handleEnrollmentSubmission);
     on<FetchGroupStudentsEvent>(_handleGroupDataLoading);
     on<FetchGroupNamesEvent>(_handleGroupNamesLoading);
     on<CheckPermissionEvent>(onCheckPermissionEvent);
     on<RequestPermissionEvent>(onRequestPermissionEvent);
+    on<DeleteStudentEvent>(_handleStudentDelete);
+
 
     on<CreateGeofenceEvent>(onCreateGeofenceEvent);
     on<ReCreateGeofenceEvent>(onReCreateGeofenceEvent);
@@ -290,6 +295,64 @@ class StudentFeatureBloc
     ));
   } catch (e) {
     emit(StudentGroupUpdateFailure(e.toString()));
+  }
+}
+
+Future<void> _handleStudentDataUpdate(
+  UpdateStudentDataEvent event,
+  Emitter<StudentFeatureState> emit,
+) async {
+  emit(StudentDataUpdating());
+  
+  final UpdateStudentUseCase updateStudentUseCase = 
+      UpdateStudentUseCase(firestoreRepositry: _firestoreRepositry);
+
+  try {
+    final studentEntity = StudentEntityClass(
+      id: event.id,
+      name: event.name,
+      email: event.email,
+      cnic: event.cnic,
+      phone: event.phone,
+      address: event.address,
+      gender: event.gender,
+      fatherName: event.fatherName,
+      fatherOccupation: event.fatherOccupation,
+      group: event.group,
+    );
+
+    await updateStudentUseCase.updateStudentData(studentEntity);
+    
+    // Clear cache for this student so fresh data is loaded next time
+    CachedData.listOfAlreadyFetchedStudentsData.remove(event.id);
+    
+    emit(StudentDataUpdateSuccess());
+  } catch (e) {
+    emit(StudentDataUpdateFailure(e.toString()));
+  }
+}
+
+Future<void> _handleStudentDelete(
+  DeleteStudentEvent event,
+  Emitter<StudentFeatureState> emit,
+) async {
+  emit(StudentDeleting());
+  
+  final DeleteStudentUseCase deleteStudentUseCase = 
+      DeleteStudentUseCase(firestoreRepositry: _firestoreRepositry);
+
+  try {
+    await deleteStudentUseCase.deleteStudent(
+      studentId: event.studentId,
+      groupName: event.groupName,
+    );
+    
+    // Clear cache for this student
+    CachedData.listOfAlreadyFetchedStudentsData.remove(event.studentId);
+    
+    emit(StudentDeleteSuccess(studentId: event.studentId));
+  } catch (e) {
+    emit(StudentDeleteFailure(e.toString()));
   }
 }
 }
