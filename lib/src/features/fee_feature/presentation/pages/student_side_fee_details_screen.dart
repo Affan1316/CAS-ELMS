@@ -122,6 +122,13 @@ class _StudentSideFeeDetailsScreenState
                               tabletSize: 20,
                             ),
                             const SizedBox(height: 8),
+                            ResponsiveText(
+                              text:
+                                  "remaining: ${currencyFormat.format(student.totalFee - student.paidAmount)}",
+                              phoneSize: 16,
+                              tabletSize: 20,
+                            ),
+                            const SizedBox(height: 8),
                           ],
                         ),
                       ),

@@ -651,71 +651,80 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
   }
 
   @override
-  addToPendingFee2(
-    StudentFeeFeatureEntityClass student,
-    FeeInstallmentEntityClass adminSidePayedInstalment,
-    double paidAmount,
-    String paymentMethod,
-  ) async {
-    final docRef = _firestore.collection('student_installment').doc(student.id);
-    final doc = await docRef.get();
+  @override
+addToPendingFee2(
+  StudentFeeFeatureEntityClass student,
+  FeeInstallmentEntityClass adminSidePayedInstalment,
+  double paidAmount,
+  String paymentMethod,
+) async {
+  final docRef = _firestore.collection('student_installment').doc(student.id);
+  final doc = await docRef.get();
 
-    if (!doc.exists) {
-      throw Exception('Student installment document not found');
-    }
-
-    final data = doc.data()!;
-    final List<Map<String, dynamic>> installments =
-        List<Map<String, dynamic>>.from(data['installments'] ?? []);
-    Map<String, dynamic> currentMap;
-
-    for (var i = 0; i < installments.length; i++) {
-      currentMap = installments.elementAt(i);
-      // current = FeeInstallmentEntityClass.fromMap(currentMap);
-      if (currentMap["id"] == adminSidePayedInstalment.id) {
-        currentMap["status"] = "pending";
-        currentMap["paidAmount"] = paidAmount;
-        currentMap["paidDate"] = DateTime.now().toIso8601String();
-        currentMap["paymentMethod"] = paymentMethod;
-        installments.removeAt(i);
-        installments.insert(i, currentMap);
-        // adding rest in next installment
-        double total = currentMap["totalAmount"];
-        if (paidAmount < total) {
-          if (i != installments.length - 1) {
-            currentMap = installments.elementAt(i + 1);
-            // FIX: Get the current total of next installment, then add only the remaining amount
-            double nextInstallmentCurrentTotal = currentMap["totalAmount"];
-            currentMap["totalAmount"] =
-                nextInstallmentCurrentTotal + (total - paidAmount);
-            // Update the next installment in the list
-            installments.removeAt(i + 1);
-            installments.insert(i + 1, currentMap);
-          } else {
-            installments.add({
-              "id": "to be set yet",
-              "paidAmount": 0,
-              "paidDate": null,
-              "paymentMethod": null,
-              "status": "Unpaid",
-              "title": "Installment ${i + 1}",
-              "totalAmount": (total - paidAmount),
-            });
-          }
-        }
-        break;
-      }
-    }
-    await docRef.update({"installments": installments});
-    var docref2 = _firestore
-        .collection("not_approved_fee_installments")
-        .doc(student.id);
-
-    // Doing this i made StudentFeeFeatureEntityClass imutable and i can not modify its map now so i did this
-    var modifyableStudentMap = student.toMap();
-    modifyableStudentMap["installments"] = installments;
-    await docref2.set(modifyableStudentMap);
+  if (!doc.exists) {
+    throw Exception('Student installment document not found');
   }
+
+  final data = doc.data()!;
+  final List<Map<String, dynamic>> installments =
+      List<Map<String, dynamic>>.from(data['installments'] ?? []);
+  Map<String, dynamic> currentMap;
+
+  for (var i = 0; i < installments.length; i++) {
+    currentMap = installments.elementAt(i);
+    
+    if (currentMap["id"] == adminSidePayedInstalment.id) {
+      // Update current installment to pending status
+      currentMap["status"] = "pending";
+      currentMap["paidAmount"] = paidAmount;
+      currentMap["paidDate"] = DateTime.now().toIso8601String();
+      currentMap["paymentMethod"] = paymentMethod;
+      installments.removeAt(i);
+      installments.insert(i, currentMap);
+      
+      // Handle remaining amount if this is a partial payment
+      double total = currentMap["totalAmount"];
+      if (paidAmount < total) {
+        double remainingAmount = total - paidAmount;
+        
+        if (i != installments.length - 1) {
+          // Add remaining amount to the next existing installment
+          currentMap = installments.elementAt(i + 1);
+          double nextInstallmentCurrentTotal = currentMap["totalAmount"];
+          currentMap["totalAmount"] = nextInstallmentCurrentTotal + remainingAmount;
+          installments.removeAt(i + 1);
+          installments.insert(i + 1, currentMap);
+        } else {
+          // Create a new installment for the remaining amount
+          final newDueDate = DateTime.now().add(Duration(days: 30 * (i + 2)));
+          installments.add({
+            "id": _uuid.v4(),
+            "paidAmount": 0,
+            "paidDate": null,
+            "paymentMethod": null,
+            "status": "Unpaid",
+            "title": "Installment ${i + 2}",
+            "totalAmount": remainingAmount,
+            "dueDate": newDueDate.toIso8601String(),
+          });
+        }
+      }
+      break;
+    }
+  }
+  
+  // Update the student installment document
+  await docRef.update({"installments": installments});
+  
+  // Update the not approved fee installments document
+  var docref2 = _firestore
+      .collection("not_approved_fee_installments")
+      .doc(student.id);
+
+  var modifyableStudentMap = student.toMap();
+  modifyableStudentMap["installments"] = installments;
+  await docref2.set(modifyableStudentMap);
+}
 }
 // await _firestore.collection("pending_fees2").doc(student.id).set({
     //   "studentId": student.id,

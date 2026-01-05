@@ -100,7 +100,10 @@ class _SuperAdminFeeNotificationsScreenState
 
   Widget _buildListBody(SuperAdminFeeState state) {
     if (state is SuperAdminFeeLoadingState || state is ConfirmingPayment) {
-      return _buildShimmerList();
+      return const Center(
+        key: ValueKey("loading"),
+        child: CircularProgressIndicator(color: Colors.blueGrey),
+      );
     }
 
     if (state is SuperAdminFeeErrorState) {
@@ -121,31 +124,5 @@ class _SuperAdminFeeNotificationsScreenState
     }
 
     return const SizedBox.shrink();
-  }
-
-  /// --- Loading shimmer-style skeleton ---
-  Widget _buildShimmerList() {
-    return ListView.separated(
-      key: const ValueKey("loading"),
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      itemBuilder:
-          (_, __) => Neumorphic(
-            style: NeumorphicStyle(
-              depth: 3,
-              color: const Color(0xFFE6E8F0),
-              boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(20)),
-            ),
-            child: Container(
-              height: 110,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey.shade300,
-              ),
-            ),
-          ),
-      separatorBuilder: (_, __) => const SizedBox(height: 18),
-      itemCount: 5,
-    );
   }
 }
