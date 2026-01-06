@@ -326,7 +326,6 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
         DataCell(Text(installment.title)),
         DataCell(Text(DateFormat('MMM dd, yyyy').format(installment.dueDate))),
         DataCell(Text(currencyFormat.format(installment.totalAmount))),
-
         DataCell(Text(currencyFormat.format(installment.paidAmount))),
         DataCell(
           Text(
@@ -335,42 +334,123 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
           ),
         ),
         DataCell(
-          ElevatedButton(
-            onPressed: () {
-              showDialog(
-                context: context,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder:
+                        (_) => PayFeeModal(
+                          totalFee: installment.totalAmount,
+                          onPay: (amount, method, date) {
+                            thisTimepaidamount = amount;
+                            installment = installment;
 
-                builder:
-                    (_) => PayFeeModal(
-                      totalFee: installment.totalAmount,
-                      onPay: (amount, method, date) {
-                        thisTimepaidamount = amount;
-                        installment = installment;
-
-                        context.read<FeeAdminBloc>().add(
-                          AddToPendingFee2Event(
-                            student: student,
-                            instalment: installment,
-                            paidAmount: amount,
-                            paymentMethod: method,
-                          ),
-                        );
-                      },
-                    ),
-              ).then((_) {
-                isRefreshed = false;
-              });
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(
-                0xFF3B82F6,
-              ), // New Primary Color (Gradient Start)
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                            context.read<FeeAdminBloc>().add(
+                              AddToPendingFee2Event(
+                                student: student,
+                                instalment: installment,
+                                paidAmount: amount,
+                                paymentMethod: method,
+                              ),
+                            );
+                          },
+                        ),
+                  ).then((_) {
+                    isRefreshed = false;
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF3B82F6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "Pay Fee",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
-            ),
-            child: const Text("Pay Fee", style: TextStyle(color: Colors.white)),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
+                  // Show confirmation dialog
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext dialogContext) {
+                      return AlertDialog(
+                        title: const Text("Skip Installment"),
+                        content: Text(
+                          "Are you sure you want to skip this installment?\n\nThe amount ${currencyFormat.format(installment.totalAmount)} will be added to the next installment.",
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(dialogContext).pop();
+                            },
+                            child: const Text("Cancel"),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(dialogContext).pop();
+
+                              // Call the event with 0 paid amount to skip
+                              thisTimepaidamount = 0;
+
+                              context.read<FeeAdminBloc>().add(
+                                AddToPendingFee2Event(
+                                  student: student,
+                                  instalment: installment,
+                                  paidAmount: 0,
+                                  paymentMethod: "Skipped",
+                                ),
+                              );
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    "Installment skipped. Amount moved to next installment.",
+                                  ),
+                                ),
+                              );
+
+                              isRefreshed = false;
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                            ),
+                            child: const Text(
+                              "Skip",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange.shade600,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "Skip",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
           ),
         ),
       ],
