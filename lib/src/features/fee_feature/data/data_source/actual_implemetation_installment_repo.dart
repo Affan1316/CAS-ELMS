@@ -652,79 +652,119 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
 
   @override
   @override
-addToPendingFee2(
-  StudentFeeFeatureEntityClass student,
-  FeeInstallmentEntityClass adminSidePayedInstalment,
-  double paidAmount,
-  String paymentMethod,
-) async {
-  final docRef = _firestore.collection('student_installment').doc(student.id);
-  final doc = await docRef.get();
+  addToPendingFee2(
+    StudentFeeFeatureEntityClass student,
+    FeeInstallmentEntityClass adminSidePayedInstalment,
+    double paidAmount,
+    String paymentMethod,
+  ) async {
+    final docRef = _firestore.collection('student_installment').doc(student.id);
+    final doc = await docRef.get();
 
-  if (!doc.exists) {
-    throw Exception('Student installment document not found');
-  }
+    if (!doc.exists) {
+      throw Exception('Student installment document not found');
+    }
 
-  final data = doc.data()!;
-  final List<Map<String, dynamic>> installments =
-      List<Map<String, dynamic>>.from(data['installments'] ?? []);
-  Map<String, dynamic> currentMap;
+    final data = doc.data()!;
+    final List<Map<String, dynamic>> installments =
+        List<Map<String, dynamic>>.from(data['installments'] ?? []);
+    Map<String, dynamic> currentMap;
 
-  for (var i = 0; i < installments.length; i++) {
-    currentMap = installments.elementAt(i);
-    
-    if (currentMap["id"] == adminSidePayedInstalment.id) {
-      // Update current installment to pending status
-      currentMap["status"] = "pending";
-      currentMap["paidAmount"] = paidAmount;
-      currentMap["paidDate"] = DateTime.now().toIso8601String();
-      currentMap["paymentMethod"] = paymentMethod;
-      installments.removeAt(i);
-      installments.insert(i, currentMap);
-      
-      // Handle remaining amount if this is a partial payment
-      double total = currentMap["totalAmount"];
-      if (paidAmount < total) {
-        double remainingAmount = total - paidAmount;
-        
-        if (i != installments.length - 1) {
-          // Add remaining amount to the next existing installment
-          currentMap = installments.elementAt(i + 1);
-          double nextInstallmentCurrentTotal = currentMap["totalAmount"];
-          currentMap["totalAmount"] = nextInstallmentCurrentTotal + remainingAmount;
-          installments.removeAt(i + 1);
-          installments.insert(i + 1, currentMap);
+    for (var i = 0; i < installments.length; i++) {
+      currentMap = installments.elementAt(i);
+
+      if (currentMap["id"] == adminSidePayedInstalment.id) {
+        double total = currentMap["totalAmount"];
+
+        // If paid amount is 0, mark as paid with 0 amount and move total to next installment
+        if (paidAmount == 0) {
+          currentMap["status"] = "Paid";
+          currentMap["paidAmount"] = 0;
+          currentMap["paidDate"] = DateTime.now().toIso8601String();
+          currentMap["paymentMethod"] = paymentMethod;
+          installments.removeAt(i);
+          installments.insert(i, currentMap);
+
+          // Add current installment's total amount to the next installment
+          if (i != installments.length - 1) {
+            // Add to the next existing installment
+            Map<String, dynamic> nextMap = installments.elementAt(i + 1);
+            double nextInstallmentCurrentTotal = nextMap["totalAmount"];
+            nextMap["totalAmount"] = nextInstallmentCurrentTotal + total;
+            installments.removeAt(i + 1);
+            installments.insert(i + 1, nextMap);
+          } else {
+            // Create a new installment with the current installment's amount
+            final newDueDate = DateTime.now().add(Duration(days: 30 * (i + 2)));
+            installments.add({
+              "id": _uuid.v4(),
+              "paidAmount": 0,
+              "paidDate": null,
+              "paymentMethod": null,
+              "status": "Unpaid",
+              "title": "Installment ${i + 2}",
+              "totalAmount": total,
+              "dueDate": newDueDate.toIso8601String(),
+            });
+          }
         } else {
-          // Create a new installment for the remaining amount
-          final newDueDate = DateTime.now().add(Duration(days: 30 * (i + 2)));
-          installments.add({
-            "id": _uuid.v4(),
-            "paidAmount": 0,
-            "paidDate": null,
-            "paymentMethod": null,
-            "status": "Unpaid",
-            "title": "Installment ${i + 2}",
-            "totalAmount": remainingAmount,
-            "dueDate": newDueDate.toIso8601String(),
-          });
+          // Original logic for non-zero paid amounts
+          // Update current installment to pending status
+          currentMap["status"] = "pending";
+          currentMap["paidAmount"] = paidAmount;
+          currentMap["paidDate"] = DateTime.now().toIso8601String();
+          currentMap["paymentMethod"] = paymentMethod;
+          installments.removeAt(i);
+          installments.insert(i, currentMap);
+
+          // Handle remaining amount if this is a partial payment
+          if (paidAmount < total) {
+            double remainingAmount = total - paidAmount;
+
+            if (i != installments.length - 1) {
+              // Add remaining amount to the next existing installment
+              Map<String, dynamic> nextMap = installments.elementAt(i + 1);
+              double nextInstallmentCurrentTotal = nextMap["totalAmount"];
+              nextMap["totalAmount"] =
+                  nextInstallmentCurrentTotal + remainingAmount;
+              installments.removeAt(i + 1);
+              installments.insert(i + 1, nextMap);
+            } else {
+              // Create a new installment for the remaining amount
+              final newDueDate = DateTime.now().add(
+                Duration(days: 30 * (i + 2)),
+              );
+              installments.add({
+                "id": _uuid.v4(),
+                "paidAmount": 0,
+                "paidDate": null,
+                "paymentMethod": null,
+                "status": "Unpaid",
+                "title": "Installment ${i + 2}",
+                "totalAmount": remainingAmount,
+                "dueDate": newDueDate.toIso8601String(),
+              });
+            }
+          }
         }
+        break;
       }
-      break;
+    }
+
+    // Update the student installment document
+    await docRef.update({"installments": installments});
+
+    // Update the not approved fee installments document only if paidAmount > 0
+    if (paidAmount > 0) {
+      var docref2 = _firestore
+          .collection("not_approved_fee_installments")
+          .doc(student.id);
+
+      var modifyableStudentMap = student.toMap();
+      modifyableStudentMap["installments"] = installments;
+      await docref2.set(modifyableStudentMap);
     }
   }
-  
-  // Update the student installment document
-  await docRef.update({"installments": installments});
-  
-  // Update the not approved fee installments document
-  var docref2 = _firestore
-      .collection("not_approved_fee_installments")
-      .doc(student.id);
-
-  var modifyableStudentMap = student.toMap();
-  modifyableStudentMap["installments"] = installments;
-  await docref2.set(modifyableStudentMap);
-}
 }
 // await _firestore.collection("pending_fees2").doc(student.id).set({
     //   "studentId": student.id,
