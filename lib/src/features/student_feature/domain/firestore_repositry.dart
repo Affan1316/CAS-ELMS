@@ -14,4 +14,10 @@ abstract class FirestoreRepositry {
     required String studentId,
     required String newGroupName,
   });
+
+  Future<void> updateStudentData(StudentEntityClass student);
+  Future<void> deleteStudent({
+    required String studentId,
+    required String groupName,
+  });
 }

@@ -47,8 +47,43 @@ class UpdateStudentGroupEvent extends StudentFeatureEvent {
   });
 }
 
+// ← NEW EVENT ADDED for full student update
+class UpdateStudentDataEvent extends StudentFeatureEvent {
+  final String id,
+      name,
+      email,
+      cnic,
+      phone,
+      address,
+      gender,
+      fatherName,
+      fatherOccupation,
+      group;
 
+  UpdateStudentDataEvent({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.cnic,
+    required this.phone,
+    required this.address,
+    required this.gender,
+    required this.fatherName,
+    required this.fatherOccupation,
+    required this.group,
+  });
+}
 
+// ← NEW EVENT ADDED for deleting student
+class DeleteStudentEvent extends StudentFeatureEvent {
+  final String studentId;
+  final String groupName;
+
+  DeleteStudentEvent({
+    required this.studentId,
+    required this.groupName,
+  });
+}
 class CheckPermissionEvent extends StudentFeatureEvent {}
 
 class RequestPermissionEvent extends StudentFeatureEvent {}
