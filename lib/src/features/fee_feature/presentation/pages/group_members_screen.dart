@@ -169,7 +169,7 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
                                 builder:
                                     (_) => FeeDetailsScreen(
                                       groupId: widget.groupId,
-                                      isDefaulter: false,
+                                      isDefaulter: state.isDefaulter,
                                       key: ValueKey(_selectedStudent!.rollNum),
                                       studentId: _selectedStudent!.rollNum,
                                     ),

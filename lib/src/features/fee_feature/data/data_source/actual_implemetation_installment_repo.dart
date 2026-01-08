@@ -678,7 +678,7 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
 
         // If paid amount is 0, mark as paid with 0 amount and move total to next installment
         if (paidAmount == 0) {
-          currentMap["status"] = "Paid";
+          currentMap["status"] = "skipped";
           currentMap["paidAmount"] = 0;
           currentMap["paidDate"] = DateTime.now().toIso8601String();
           currentMap["paymentMethod"] = paymentMethod;
