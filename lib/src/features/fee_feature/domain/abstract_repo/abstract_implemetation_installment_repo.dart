@@ -12,6 +12,7 @@ abstract class AbstractInstallmentRepo {
     required String groupId,
     required double totalFee,
     required int numberOfInstallments,
+    required double amountPerMonth,
   });
   Future<StudentFeeFeatureEntityClass?> getStudent(String studentId);
   // Future<void> updateInstallmentPayment({

@@ -43,8 +43,8 @@ class _CreateFeePlanPageState extends State<CreateFeePlanPage> {
     super.initState();
     bloc = context.read<FeeAdminBloc>();
 
-    totalFeeController.addListener(_recalculate);
-    installmentsController.addListener(_recalculate);
+    // totalFeeController.addListener(_recalculate);
+    // installmentsController.addListener(_recalculate);
   }
 
   void _recalculate() {

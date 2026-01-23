@@ -101,29 +101,42 @@ class MainCard extends StatelessWidget {
 
                   const SizedBox(height: 20),
                   // --- Installment Amount ---
+                  // const Text(
+                  //   "Installment Amount",
+                  //   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  // ),
+                  // const SizedBox(height: 10),
+                  // Neumorphic(
+                  //   style: NeumorphicStyle(
+                  //     depth: -4,
+                  //     boxShape: NeumorphicBoxShape.roundRect(
+                  //       BorderRadius.circular(10),
+                  //     ),
+                  //   ),
+                  //   padding: const EdgeInsets.symmetric(
+                  //     horizontal: 12,
+                  //     vertical: 14,
+                  //   ),
+                  //   child: Align(
+                  //     alignment: Alignment.centerLeft,
+                  //     child: Text(
+                  //       installmentAmount.toStringAsFixed(2),
+                  //       style: const TextStyle(fontSize: 16),
+                  //     ),
+                  //   ),
+                  // ),
+
+                  // Replace this section (around line 80-95):
                   const Text(
                     "Installment Amount",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 10),
-                  Neumorphic(
-                    style: NeumorphicStyle(
-                      depth: -4,
-                      boxShape: NeumorphicBoxShape.roundRect(
-                        BorderRadius.circular(10),
-                      ),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 14,
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        installmentAmount.toStringAsFixed(2),
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
+                  InputField(
+                    // Changed from Neumorphic to InputField
+                    controller: installmentAmountController,
+                    hint: "Enter per month fee",
+                    keyboardType: TextInputType.number,
                   ),
 
                   const SizedBox(height: 30),
@@ -187,6 +200,28 @@ class MainCard extends StatelessWidget {
                                 );
                                 return;
                               }
+                              if (installmentAmountController.text
+                                  .trim()
+                                  .isEmpty) {
+                                _showErrorSnackBar(
+                                  context,
+                                  'Please enter per month fee',
+                                );
+                                return;
+                              }
+
+                              final installmentAmount = double.tryParse(
+                                installmentAmountController.text.trim(),
+                              );
+
+                              if (installmentAmount == null ||
+                                  installmentAmount <= 0) {
+                                _showErrorSnackBar(
+                                  context,
+                                  'Please enter a valid per month fee',
+                                );
+                                return;
+                              }
 
                               context.read<FeeAdminBloc>().add(
                                 CreateStudentInstallmentEvent(
@@ -196,6 +231,7 @@ class MainCard extends StatelessWidget {
                                   totalFee: totalFee,
                                   numberOfInstallments: installments,
                                   paidAmount: 0,
+                                  amountPerMonth: installmentAmount,
                                 ),
                               );
                             },

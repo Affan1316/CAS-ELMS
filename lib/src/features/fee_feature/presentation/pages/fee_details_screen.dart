@@ -144,7 +144,7 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                               child: DataTable(
                                 columnSpacing: isTablet ? 40 : 20,
                                 columns: const [
-                                  DataColumn(label: Text("title")),
+                                  DataColumn(label: Text("ID")),
                                   DataColumn(label: Text("Due Date")),
                                   DataColumn(label: Text("Total")),
                                   DataColumn(label: Text("Paid")),

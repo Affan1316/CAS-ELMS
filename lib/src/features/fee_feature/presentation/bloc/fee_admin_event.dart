@@ -70,6 +70,7 @@ class CreateStudentInstallmentEvent extends FeeAdminEvent {
   final double totalFee;
   final int numberOfInstallments;
   final double paidAmount;
+  final double amountPerMonth;
 
   const CreateStudentInstallmentEvent({
     required this.studentId,
@@ -78,6 +79,7 @@ class CreateStudentInstallmentEvent extends FeeAdminEvent {
     required this.totalFee,
     required this.numberOfInstallments,
     required this.paidAmount,
+    required this.amountPerMonth,
   });
 
   @override
@@ -88,6 +90,7 @@ class CreateStudentInstallmentEvent extends FeeAdminEvent {
     totalFee,
     numberOfInstallments,
     paidAmount,
+    amountPerMonth,
   ];
 }
 
