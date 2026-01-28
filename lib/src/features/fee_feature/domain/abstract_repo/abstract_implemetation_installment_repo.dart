@@ -14,24 +14,22 @@ abstract class AbstractInstallmentRepo {
     required int numberOfInstallments,
   });
   Future<StudentFeeFeatureEntityClass?> getStudent(String studentId);
-  // Future<void> updateInstallmentPayment({
-  //   required String studentId,
-  //   required String installmentId,
-  //   required double paidAmount,
-  //   required DateTime paidDate,
-  //   required String paymentMethod,
-  //   required String groupId,
-  //   required double totalReaminingFeeForThisStudent,
-  // });
+
   Future<List<FeeEntityClass>> fetchFeesByDateRange(
     DateTime start,
     DateTime end,
   );
   Future<List<FeeEntityClass>> fetchTodayFees();
+
+  // NEW: Fetch day-wise aggregated fees
+  Future<Map<DateTime, double>> fetchDayWiseFeesByDateRange(
+    DateTime start,
+    DateTime end,
+  );
+
   Future<void> addToFeeDefaulters({
     required String studentId,
     required String name,
-
     required double remaingFee,
     required String groupId,
   });
@@ -53,11 +51,7 @@ abstract class AbstractInstallmentRepo {
     double totalReaminingFeeForThisStudent,
   );
   Future<bool> checkIfStudentIsDefaulter(String groupId, String studentId);
-  addToSuperAdminApprovalList(
-    // FeeInstallmentEntityClass installment,
-    StudentFeeFeatureEntityClass student,
-    int index,
-  );
+  addToSuperAdminApprovalList(StudentFeeFeatureEntityClass student, int index);
   addToPendingFee2(
     StudentFeeFeatureEntityClass student,
     FeeInstallmentEntityClass adminSidePayedInstalment,

@@ -1,45 +1,3 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
-
-// class InstallmentService {
-//   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-//   Future<void> createInstallmentPlan({
-//     required String studentId,
-//     required double totalFee,
-//     required int numberOfInstallments,
-//     required double amountPerMonth,
-//   }) async {
-//     try {
-//       await _firestore.collection('student_installment').doc(studentId).set({
-//         'totalFee': totalFee,
-//         'numberOfInstallments': numberOfInstallments,
-//         'amountPerMonth': amountPerMonth,
-//         'createdAt': FieldValue.serverTimestamp(),
-//         'updatedAt': FieldValue.serverTimestamp(),
-//       });
-//     } catch (e) {
-//       throw Exception('Failed to create installment plan: $e');
-//     }
-//   }
-
-//   Future<Map<String, dynamic>?> getInstallmentPlan(String studentId) async {
-//     try {
-//       final doc =
-//           await _firestore
-//               .collection('student_installment')
-//               .doc(studentId)
-//               .get();
-
-//       if (doc.exists) {
-//         return doc.data();
-//       }
-//       return null;
-//     } catch (e) {
-//       throw Exception('Failed to get installment plan: $e');
-//     }
-//   }
-// }
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulter_entity.dart';
@@ -168,88 +126,6 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
       throw Exception('Failed to fetch installment plan: $e');
     }
   }
-
-  // @override
-  // Future<void> updateInstallmentPayment({
-  //   required String studentId,
-  //   required String installmentId,
-  //   required double paidAmount,
-  //   required DateTime paidDate,
-  //   required String paymentMethod,
-  //   required String groupId,
-  //   required double totalReaminingFeeForThisStudent,
-  // }) async {
-  //   try {
-  //     final docRef = _firestore
-  //         .collection('student_installment')
-  //         .doc(studentId);
-  //     final doc = await docRef.get();
-
-  //     if (!doc.exists) {
-  //       throw Exception('Student installment document not found');
-  //     }
-
-  //     final data = doc.data()!;
-  //     final List<dynamic> installments = List<dynamic>.from(
-  //       data['installments'] ?? [],
-  //     );
-
-  //     double totalPaidSoFar = 0;
-
-  //     final updatedInstallments =
-  //         installments.map((e) {
-  //           final m = Map<String, dynamic>.from(e as Map);
-
-  //           if (m['id'] == installmentId) {
-  //             final double installmentTotal =
-  //                 (m['totalAmount'] as num).toDouble();
-  //             final double newPaid = paidAmount;
-
-  //             m['paidAmount'] = newPaid;
-  //             m['paidDate'] = (paidDate ?? DateTime.now()).toIso8601String();
-  //             m['paymentMethod'] = paymentMethod;
-
-  //             // Update status based on payment
-  //             if (newPaid >= installmentTotal) {
-  //               m['status'] = 'pending';
-  //             }
-  //             //  else if (newPaid > 0 && newPaid < installmentTotal) {
-  //             //   m['status'] = 'Partial';
-  //             // }
-  //             else {
-  //               m['status'] = 'Unpaid';
-  //             }
-  //           }
-
-  //           totalPaidSoFar += (m['paidAmount'] as num?)?.toDouble() ?? 0;
-  //           return m;
-  //         }).toList();
-
-  //     await docRef.update({
-  //       'installments': updatedInstallments,
-  //       'paidAmount': totalPaidSoFar, // keep student-level summary
-  //       'updatedAt': FieldValue.serverTimestamp(),
-  //     });
-  //   } catch (e) {
-  //     throw Exception('Failed to update installment: $e');
-  //   }
-
-  //   debugPrint("453353345454334563463463463456565654645457457457474747457457");
-  //   var sdsds = {
-  //     "paidAmount": "$paidAmount",
-  //     "paymentMethod": "$paymentMethod",
-  //     // "paidDate": "$paidDate",
-  //     "createdAt": FieldValue.serverTimestamp(),
-  //   };
-  //   debugPrint("$sdsds");
-  //   var documentReference = _firestore.collection("fee_history_daywise");
-  //   await documentReference.doc().set({
-  //     "paidAmount": "$paidAmount",
-  //     "paymentMethod": "$paymentMethod",
-  //     // "paidDate": "$paidDate",
-  //     "createdAt": FieldValue.serverTimestamp(),
-  //   });
-  // }
 
   @override
   removeFromDefaulter(
@@ -610,44 +486,6 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
     } catch (e) {
       print("addinsg ToSuperAdminApprovalList failed due to this error $e");
     }
-
-    // DocumentReference<Map<String, dynamic>> documentReference = _firestore
-    //         .collection("not_approved_fee_installments")
-    //         .doc(student.id);
-    // DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
-    //     await documentReference.get();
-
-    //   FeeInstallmentEntityClass? updatedFeeInstallment = updatedStudent
-    //       ?.installments
-    //       .elementAt(index);
-
-    //   Map<String, dynamic> map = updatedFeeInstallment!.toMap();
-
-    //   DocumentReference<Map<String, dynamic>> documentReference = _firestore
-    //       .collection("not_approved_fee_installments")
-    //       .doc(student.id);
-    //   DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
-    //       await documentReference.get();
-
-    //   if (!documentSnapshot.exists) {
-    //     map.addAll({"studentId": student.id, "groupId": student.groupId});
-    //     List<Map> list = [];
-    //     list.add(map);
-    //     await _firestore
-    //         .collection("not_approved_fee_installments")
-    //         .doc(student.id)
-    //         .set({"installments": list});
-    //   } else {
-    //     await _firestore
-    //         .collection("not_approved_fee_installments")
-    //         .doc(student.id)
-    //         .set({"installments": list});
-    //   //   Map<String, dynamic>? mapOfNonapprovedInstallmentList =
-    //   //       documentSnapshot.data();
-    //   //   List<FeeInstallmentEntityClass> listOfInstallments =
-    //   //       mapOfNonapprovedInstallmentList?["installments"];
-
-    //   // }
   }
 
   @override
@@ -763,6 +601,88 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
       var modifyableStudentMap = student.toMap();
       modifyableStudentMap["installments"] = installments;
       await docref2.set(modifyableStudentMap);
+    }
+  }
+
+  @override
+  Future<Map<DateTime, double>> fetchDayWiseFeesByDateRange(
+    DateTime start,
+    DateTime end,
+  ) async {
+    debugPrint("========================================");
+    debugPrint("fetchDayWiseFeesByDateRange: START");
+    debugPrint("Start Date: $start");
+    debugPrint("End Date: $end");
+    debugPrint("========================================");
+
+    final startTs = Timestamp.fromDate(
+      DateTime(start.year, start.month, start.day, 0, 0, 0),
+    );
+    final endTs = Timestamp.fromDate(
+      DateTime(end.year, end.month, end.day, 23, 59, 59, 999),
+    );
+
+    try {
+      final snapshot =
+          await _firestore
+              .collection("fee_history_daywise")
+              .where('createdAt', isGreaterThanOrEqualTo: startTs)
+              .where('createdAt', isLessThanOrEqualTo: endTs)
+              .orderBy('createdAt', descending: true)
+              .get();
+
+      debugPrint(
+        "fetchDayWiseFeesByDateRange: Fetched ${snapshot.docs.length} documents",
+      );
+
+      // Map to store date -> total amount
+      final Map<DateTime, double> dayWiseTotals = {};
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        debugPrint("Processing document: ${doc.id}");
+        debugPrint("Document data: $data");
+
+        if (data['createdAt'] != null && data['paidAmount'] != null) {
+          final Timestamp timestamp = data['createdAt'] as Timestamp;
+          final DateTime dateTime = timestamp.toDate();
+
+          // Normalize to date only (remove time component)
+          final DateTime dateOnly = DateTime(
+            dateTime.year,
+            dateTime.month,
+            dateTime.day,
+          );
+
+          final double paidAmount = (data['paidAmount'] as num).toDouble();
+
+          debugPrint(
+            "Date: $dateOnly, Amount: $paidAmount, Student: ${data['name']}",
+          );
+
+          // Add to total for this date
+          if (dayWiseTotals.containsKey(dateOnly)) {
+            dayWiseTotals[dateOnly] = dayWiseTotals[dateOnly]! + paidAmount;
+          } else {
+            dayWiseTotals[dateOnly] = paidAmount;
+          }
+        } else {
+          debugPrint("⚠️ Document missing createdAt or paidAmount: ${doc.id}");
+        }
+      }
+
+      debugPrint("========================================");
+      debugPrint("Day-wise totals:");
+      dayWiseTotals.forEach((date, total) {
+        debugPrint("  ${date.toString().split(' ')[0]}: $total");
+      });
+      debugPrint("Total unique dates: ${dayWiseTotals.length}");
+      debugPrint("========================================");
+
+      return dayWiseTotals;
+    } catch (e) {
+      debugPrint("❌ ERROR in fetchDayWiseFeesByDateRange: $e");
+      rethrow;
     }
   }
 }

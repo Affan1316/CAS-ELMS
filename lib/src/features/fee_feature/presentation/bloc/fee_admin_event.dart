@@ -250,3 +250,10 @@ class AddToPendingFee2Event extends FeeAdminEvent {
     required this.paymentMethod,
   });
 }
+
+class FetchDayWiseFees extends FeeAdminEvent {
+  final DateTime startDate;
+  final DateTime endDate;
+
+  FetchDayWiseFees(this.startDate, this.endDate);
+}

@@ -11,8 +11,9 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widge
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/sort_dialog_widget.dart';
 
 class FeeHistoryScreen extends StatefulWidget {
-  const FeeHistoryScreen({super.key});
-
+  const FeeHistoryScreen({super.key, this.startDate, this.endDate});
+  final DateTime? startDate;
+  final DateTime? endDate;
   @override
   State<FeeHistoryScreen> createState() => _FeeHistoryScreenState();
 }
@@ -26,7 +27,11 @@ class _FeeHistoryScreenState extends State<FeeHistoryScreen>
   @override
   void initState() {
     super.initState();
-    context.read<FeeAdminBloc>().add(FetchTodayFees());
+    context.read<FeeAdminBloc>().add(
+      widget.startDate == null
+          ? FetchTodayFees()
+          : FetchFeesByDateRange(widget.startDate!, widget.endDate!),
+    );
     _slideController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,

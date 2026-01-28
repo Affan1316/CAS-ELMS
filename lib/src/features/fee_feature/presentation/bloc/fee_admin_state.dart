@@ -244,3 +244,23 @@ class AddedToPendingFee extends FeeAdminState {
 
   const AddedToPendingFee({required this.student});
 }
+
+class DayWiseFeesLoaded extends FeeAdminState {
+  final Map<DateTime, double> dayWiseFees;
+  final DateTime? startDate;
+  final DateTime? endDate;
+
+  DayWiseFeesLoaded({required this.dayWiseFees, this.startDate, this.endDate});
+
+  DayWiseFeesLoaded copyWith({
+    Map<DateTime, double>? dayWiseFees,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) {
+    return DayWiseFeesLoaded(
+      dayWiseFees: dayWiseFees ?? this.dayWiseFees,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+    );
+  }
+}
