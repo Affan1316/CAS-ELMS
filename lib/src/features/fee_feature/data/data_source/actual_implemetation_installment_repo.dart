@@ -20,9 +20,10 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
     required String groupId,
     required double totalFee,
     required int numberOfInstallments,
+    required double amountPerMonth,
   }) async {
     try {
-      final double amountPerMonth = totalFee / numberOfInstallments;
+      // final double amountPerMonth = totalFee / numberOfInstallments;
 
       final List<Map<String, dynamic>> installments = List.generate(
         numberOfInstallments,

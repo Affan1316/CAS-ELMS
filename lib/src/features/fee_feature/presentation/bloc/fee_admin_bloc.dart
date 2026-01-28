@@ -313,6 +313,7 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
         totalFee: event.totalFee,
         paidAmount: event.paidAmount,
         numberOfInstallments: event.numberOfInstallments,
+        amountPerMonth: event.amountPerMonth,
       );
 
       debugPrint("✅ _onCreateStudentInstallment: SUCCESS");
