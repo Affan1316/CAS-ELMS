@@ -23,12 +23,18 @@ class DayWiseFeePage extends StatelessWidget {
         debugPrint("DayWiseFeePage: Creating FeeAdminBloc");
         final bloc = FeeAdminBloc();
         final now = DateTime.now();
-        final today = DateTime(now.year, now.month, now.day);
 
-        debugPrint("DayWiseFeePage: Dispatching FetchDayWiseFees for today");
-        debugPrint("Date: $today");
+        // Get the first and last day of the current month
+        final firstDayOfMonth = DateTime(now.year, now.month, 1);
+        final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
 
-        bloc.add(FetchDayWiseFees(today, today));
+        debugPrint(
+          "DayWiseFeePage: Dispatching FetchDayWiseFees for current month",
+        );
+        debugPrint("Start Date (First day of month): $firstDayOfMonth");
+        debugPrint("End Date (Last day of month): $lastDayOfMonth");
+
+        bloc.add(FetchDayWiseFees(firstDayOfMonth, lastDayOfMonth));
         return bloc;
       },
       child: Scaffold(
@@ -615,9 +621,14 @@ class _FeeList extends StatelessWidget {
                   ElevatedButton.icon(
                     onPressed: () {
                       final now = DateTime.now();
-                      final today = DateTime(now.year, now.month, now.day);
+                      final firstDayOfMonth = DateTime(now.year, now.month, 1);
+                      final lastDayOfMonth = DateTime(
+                        now.year,
+                        now.month + 1,
+                        0,
+                      );
                       context.read<FeeAdminBloc>().add(
-                        FetchDayWiseFees(today, today),
+                        FetchDayWiseFees(firstDayOfMonth, lastDayOfMonth),
                       );
                     },
                     icon: const Icon(Icons.refresh),
