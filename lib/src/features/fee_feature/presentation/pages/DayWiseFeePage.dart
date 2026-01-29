@@ -1,5 +1,5 @@
 // =========================
-// PRESENTATION LAYER (UI) - RESPONSIVE VERSION
+// PRESENTATION LAYER (UI) - RESPONSIVE VERSION WITH PAYMENT SUMMARY
 // =========================
 
 import 'package:flutter/material.dart';
@@ -8,9 +8,86 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_state.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/payment_summary_bottom_sheet.dart';
 
 class DayWiseFeePage extends StatelessWidget {
   const DayWiseFeePage({super.key});
+
+  /// Shows payment summary by fetching detailed fee data for the date range
+  void _showPaymentSummaryForDateRange(
+    BuildContext context,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    debugPrint("========================================");
+    debugPrint("_showPaymentSummaryForDateRange: START");
+    debugPrint("Start Date: $startDate");
+    debugPrint("End Date: $endDate");
+    debugPrint("========================================");
+
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (context) => const Center(
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Loading payment details...'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+    );
+
+    // Create a temporary bloc to fetch the detailed data
+    final tempBloc = FeeAdminBloc();
+    tempBloc.add(FetchFeesByDateRange(startDate, endDate));
+
+    // Wait for the state to be loaded
+    await for (final state in tempBloc.stream) {
+      if (state is FeeHistoryLoaded) {
+        // Close loading dialog
+        if (context.mounted) Navigator.pop(context);
+
+        // Show payment summary bottom sheet
+        if (context.mounted) {
+          showModalBottomSheet(
+            context: context,
+            backgroundColor: Colors.transparent,
+            isScrollControlled: true,
+            builder: (context) => PaymentSummaryBottomSheet(state: state),
+          );
+        }
+
+        tempBloc.close();
+        break;
+      } else if (state is FeeHistoryError) {
+        // Close loading dialog
+        if (context.mounted) Navigator.pop(context);
+
+        // Show error
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error loading payment details: ${state.message}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+
+        tempBloc.close();
+        break;
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,20 +114,47 @@ class DayWiseFeePage extends StatelessWidget {
         bloc.add(FetchDayWiseFees(firstDayOfMonth, lastDayOfMonth));
         return bloc;
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Day Wise Fee History'),
-          backgroundColor: Colors.blue,
-          elevation: 2,
-        ),
-        body: Column(
-          children: [
-            _DateFilterBar(),
-            const Divider(height: 1, thickness: 1),
-            Expanded(child: _FeeList()),
-            // Bottom bar removed - data now shown in summary card
-          ],
-        ),
+      child: Builder(
+        builder:
+            (context) => Scaffold(
+              appBar: AppBar(
+                title: const Text('Day Wise Fee History'),
+                backgroundColor: Colors.blue,
+                elevation: 2,
+                actions: [
+                  // Add Payment Summary button
+                  BlocBuilder<FeeAdminBloc, FeeAdminState>(
+                    builder: (context, state) {
+                      if (state is DayWiseFeesLoaded &&
+                          state.startDate != null &&
+                          state.endDate != null) {
+                        return IconButton(
+                          icon: const Icon(Icons.payment, color: Colors.white),
+                          onPressed:
+                              () => _showPaymentSummaryForDateRange(
+                                context,
+                                state.startDate!,
+                                state.endDate!,
+                              ),
+                          tooltip: 'Payment Summary',
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ),
+              body: Column(
+                children: [
+                  _DateFilterBar(
+                    onShowPaymentSummary: _showPaymentSummaryForDateRange,
+                  ),
+                  const Divider(height: 1, thickness: 1),
+                  Expanded(child: _FeeList()),
+                ],
+              ),
+            ),
       ),
     );
   }
@@ -60,6 +164,10 @@ class DayWiseFeePage extends StatelessWidget {
 // DATE FILTER BAR - RESPONSIVE
 // ========================================
 class _DateFilterBar extends StatelessWidget {
+  final void Function(BuildContext, DateTime, DateTime)? onShowPaymentSummary;
+
+  const _DateFilterBar({this.onShowPaymentSummary});
+
   @override
   Widget build(BuildContext context) {
     debugPrint("_DateFilterBar: build() called");
@@ -142,11 +250,18 @@ class _DateFilterBar extends StatelessWidget {
     debugPrint("Current End Date: $currentEndDate");
     debugPrint("========================================");
 
+    final now = DateTime.now();
+    // Ensure initialDate doesn't exceed today
+    final initialDate =
+        currentStartDate != null && currentStartDate.isAfter(now)
+            ? now
+            : (currentStartDate ?? now);
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: currentStartDate ?? DateTime.now(),
+      initialDate: initialDate,
       firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
+      lastDate: now,
       helpText: 'Select Start Date',
       builder: (context, child) {
         return Theme(
@@ -191,11 +306,18 @@ class _DateFilterBar extends StatelessWidget {
     debugPrint("Current End Date: $currentEndDate");
     debugPrint("========================================");
 
+    final now = DateTime.now();
+    // Ensure initialDate doesn't exceed today
+    final initialDate =
+        currentEndDate != null && currentEndDate.isAfter(now)
+            ? now
+            : (currentEndDate ?? now);
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: currentEndDate ?? DateTime.now(),
+      initialDate: initialDate,
       firstDate: currentStartDate ?? DateTime(2020),
-      lastDate: DateTime.now(),
+      lastDate: now,
       helpText: 'Select End Date',
       builder: (context, child) {
         return Theme(
@@ -698,7 +820,7 @@ class _FeeList extends StatelessWidget {
 }
 
 // ========================================
-// SUMMARY ITEM WIDGET - NEW
+// SUMMARY ITEM WIDGET
 // ========================================
 class _SummaryItem extends StatelessWidget {
   final IconData icon;
