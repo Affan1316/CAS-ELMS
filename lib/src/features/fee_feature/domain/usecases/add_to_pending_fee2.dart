@@ -12,12 +12,14 @@ class AddToPendingFee2 {
     FeeInstallmentEntityClass instalment,
     double paidAmount,
     String paymentMethod,
+    DateTime paidDate,
   ) {
     abstractInstallmentRepo.addToPendingFee2(
       student,
       instalment,
       paidAmount,
       paymentMethod,
+      paidDate,
     );
   }
 }

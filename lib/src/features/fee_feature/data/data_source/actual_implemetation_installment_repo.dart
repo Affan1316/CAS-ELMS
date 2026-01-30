@@ -496,6 +496,7 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
     FeeInstallmentEntityClass adminSidePayedInstalment,
     double paidAmount,
     String paymentMethod,
+    DateTime paidDate,
   ) async {
     final docRef = _firestore.collection('student_installment').doc(student.id);
     final doc = await docRef.get();
@@ -519,7 +520,7 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
         if (paidAmount == 0) {
           currentMap["status"] = "skipped";
           currentMap["paidAmount"] = 0;
-          currentMap["paidDate"] = DateTime.now().toIso8601String();
+          currentMap["paidDate"] = paidDate.toIso8601String();
           currentMap["paymentMethod"] = paymentMethod;
           installments.removeAt(i);
           installments.insert(i, currentMap);
@@ -551,7 +552,7 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
           // Update current installment to pending status
           currentMap["status"] = "pending";
           currentMap["paidAmount"] = paidAmount;
-          currentMap["paidDate"] = DateTime.now().toIso8601String();
+          currentMap["paidDate"] = paidDate.toIso8601String();
           currentMap["paymentMethod"] = paymentMethod;
           installments.removeAt(i);
           installments.insert(i, currentMap);

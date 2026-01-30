@@ -370,6 +370,7 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                                 instalment: installment,
                                 paidAmount: amount,
                                 paymentMethod: method,
+                                paidDate: date,
                               ),
                             );
                           },
@@ -396,60 +397,37 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
               const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: () {
-                  // Show confirmation dialog
                   showDialog(
                     context: context,
-                    builder: (BuildContext dialogContext) {
-                      return AlertDialog(
-                        title: const Text("Skip Installment"),
-                        content: Text(
-                          "Are you sure you want to skip this installment?\n\nThe amount ${currencyFormat.format(installment.totalAmount)} will be added to the next installment.",
+                    builder:
+                        (_) => PayFeeModal(
+                          totalFee: installment.totalAmount,
+                          onPay: (amount, method, date) {
+                            thisTimepaidamount = 0;
+                            installment = installment;
+
+                            context.read<FeeAdminBloc>().add(
+                              AddToPendingFee2Event(
+                                student: student,
+                                instalment: installment,
+                                paidAmount: 0,
+                                paymentMethod: "Skipped",
+                                paidDate: date,
+                              ),
+                            );
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Installment skipped. Amount moved to next installment.",
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(dialogContext).pop();
-                            },
-                            child: const Text("Cancel"),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(dialogContext).pop();
-
-                              // Call the event with 0 paid amount to skip
-                              thisTimepaidamount = 0;
-
-                              context.read<FeeAdminBloc>().add(
-                                AddToPendingFee2Event(
-                                  student: student,
-                                  instalment: installment,
-                                  paidAmount: 0,
-                                  paymentMethod: "Skipped",
-                                ),
-                              );
-
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "Installment skipped. Amount moved to next installment.",
-                                  ),
-                                ),
-                              );
-
-                              isRefreshed = false;
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                            ),
-                            child: const Text(
-                              "Skip",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
+                  ).then((_) {
+                    isRefreshed = false;
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange.shade600,

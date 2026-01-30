@@ -58,5 +58,6 @@ abstract class AbstractInstallmentRepo {
     FeeInstallmentEntityClass adminSidePayedInstalment,
     double paidAmount,
     String paymentMethod,
+    DateTime paidDate,
   );
 }
