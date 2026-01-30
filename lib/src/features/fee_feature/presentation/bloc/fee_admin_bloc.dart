@@ -782,6 +782,7 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
         event.instalment,
         event.paidAmount,
         event.paymentMethod,
+        event.paidDate,
       );
 
       final StudentFeeFeatureEntityClass? student =

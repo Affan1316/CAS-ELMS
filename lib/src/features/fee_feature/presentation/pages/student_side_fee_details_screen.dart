@@ -395,6 +395,7 @@ class _StudentSideFeeDetailsScreenState
                             instalment: installment,
                             paidAmount: amount,
                             paymentMethod: method,
+                            paidDate: date,
                           ),
                         );
                       },

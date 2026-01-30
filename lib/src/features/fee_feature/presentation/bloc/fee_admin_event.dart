@@ -246,11 +246,13 @@ class AddToPendingFee2Event extends FeeAdminEvent {
   final FeeInstallmentEntityClass instalment;
   final double paidAmount;
   final String paymentMethod;
+  final DateTime paidDate;
   const AddToPendingFee2Event({
     required this.student,
     required this.instalment,
     required this.paidAmount,
     required this.paymentMethod,
+    required this.paidDate,
   });
 }
 
