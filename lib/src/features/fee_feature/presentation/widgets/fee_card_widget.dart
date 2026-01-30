@@ -38,10 +38,12 @@ class FeeCardWidget extends StatelessWidget {
                   ).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
+                child: Image.asset(
                   _getPaymentMethodIcon(fee.paymentMethod),
-                  color: _getPaymentMethodColor(fee.paymentMethod),
-                  size: 24,
+                  width: 28,
+                  height: 28,
+                  // color: _getPaymentMethodColor(fee.paymentMethod), // remove if image is colored
+                  fit: BoxFit.contain,
                 ),
               ),
               const SizedBox(width: 16),
@@ -192,16 +194,16 @@ class FeeCardWidget extends StatelessWidget {
     }
   }
 
-  IconData _getPaymentMethodIcon(PaymentMethodEnum method) {
+  String _getPaymentMethodIcon(PaymentMethodEnum method) {
     switch (method) {
       case PaymentMethodEnum.jazzCash:
-        return Icons.phone_android;
+        return 'assets/icons/jazzcash.png';
       case PaymentMethodEnum.easyPaisa:
-        return Icons.account_balance_wallet;
+        return 'assets/icons/easypaisa.png';
       case PaymentMethodEnum.ubl:
-        return Icons.account_balance;
+        return 'assets/icons/ubl.png';
       case PaymentMethodEnum.cashPayment:
-        return Icons.account_balance_wallet_outlined;
+        return 'assets/icons/cash.png';
     }
   }
 

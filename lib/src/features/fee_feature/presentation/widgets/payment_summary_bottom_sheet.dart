@@ -84,28 +84,28 @@ class PaymentSummaryBottomSheet extends StatelessWidget {
                       _buildPaymentMethodCard(
                         context,
                         'Cash Payments',
-                        Icons.account_balance_wallet_outlined,
+                        'assets/icons/cash.png',
                         Colors.green,
                         state.cashPaymentTotal,
                       ),
                       _buildPaymentMethodCard(
                         context,
                         'JazzCash',
-                        Icons.phone_android,
+                        'assets/icons/jazzcash.png',
                         Colors.red,
                         state.JazzCashTotal,
                       ),
                       _buildPaymentMethodCard(
                         context,
                         'UBL Bank',
-                        Icons.account_balance,
+                        'assets/icons/ubl.png',
                         Colors.blue,
                         state.UBLTotal,
                       ),
                       _buildPaymentMethodCard(
                         context,
                         'EasyPaisa',
-                        Icons.account_balance_wallet,
+                        'assets/icons/easypaisa.png',
                         Colors.green[600]!,
                         state.easyPaisaTotal,
                       ),
@@ -163,7 +163,7 @@ class PaymentSummaryBottomSheet extends StatelessWidget {
   Widget _buildPaymentMethodCard(
     BuildContext context,
     String title,
-    IconData icon,
+    String assetPath,
     Color color,
     double amount,
   ) {
@@ -177,13 +177,20 @@ class PaymentSummaryBottomSheet extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 58,
+            height: 58,
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Image.asset(
+                assetPath,
+                // optional (remove if image is colored)
+                fit: BoxFit.contain,
+              ),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
