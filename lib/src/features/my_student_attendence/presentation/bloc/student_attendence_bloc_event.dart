@@ -1,6 +1,5 @@
 part of 'student_attendence_bloc_bloc.dart';
 
-
 // BLoC Events
 abstract class AttendanceEvent {}
 
@@ -8,8 +7,9 @@ abstract class AttendanceEvent {}
 class LoadAttendance extends AttendanceEvent {
   final String? rollNo;
   final String? name;
+  final DateTimeRange<DateTime>? dateRange;
 
-  LoadAttendance({this.rollNo, this.name});
-
+  LoadAttendance({this.rollNo, this.name, this.dateRange});
 }
+
 class LocationCheckEvent extends AttendanceEvent {}
