@@ -74,6 +74,41 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
     return math.sqrt(dx * dx + dy * dy);
   }
 
+  Future<void> _selectDateRange() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now(),
+      initialDateRange: DateTimeRange(
+        start: DateTime.now().subtract(const Duration(days: 7)),
+        end: DateTime.now(),
+      ), // 👇 YEH ADD KAR - White background ke liye
+      builder: (context, child) {
+        return Container(
+          color: Colors.white,
+          child: Theme(
+            data: ThemeData.light().copyWith(
+              scaffoldBackgroundColor: Colors.white,
+              dialogBackgroundColor: Colors.white,
+              colorScheme: const ColorScheme.light(
+                surface: Colors.white,
+                background: Colors.white,
+                onSurface: Colors.black,
+              ),
+            ),
+            child: child!,
+          ),
+        );
+      },
+    );
+
+    if (picked != null && context.mounted) {
+      context.read<StudentAttendenceBloc>().add(
+        LoadAttendance(dateRange: picked),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = context.width;
@@ -87,6 +122,23 @@ class _StudentAdentencePageState extends State<StudentAdentencePage>
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'dateRange',
+        onPressed: _selectDateRange,
+        backgroundColor: const Color(0xFF2196F3),
+        elevation: 4,
+        highlightElevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        icon: const Icon(Icons.date_range, color: Colors.white),
+        label: const Text(
+          'Select Dates',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+          ),
+        ),
+      ),
       body: Column(
         children: [
           // Neumorphic Header with SafeArea

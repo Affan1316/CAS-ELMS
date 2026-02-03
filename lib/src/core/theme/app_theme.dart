@@ -14,6 +14,14 @@ class AppTheme {
     dialogTheme: DialogThemeData(backgroundColor: AppColors.containerColor),
     textTheme: Typography.material2021().black,
     useMaterial3: true,
+    datePickerTheme: DatePickerThemeData(
+      // Header background color
+      headerBackgroundColor: Colors.white,
+      // Selected date background
+      dayBackgroundColor: WidgetStateProperty.fromMap({
+        WidgetState.selected: AppColors.primary,
+      }),
+    ),
   );
 
   static final ThemeData darkTheme = ThemeData(
@@ -28,5 +36,13 @@ class AppTheme {
     dialogTheme: DialogThemeData(backgroundColor: AppColors.containerColor),
     textTheme: Typography.material2021().white,
     useMaterial3: true,
+    datePickerTheme: DatePickerThemeData(
+      // Header background color
+      headerBackgroundColor: Colors.white,backgroundColor:Colors.white ,
+      // Selected date background
+      dayBackgroundColor: WidgetStateProperty.fromMap({
+        WidgetState.selected: AppColors.primary,
+      }),
+    ),
   );
 }

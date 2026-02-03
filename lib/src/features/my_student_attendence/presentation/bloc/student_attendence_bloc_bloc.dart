@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/auth/data/service/AuthService.dart';
 import 'package:flutter_cas_app_main/src/features/my_student_attendence/data/reposetory/student_attendence_firebase.dart';
 import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/services/location_service.dart';
@@ -27,6 +28,9 @@ class StudentAttendenceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     Emitter<AttendanceState> emit,
   ) async {
     try {
+      late DateTime start;
+      late DateTime end;
+
       final user = event.name ?? await authService.getSavedEmail();
       final userId = event.rollNo ?? await authService.getSavedStudentId();
 
@@ -36,10 +40,13 @@ class StudentAttendenceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         final records = await firebase.getStudentAttendance(userId);
         // Emit the new state with the loaded data
         // Choose the date range you want to show. Here I use last 30 days.
-        final end = DateTime.now();
-        final start = end.subtract(
-          const Duration(days: 29),
-        ); // inclusive 30 days
+        if (event.dateRange != null) {
+          start = event.dateRange!.start;
+          end = event.dateRange!.end;
+        } else {
+          end = DateTime.now();
+          start = end.subtract(const Duration(days: 29)); // inclusive 30 days
+        }
 
         // Build a full list filling missing dates as Absent
         final fullRecords = fillMissingWithAbsent(
@@ -66,10 +73,10 @@ class StudentAttendenceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     await LocationServiceManager.initLocationService();
     // MyGeofenceService().reCreateFence();
     // getting location trigger event quicker
-  
+
     bool isLocEnabled = await Geolocator.isLocationServiceEnabled();
-      await LocationServiceManager().startLocationService();
-      print("_onLocationCheckEvent");
+    await LocationServiceManager().startLocationService();
+    print("_onLocationCheckEvent");
     if (isLocEnabled) {
       Position position = await Geolocator.getCurrentPosition();
 
@@ -83,12 +90,10 @@ class StudentAttendenceBloc extends Bloc<AttendanceEvent, AttendanceState> {
 
         await LocationServiceManager().startLocationService();
         await LocationServiceManager().sendExitEventTag();
-      
       } else {
         log("enter at location check event");
         await LocationServiceManager().startLocationService();
         await LocationServiceManager().sendEnterEventTag();
-       
       }
     }
   }
