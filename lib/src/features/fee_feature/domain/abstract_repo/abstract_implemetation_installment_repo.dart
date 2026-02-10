@@ -68,4 +68,9 @@ abstract class AbstractInstallmentRepo {
     required double favouredAmount,
   });
   Future<List<FavouredStudentEntity>> readFavouredStudents();
+  Future<StudentFeeFeatureEntityClass?> updateInstallmentDueDate({
+    required String studentId,
+    required String installmentId,
+    required DateTime newDueDate,
+  });
 }

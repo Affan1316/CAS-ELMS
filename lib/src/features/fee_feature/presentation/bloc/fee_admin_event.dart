@@ -288,3 +288,18 @@ class FilterFavouredStudentsByGroupEvent extends FeeAdminEvent {
   @override
   List<Object?> get props => [groupId];
 }
+
+class UpdateInstallmentDueDateEvent extends FeeAdminEvent {
+  final String studentId;
+  final String installmentId;
+  final DateTime newDueDate;
+
+  const UpdateInstallmentDueDateEvent({
+    required this.studentId,
+    required this.installmentId,
+    required this.newDueDate,
+  });
+
+  @override
+  List<Object?> get props => [studentId, installmentId, newDueDate];
+}

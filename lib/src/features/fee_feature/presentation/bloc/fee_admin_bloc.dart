@@ -106,6 +106,7 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     on<FilterFavouredStudentsByGroupEvent>(
       _handleFilterFavouredStudentsByGroup,
     );
+    on<UpdateInstallmentDueDateEvent>(_handleUpdateInstallmentDueDate);
 
     debugPrint("FeeAdminBloc: Initialization complete");
   }
@@ -915,6 +916,44 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
       debugPrint(
         "⚠️ _handleFilterFavouredStudentsByGroup: Current state is not FavouredStudentsLoadedState",
       );
+    }
+  }
+
+  Future<void> _handleUpdateInstallmentDueDate(
+    UpdateInstallmentDueDateEvent event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    debugPrint("========================================");
+    debugPrint("_handleUpdateInstallmentDueDate: START");
+    debugPrint("Student ID: ${event.studentId}");
+    debugPrint("Installment ID: ${event.installmentId}");
+    debugPrint("New Due Date: ${event.newDueDate}");
+    debugPrint("========================================");
+
+    emit(StudentInstalmentLoadingState());
+
+    try {
+      final updatedStudent = await actualImplemetationInstallmentRepo
+          .updateInstallmentDueDate(
+            studentId: event.studentId,
+            installmentId: event.installmentId,
+            newDueDate: event.newDueDate,
+          );
+
+      if (updatedStudent != null) {
+        debugPrint("✅ _handleUpdateInstallmentDueDate: SUCCESS");
+        emit(InstallmentDueDateUpdatedState(student: updatedStudent));
+      } else {
+        debugPrint(
+          "❌ _handleUpdateInstallmentDueDate: Updated student is null",
+        );
+        emit(
+          FeeAdminErrorState(error: "Failed to update installment due date"),
+        );
+      }
+    } catch (e) {
+      debugPrint("❌ ERROR in _handleUpdateInstallmentDueDate: $e");
+      emit(FeeAdminErrorState(error: e.toString()));
     }
   }
 }

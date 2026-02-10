@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_state.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/EditDueDateModal%20.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/decrease_fee_modal.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/gradient_background.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/neu_card.dart';
@@ -73,6 +74,17 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                   content: Text(
                     "Fee decreased successfully in favour of student",
                   ),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              _refreshData();
+            }
+            // NEW: Handle due date update completion
+            if (state is InstallmentDueDateUpdatedState) {
+              student = state.student;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Due date updated successfully"),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -165,6 +177,7 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                                   DataColumn(label: Text("Paid Date")),
                                   DataColumn(label: Text("Status")),
                                   DataColumn(label: Text("Action")),
+                                  DataColumn(label: Text("edit due date")),
                                 ],
                                 rows:
                                     student.installments.map((installment) {
@@ -536,6 +549,50 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                   "Skip",
                   style: TextStyle(color: Colors.white),
                 ),
+              ),
+            ],
+          ),
+        ),
+        // NEW: Due Date cell with edit button
+        DataCell(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(DateFormat('MMM dd, yyyy').format(installment.dueDate)),
+              const SizedBox(width: 4),
+              IconButton(
+                icon: const Icon(Icons.edit_calendar, size: 18),
+                color: const Color(0xFF3B82F6),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                onPressed: () {
+                  if (!isRefreshed) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Please refresh first")),
+                    );
+                    return;
+                  }
+
+                  showDialog(
+                    context: context,
+                    builder:
+                        (_) => EditDueDateModal(
+                          currentDueDate: installment.dueDate,
+                          onUpdate: (newDueDate) {
+                            context.read<FeeAdminBloc>().add(
+                              UpdateInstallmentDueDateEvent(
+                                studentId: student.id,
+                                installmentId: installment.id,
+                                newDueDate: newDueDate,
+                              ),
+                            );
+                          },
+                        ),
+                  ).then((_) {
+                    isRefreshed = false;
+                  });
+                },
+                tooltip: 'Edit Due Date',
               ),
             ],
           ),

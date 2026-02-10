@@ -318,3 +318,12 @@ class FavouredStudentsErrorState extends FeeAdminState {
   @override
   List<Object?> get props => [error];
 }
+
+class InstallmentDueDateUpdatedState extends FeeAdminState {
+  final StudentFeeFeatureEntityClass student;
+
+  const InstallmentDueDateUpdatedState({required this.student});
+
+  @override
+  List<Object?> get props => [student];
+}

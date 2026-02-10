@@ -824,6 +824,81 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
       rethrow;
     }
   }
+
+  @override
+  Future<StudentFeeFeatureEntityClass?> updateInstallmentDueDate({
+    required String studentId,
+    required String installmentId,
+    required DateTime newDueDate,
+  }) async {
+    try {
+      debugPrint("========================================");
+      debugPrint("updateInstallmentDueDate: START");
+      debugPrint("Student ID: $studentId");
+      debugPrint("Installment ID: $installmentId");
+      debugPrint("New Due Date: $newDueDate");
+      debugPrint("========================================");
+
+      // 1. Get current student data
+      final docRef = _firestore
+          .collection('student_installment')
+          .doc(studentId);
+      final doc = await docRef.get();
+
+      if (!doc.exists) {
+        debugPrint("❌ Student document not found");
+        throw Exception('Student installment document not found');
+      }
+
+      final data = doc.data()!;
+      final List<Map<String, dynamic>> installments =
+          List<Map<String, dynamic>>.from(data['installments'] ?? []);
+
+      debugPrint("Current installments count: ${installments.length}");
+
+      // 2. Find and update the specific installment
+      bool installmentFound = false;
+      for (int i = 0; i < installments.length; i++) {
+        if (installments[i]['id'] == installmentId) {
+          installmentFound = true;
+
+          final oldDueDate = installments[i]['dueDate'];
+          debugPrint("Old due date: $oldDueDate");
+
+          // Update the due date
+          installments[i]['dueDate'] = newDueDate.toIso8601String();
+
+          debugPrint("✅ Updated installment at index $i");
+          break;
+        }
+      }
+
+      if (!installmentFound) {
+        debugPrint("❌ Installment with ID $installmentId not found");
+        throw Exception('Installment not found');
+      }
+
+      // 3. Update the document in Firestore
+      await docRef.update({
+        'installments': installments,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      debugPrint("✅ Updated student_installment document in Firestore");
+
+      // 4. Return updated student data
+      final updatedStudent = await getStudent(studentId);
+
+      debugPrint("========================================");
+      debugPrint("updateInstallmentDueDate: COMPLETE");
+      debugPrint("========================================");
+
+      return updatedStudent;
+    } catch (e) {
+      debugPrint("❌ ERROR in updateInstallmentDueDate: $e");
+      rethrow;
+    }
+  }
 }
 // await _firestore.collection("pending_fees2").doc(student.id).set({
     //   "studentId": student.id,
