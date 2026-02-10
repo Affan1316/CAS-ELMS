@@ -4,6 +4,7 @@ import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cas_app_main/src/features/add_courses/presentation/pages/add_course_page.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/FavouredStudentsScreen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/groups_list_screen.dart';
@@ -532,6 +533,10 @@ void _navigateToScreen(BuildContext context, int index) {
           ),
         );
         break;
+      case 12:
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => FavouredStudentsScreen()),
+        );
 
       default:
         print('Invalid index: $index');

@@ -262,3 +262,29 @@ class FetchDayWiseFees extends FeeAdminEvent {
 
   FetchDayWiseFees(this.startDate, this.endDate);
 }
+
+class DecreaseFeeInFavourEvent extends FeeAdminEvent {
+  final StudentFeeFeatureEntityClass student;
+  final double favouredAmount;
+
+  const DecreaseFeeInFavourEvent({
+    required this.student,
+    required this.favouredAmount,
+  });
+
+  @override
+  List<Object?> get props => [student, favouredAmount];
+}
+
+class ReadFavouredStudentsEvent extends FeeAdminEvent {
+  const ReadFavouredStudentsEvent();
+}
+
+class FilterFavouredStudentsByGroupEvent extends FeeAdminEvent {
+  final String? groupId; // null means show all groups
+
+  const FilterFavouredStudentsByGroupEvent({this.groupId});
+
+  @override
+  List<Object?> get props => [groupId];
+}

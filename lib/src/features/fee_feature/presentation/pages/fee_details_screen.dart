@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_state.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/decrease_fee_modal.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/gradient_background.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/neu_card.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/pay_fee_modal.dart';
@@ -65,7 +66,20 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                 context,
               ).showSnackBar(SnackBar(content: Text("Added to defaulters ")));
             }
+            if (state is FeeDecreasedInFavourState) {
+              student = state.student;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    "Fee decreased successfully in favour of student",
+                  ),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              _refreshData();
+            }
           },
+
           builder: (context, state) {
             if (state is StudentLoadedState) {
               student = state.student;
@@ -168,6 +182,77 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
+
+                    Center(
+                      child: ElevatedButton.icon(
+                        icon: const Icon(
+                          Icons.trending_down,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          "Decrease Fee (Favour)",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        onPressed: () {
+                          if (!isRefreshed) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Please refresh first"),
+                              ),
+                            );
+                            return;
+                          }
+
+                          final remainingFee =
+                              student.totalFee - student.paidAmount;
+                          if (remainingFee <= 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("No remaining fee to decrease"),
+                              ),
+                            );
+                            return;
+                          }
+
+                          showDialog(
+                            context: context,
+                            builder:
+                                (_) => DecreaseFeeModal(
+                                  currentTotalFee: student.totalFee,
+                                  currentPaidAmount: student.paidAmount,
+                                  onDecrease: (favouredAmount) {
+                                    context.read<FeeAdminBloc>().add(
+                                      DecreaseFeeInFavourEvent(
+                                        student: student,
+                                        favouredAmount: favouredAmount,
+                                      ),
+                                    );
+                                  },
+                                ),
+                          ).then((_) {
+                            isRefreshed = false;
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple.shade600,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 4,
+                          shadowColor: Colors.black54,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
                     Center(
                       child:
                           !widget.isDefaulter
@@ -355,6 +440,14 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
             children: [
               ElevatedButton(
                 onPressed: () {
+                  if (installment.status == "Paid") {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("This installment is already paid."),
+                      ),
+                    );
+                    return;
+                  }
                   showDialog(
                     context: context,
                     builder:

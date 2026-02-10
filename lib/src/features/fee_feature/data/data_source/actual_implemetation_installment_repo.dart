@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/FavouredStudentEntity%20.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulter_entity.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulters_collective.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_entity_class.dart';
@@ -684,6 +685,142 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
       return dayWiseTotals;
     } catch (e) {
       debugPrint("❌ ERROR in fetchDayWiseFeesByDateRange: $e");
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StudentFeeFeatureEntityClass?> decreaseFeeInFavour({
+    required String studentId,
+    required String studentName,
+    required String groupId,
+    required double favouredAmount,
+  }) async {
+    try {
+      debugPrint("========================================");
+      debugPrint("decreaseFeeInFavour: START");
+      debugPrint("Student ID: $studentId");
+      debugPrint("Student Name: $studentName");
+      debugPrint("Group ID: $groupId");
+      debugPrint("Favoured Amount: $favouredAmount");
+      debugPrint("========================================");
+
+      // 1. Get current student data
+      final docRef = _firestore
+          .collection('student_installment')
+          .doc(studentId);
+      final doc = await docRef.get();
+
+      if (!doc.exists) {
+        debugPrint("❌ Student document not found");
+        throw Exception('Student installment document not found');
+      }
+
+      final data = doc.data()!;
+      final double currentTotalFee = (data['totalFee'] as num).toDouble();
+      final double currentPaidAmount = (data['paidAmount'] as num).toDouble();
+
+      // Calculate new total fee
+      final double newTotalFee = currentTotalFee - favouredAmount;
+
+      debugPrint("Current Total Fee: $currentTotalFee");
+      debugPrint("New Total Fee: $newTotalFee");
+
+      // 2. Update student_installment document
+      await docRef.update({
+        'totalFee': newTotalFee,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      debugPrint("✅ Updated student_installment document");
+
+      // 3. Update fee_history_group_wise
+      final groupDocRef = _firestore
+          .collection('fee_history_group_wise')
+          .doc(groupId);
+
+      final groupDoc = await groupDocRef.get();
+
+      if (groupDoc.exists) {
+        final groupData = groupDoc.data();
+        if (groupData != null) {
+          final double currentGroupTotal =
+              (groupData['total'] as num).toDouble();
+          final double newGroupTotal = currentGroupTotal - favouredAmount;
+
+          await groupDocRef.update({'total': newGroupTotal});
+
+          debugPrint("✅ Updated fee_history_group_wise");
+        }
+      }
+
+      // 4. Add record to fee_favours collection
+      final favourDocRef = _firestore.collection('fee_favours').doc(studentId);
+
+      await favourDocRef.set({
+        'studentId': studentId,
+        'studentName': studentName,
+        'groupId': groupId,
+        'favouredAmount': favouredAmount,
+        'previousTotalFee': currentTotalFee,
+        'newTotalFee': newTotalFee,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      debugPrint("✅ Added record to fee_favours collection");
+
+      // 5. Return updated student data
+      final updatedStudent = await getStudent(studentId);
+
+      debugPrint("========================================");
+      debugPrint("decreaseFeeInFavour: COMPLETE");
+      debugPrint("========================================");
+
+      return updatedStudent;
+    } catch (e) {
+      debugPrint("❌ ERROR in decreaseFeeInFavour: $e");
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<FavouredStudentEntity>> readFavouredStudents() async {
+    try {
+      debugPrint("========================================");
+      debugPrint("readFavouredStudents: START");
+      debugPrint("========================================");
+
+      final QuerySnapshot<Map<String, dynamic>> snapshot =
+          await _firestore
+              .collection('fee_favours')
+              .orderBy('createdAt', descending: true)
+              .get();
+
+      debugPrint(
+        "readFavouredStudents: Found ${snapshot.docs.length} favoured students",
+      );
+
+      final List<FavouredStudentEntity> favouredStudents = [];
+
+      for (var doc in snapshot.docs) {
+        try {
+          final data = doc.data();
+          favouredStudents.add(FavouredStudentEntity.fromMap(data));
+        } catch (e) {
+          debugPrint("⚠️ Error parsing document ${doc.id}: $e");
+          continue;
+        }
+      }
+
+      debugPrint("========================================");
+      debugPrint(
+        "readFavouredStudents: Successfully parsed ${favouredStudents.length} students",
+      );
+      debugPrint("========================================");
+
+      return favouredStudents;
+    } catch (e) {
+      debugPrint("❌ ERROR in readFavouredStudents: $e");
       rethrow;
     }
   }
