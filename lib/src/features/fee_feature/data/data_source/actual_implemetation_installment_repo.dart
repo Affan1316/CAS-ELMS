@@ -719,22 +719,40 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
       final data = doc.data()!;
       final double currentTotalFee = (data['totalFee'] as num).toDouble();
       final double currentPaidAmount = (data['paidAmount'] as num).toDouble();
+      final List<Map<String, dynamic>> installments =
+          List<Map<String, dynamic>>.from(data['installments'] ?? []);
 
       // Calculate new total fee
       final double newTotalFee = currentTotalFee - favouredAmount;
+      final double remainingFee = newTotalFee - currentPaidAmount;
 
       debugPrint("Current Total Fee: $currentTotalFee");
+      debugPrint("Current Paid Amount: $currentPaidAmount");
+      debugPrint("Favoured Amount: $favouredAmount");
       debugPrint("New Total Fee: $newTotalFee");
+      debugPrint("Remaining Fee to Pay: $remainingFee");
+      debugPrint("Current Installments Count: ${installments.length}");
 
-      // 2. Update student_installment document
+      // 2. Adjust installments based on the favoured amount
+      List<Map<String, dynamic>> adjustedInstallments =
+          _adjustInstallmentsForFavour(
+            installments,
+            favouredAmount,
+            currentPaidAmount,
+          );
+
+      debugPrint("Adjusted Installments Count: ${adjustedInstallments.length}");
+
+      // 3. Update student_installment document
       await docRef.update({
         'totalFee': newTotalFee,
+        'installments': adjustedInstallments,
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
       debugPrint("✅ Updated student_installment document");
 
-      // 3. Update fee_history_group_wise
+      // 4. Update fee_history_group_wise
       final groupDocRef = _firestore
           .collection('fee_history_group_wise')
           .doc(groupId);
@@ -754,7 +772,7 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
         }
       }
 
-      // 4. Add record to fee_favours collection
+      // 5. Add record to fee_favours collection
       final favourDocRef = _firestore.collection('fee_favours').doc(studentId);
 
       await favourDocRef.set({
@@ -764,12 +782,14 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
         'favouredAmount': favouredAmount,
         'previousTotalFee': currentTotalFee,
         'newTotalFee': newTotalFee,
+        'installmentsRemoved':
+            installments.length - adjustedInstallments.length,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
       debugPrint("✅ Added record to fee_favours collection");
 
-      // 5. Return updated student data
+      // 6. Return updated student data
       final updatedStudent = await getStudent(studentId);
 
       debugPrint("========================================");
@@ -781,6 +801,122 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
       debugPrint("❌ ERROR in decreaseFeeInFavour: $e");
       rethrow;
     }
+  }
+
+  /// Helper method to adjust installments when reducing total fee
+  /// Strategy:
+  /// 1. Only adjust UNPAID installments (status = "Unpaid")
+  /// 2. Remove installments from the END first (later due dates)
+  /// 3. If remaining amount after removal, reduce the last unpaid installment
+  List<Map<String, dynamic>> _adjustInstallmentsForFavour(
+    List<Map<String, dynamic>> installments,
+    double favouredAmount,
+    double currentPaidAmount,
+  ) {
+    debugPrint("========================================");
+    debugPrint("_adjustInstallmentsForFavour: START");
+    debugPrint("Favoured Amount to Remove: $favouredAmount");
+    debugPrint("========================================");
+
+    // Separate paid/pending installments from unpaid ones
+    List<Map<String, dynamic>> paidOrPendingInstallments = [];
+    List<Map<String, dynamic>> unpaidInstallments = [];
+
+    for (var installment in installments) {
+      String status = installment['status'] ?? 'Unpaid';
+      if (status == 'Paid' || status == 'pending' || status == 'skipped') {
+        paidOrPendingInstallments.add(installment);
+      } else {
+        unpaidInstallments.add(installment);
+      }
+    }
+
+    debugPrint(
+      "Paid/Pending/Skipped Installments: ${paidOrPendingInstallments.length}",
+    );
+    debugPrint("Unpaid Installments: ${unpaidInstallments.length}");
+
+    if (unpaidInstallments.isEmpty) {
+      debugPrint("⚠️ No unpaid installments to adjust!");
+      return installments; // Return original if nothing to adjust
+    }
+
+    // Sort unpaid installments by due date (latest first for removal)
+    unpaidInstallments.sort((a, b) {
+      DateTime dateA = DateTime.parse(a['dueDate']);
+      DateTime dateB = DateTime.parse(b['dueDate']);
+      return dateB.compareTo(dateA); // Descending order (latest first)
+    });
+
+    double remainingToRemove = favouredAmount;
+    List<Map<String, dynamic>> adjustedUnpaidInstallments = [];
+
+    debugPrint("Starting adjustment process...");
+
+    for (var i = 0; i < unpaidInstallments.length; i++) {
+      var installment = unpaidInstallments[i];
+      double installmentAmount = (installment['totalAmount'] as num).toDouble();
+
+      debugPrint(
+        "  Installment ${i + 1}: Amount = $installmentAmount, Remaining to Remove = $remainingToRemove",
+      );
+
+      if (remainingToRemove >= installmentAmount) {
+        // Remove this entire installment
+        remainingToRemove -= installmentAmount;
+        debugPrint(
+          "    ❌ Removing entire installment (Amount: $installmentAmount)",
+        );
+        // Don't add to adjusted list (effectively removes it)
+      } else if (remainingToRemove > 0) {
+        // Reduce this installment's amount
+        double newAmount = installmentAmount - remainingToRemove;
+        installment['totalAmount'] = newAmount;
+        adjustedUnpaidInstallments.add(installment);
+        debugPrint(
+          "    ✂️ Reducing installment from $installmentAmount to $newAmount",
+        );
+        remainingToRemove = 0;
+      } else {
+        // No more to remove, keep this installment as is
+        adjustedUnpaidInstallments.add(installment);
+        debugPrint(
+          "    ✅ Keeping installment unchanged (Amount: $installmentAmount)",
+        );
+      }
+    }
+
+    // Sort unpaid installments back by due date (earliest first) for proper order
+    adjustedUnpaidInstallments.sort((a, b) {
+      DateTime dateA = DateTime.parse(a['dueDate']);
+      DateTime dateB = DateTime.parse(b['dueDate']);
+      return dateA.compareTo(dateB); // Ascending order
+    });
+
+    // Combine paid/pending with adjusted unpaid installments
+    List<Map<String, dynamic>> finalInstallments = [
+      ...paidOrPendingInstallments,
+      ...adjustedUnpaidInstallments,
+    ];
+
+    // Sort all installments by due date for consistency
+    finalInstallments.sort((a, b) {
+      DateTime dateA = DateTime.parse(a['dueDate']);
+      DateTime dateB = DateTime.parse(b['dueDate']);
+      return dateA.compareTo(dateB);
+    });
+
+    debugPrint("========================================");
+    debugPrint("_adjustInstallmentsForFavour: COMPLETE");
+    debugPrint("Original Count: ${installments.length}");
+    debugPrint("Final Count: ${finalInstallments.length}");
+    debugPrint(
+      "Installments Removed: ${installments.length - finalInstallments.length}",
+    );
+    debugPrint("Remaining Amount Not Removed: $remainingToRemove");
+    debugPrint("========================================");
+
+    return finalInstallments;
   }
 
   @override
