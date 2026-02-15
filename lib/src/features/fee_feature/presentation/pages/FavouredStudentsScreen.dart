@@ -363,7 +363,7 @@ class _GroupSection extends StatelessWidget {
               columnSpacing: isTablet ? 48 : 24,
               dataRowHeight: 52,
               headingRowHeight: 48,
-              headingRowColor: MaterialStateProperty.all(Colors.grey.shade100),
+              headingRowColor: WidgetStateProperty.all(Colors.grey.shade100),
               columns: const [
                 DataColumn(label: Text('Student')),
                 DataColumn(label: Text('ID')),

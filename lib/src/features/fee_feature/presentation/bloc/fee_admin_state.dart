@@ -251,7 +251,7 @@ class DayWiseFeesLoaded extends FeeAdminState {
   final DateTime? startDate;
   final DateTime? endDate;
 
-  DayWiseFeesLoaded({required this.dayWiseFees, this.startDate, this.endDate});
+  const DayWiseFeesLoaded({required this.dayWiseFees, this.startDate, this.endDate});
 
   DayWiseFeesLoaded copyWith({
     Map<DateTime, double>? dayWiseFees,

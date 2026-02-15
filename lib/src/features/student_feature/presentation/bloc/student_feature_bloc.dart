@@ -13,6 +13,7 @@ import 'package:flutter_cas_app_main/src/features/student_feature/data/student_e
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/add_student_use_case.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/delete_student_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/firestore_repositry.dart';
+import 'package:flutter_cas_app_main/src/features/student_feature/domain/repository/fee_cleanup_repository.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/read_student_use_case.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/student_detail_update_usecase.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/update_student_group_usecase.dart';
@@ -36,7 +37,9 @@ class StudentFeatureBloc
   bool isNotificationPermissionGranted = false;
   bool isLocationAlwaysPermissionGranted = false;
 
-  StudentFeatureBloc() : super(StudentEnrollmentInitial()) {
+  final FeeCleanupRepository? feeCleanupRepository;
+
+  StudentFeatureBloc({this.feeCleanupRepository}) : super(StudentEnrollmentInitial()) {
     on<UpdateStudentDataEvent>(_handleStudentDataUpdate);
     on<SubmitEnrollmentFormEvent>(_handleEnrollmentSubmission);
     on<FetchGroupStudentsEvent>(_handleGroupDataLoading);
@@ -339,7 +342,10 @@ Future<void> _handleStudentDelete(
   emit(StudentDeleting());
   
   final DeleteStudentUseCase deleteStudentUseCase = 
-      DeleteStudentUseCase(firestoreRepositry: _firestoreRepositry);
+      DeleteStudentUseCase(
+        firestoreRepositry: _firestoreRepositry,
+        feeCleanupRepository: feeCleanupRepository,
+      );
 
   try {
     await deleteStudentUseCase.deleteStudent(
