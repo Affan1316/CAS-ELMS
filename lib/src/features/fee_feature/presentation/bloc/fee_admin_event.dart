@@ -260,7 +260,7 @@ class FetchDayWiseFees extends FeeAdminEvent {
   final DateTime startDate;
   final DateTime endDate;
 
-  FetchDayWiseFees(this.startDate, this.endDate);
+  const FetchDayWiseFees(this.startDate, this.endDate);
 }
 
 class DecreaseFeeInFavourEvent extends FeeAdminEvent {

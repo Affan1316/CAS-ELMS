@@ -6,7 +6,6 @@ import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentatio
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/pages/OnboardingScreen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/DayWiseFeePage.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/inquiry_detail_page.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/groups_report_page.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/super_admin_fee_notifications_screen.dart';
