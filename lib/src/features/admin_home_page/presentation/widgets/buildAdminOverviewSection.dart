@@ -117,6 +117,11 @@ Widget buildFeaturesGrid(
       'subtitle': 'Manage absences',
       'icon': Icons.event_busy_outlined,
     },
+    {
+      'title': 'Favoured Students',
+      'subtitle': 'see in detail',
+      'icon': Icons.all_inclusive_rounded,
+    },
   ];
 
   return LayoutBuilder(

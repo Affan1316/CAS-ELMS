@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/FavouredStudentEntity%20.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulter_entity.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulters_collective.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_entity_class.dart';
@@ -100,6 +101,12 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
       _handleAddingFeeInstallmentToSuperAdminApprovalList,
     );
     on<AddToPendingFee2Event>(_handleAddingToPendingFee);
+    on<DecreaseFeeInFavourEvent>(_handleDecreaseFeeInFavour);
+    on<ReadFavouredStudentsEvent>(_handleReadFavouredStudents);
+    on<FilterFavouredStudentsByGroupEvent>(
+      _handleFilterFavouredStudentsByGroup,
+    );
+    on<UpdateInstallmentDueDateEvent>(_handleUpdateInstallmentDueDate);
 
     debugPrint("FeeAdminBloc: Initialization complete");
   }
@@ -803,6 +810,149 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
       }
     } catch (e) {
       debugPrint("❌ ERROR in _handleAddingToPendingFee: $e");
+      emit(FeeAdminErrorState(error: e.toString()));
+    }
+  }
+
+  Future<void> _handleDecreaseFeeInFavour(
+    DecreaseFeeInFavourEvent event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    debugPrint("========================================");
+    debugPrint("_handleDecreaseFeeInFavour: START");
+    debugPrint("Student ID: ${event.student.id}");
+    debugPrint("Student Name: ${event.student.name}");
+    debugPrint("Favoured Amount: ${event.favouredAmount}");
+    debugPrint("========================================");
+
+    emit(StudentInstalmentLoadingState());
+
+    try {
+      final updatedStudent = await actualImplemetationInstallmentRepo
+          .decreaseFeeInFavour(
+            studentId: event.student.id,
+            studentName: event.student.name,
+            groupId: event.student.groupId,
+            favouredAmount: event.favouredAmount,
+          );
+
+      if (updatedStudent != null) {
+        debugPrint("✅ _handleDecreaseFeeInFavour: SUCCESS");
+        emit(FeeDecreasedInFavourState(student: updatedStudent));
+      } else {
+        debugPrint("❌ _handleDecreaseFeeInFavour: Updated student is null");
+        emit(FeeAdminErrorState(error: "Failed to update student fee"));
+      }
+    } catch (e) {
+      debugPrint("❌ ERROR in _handleDecreaseFeeInFavour: $e");
+      emit(FeeAdminErrorState(error: e.toString()));
+    }
+  }
+
+  Future<void> _handleReadFavouredStudents(
+    ReadFavouredStudentsEvent event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    debugPrint("========================================");
+    debugPrint("_handleReadFavouredStudents: START");
+    debugPrint("========================================");
+
+    emit(FavouredStudentsLoadingState());
+
+    try {
+      final List<FavouredStudentEntity> favouredStudents =
+          await actualImplemetationInstallmentRepo.readFavouredStudents();
+
+      debugPrint(
+        "_handleReadFavouredStudents: Fetched ${favouredStudents.length} students",
+      );
+
+      // Group students by groupId
+      final Map<String, List<FavouredStudentEntity>> groupedByGroup = {};
+
+      for (var student in favouredStudents) {
+        if (!groupedByGroup.containsKey(student.groupId)) {
+          groupedByGroup[student.groupId] = [];
+        }
+        groupedByGroup[student.groupId]!.add(student);
+      }
+
+      debugPrint(
+        "_handleReadFavouredStudents: Grouped into ${groupedByGroup.length} groups",
+      );
+
+      emit(
+        FavouredStudentsLoadedState(
+          favouredStudents: favouredStudents,
+          groupedByGroup: groupedByGroup,
+          selectedGroupId: null, // Show all groups by default
+        ),
+      );
+
+      debugPrint("✅ _handleReadFavouredStudents: SUCCESS");
+    } catch (e) {
+      debugPrint("❌ ERROR in _handleReadFavouredStudents: $e");
+      emit(FavouredStudentsErrorState(error: e.toString()));
+    }
+  }
+
+  void _handleFilterFavouredStudentsByGroup(
+    FilterFavouredStudentsByGroupEvent event,
+    Emitter<FeeAdminState> emit,
+  ) {
+    debugPrint("========================================");
+    debugPrint(
+      "_handleFilterFavouredStudentsByGroup: Group = '${event.groupId ?? 'ALL'}'",
+    );
+    debugPrint("========================================");
+
+    if (state is FavouredStudentsLoadedState) {
+      final currentState = state as FavouredStudentsLoadedState;
+
+      emit(currentState.copyWith(selectedGroupId: event.groupId));
+
+      debugPrint("✅ _handleFilterFavouredStudentsByGroup: Filter applied");
+    } else {
+      debugPrint(
+        "⚠️ _handleFilterFavouredStudentsByGroup: Current state is not FavouredStudentsLoadedState",
+      );
+    }
+  }
+
+  Future<void> _handleUpdateInstallmentDueDate(
+    UpdateInstallmentDueDateEvent event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    debugPrint("========================================");
+    debugPrint("_handleUpdateInstallmentDueDate: START");
+    debugPrint("Student ID: ${event.studentId}");
+    debugPrint("Installment ID: ${event.installmentId}");
+    debugPrint("New Due Date: ${event.newDueDate}");
+    debugPrint("========================================");
+
+    emit(StudentInstalmentLoadingState());
+
+    try {
+      final updatedStudent = await actualImplemetationInstallmentRepo
+          .updateInstallmentDueDate(
+            studentId: event.studentId,
+            installmentId: event.installmentId,
+            newDueDate: event.newDueDate,
+          );
+
+      if (updatedStudent != null) {
+        debugPrint("✅ _handleUpdateInstallmentDueDate: SUCCESS");
+        emit(InstallmentDueDateUpdatedState(student: updatedStudent));
+      } else {
+        debugPrint(
+          "❌ _handleUpdateInstallmentDueDate: Updated student is null",
+        );
+        emit(
+          FeeAdminErrorState(error: "Failed to update installment due date"),
+        );
+      }
+    } catch (e) {
+      debugPrint("❌ ERROR in _handleUpdateInstallmentDueDate: $e");
       emit(FeeAdminErrorState(error: e.toString()));
     }
   }

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/FavouredStudentEntity%20.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulter_entity.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulters_collective.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_entity_class.dart';
@@ -263,4 +264,66 @@ class DayWiseFeesLoaded extends FeeAdminState {
       endDate: endDate ?? this.endDate,
     );
   }
+}
+
+class FeeDecreasedInFavourState extends FeeAdminState {
+  final StudentFeeFeatureEntityClass student;
+
+  const FeeDecreasedInFavourState({required this.student});
+
+  @override
+  List<Object?> get props => [student];
+}
+
+class FavouredStudentsLoadingState extends FeeAdminState {
+  const FavouredStudentsLoadingState();
+}
+
+class FavouredStudentsLoadedState extends FeeAdminState {
+  final List<FavouredStudentEntity> favouredStudents;
+  final Map<String, List<FavouredStudentEntity>> groupedByGroup;
+  final String? selectedGroupId; // null means all groups
+
+  const FavouredStudentsLoadedState({
+    required this.favouredStudents,
+    required this.groupedByGroup,
+    this.selectedGroupId,
+  });
+
+  FavouredStudentsLoadedState copyWith({
+    List<FavouredStudentEntity>? favouredStudents,
+    Map<String, List<FavouredStudentEntity>>? groupedByGroup,
+    String? selectedGroupId,
+  }) {
+    return FavouredStudentsLoadedState(
+      favouredStudents: favouredStudents ?? this.favouredStudents,
+      groupedByGroup: groupedByGroup ?? this.groupedByGroup,
+      selectedGroupId: selectedGroupId ?? this.selectedGroupId,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    favouredStudents,
+    groupedByGroup,
+    selectedGroupId,
+  ];
+}
+
+class FavouredStudentsErrorState extends FeeAdminState {
+  final String error;
+
+  const FavouredStudentsErrorState({required this.error});
+
+  @override
+  List<Object?> get props => [error];
+}
+
+class InstallmentDueDateUpdatedState extends FeeAdminState {
+  final StudentFeeFeatureEntityClass student;
+
+  const InstallmentDueDateUpdatedState({required this.student});
+
+  @override
+  List<Object?> get props => [student];
 }

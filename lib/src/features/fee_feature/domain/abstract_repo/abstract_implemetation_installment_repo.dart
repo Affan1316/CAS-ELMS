@@ -1,3 +1,4 @@
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/FavouredStudentEntity%20.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulter_entity.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_defaulters_collective.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/fee_entity_class.dart';
@@ -60,4 +61,16 @@ abstract class AbstractInstallmentRepo {
     String paymentMethod,
     DateTime paidDate,
   );
+  Future<StudentFeeFeatureEntityClass?> decreaseFeeInFavour({
+    required String studentId,
+    required String studentName,
+    required String groupId,
+    required double favouredAmount,
+  });
+  Future<List<FavouredStudentEntity>> readFavouredStudents();
+  Future<StudentFeeFeatureEntityClass?> updateInstallmentDueDate({
+    required String studentId,
+    required String installmentId,
+    required DateTime newDueDate,
+  });
 }
