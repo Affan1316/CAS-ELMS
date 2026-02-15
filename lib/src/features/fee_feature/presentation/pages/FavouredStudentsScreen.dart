@@ -372,43 +372,6 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
 
         // Students Table
         NeuCard(
-<<<<<<< HEAD
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              columnSpacing: isTablet ? 48 : 24,
-              dataRowHeight: 52,
-              headingRowHeight: 48,
-              headingRowColor: WidgetStateProperty.all(Colors.grey.shade100),
-              columns: const [
-                DataColumn(label: Text('Student')),
-                DataColumn(label: Text('ID')),
-                DataColumn(label: Text('Previous')),
-                DataColumn(label: Text('Favoured')),
-                DataColumn(label: Text('New Fee')),
-                DataColumn(label: Text('Date')),
-              ],
-              rows:
-                  students.map((s) {
-                    return DataRow(
-                      cells: [
-                        DataCell(
-                          Text(
-                            s.studentName,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                        DataCell(Text(s.studentId)),
-                        DataCell(
-                          Text(currencyFormat.format(s.previousTotalFee)),
-                        ),
-                        DataCell(
-                          Text(
-                            currencyFormat.format(s.favouredAmount),
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.purple.shade700,
-=======
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: SingleChildScrollView(
@@ -472,7 +435,6 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                               ),
->>>>>>> 93cf9b357a02253279239fe9625d37a0bd17ffe9
                             ),
                           ),
                           DataCell(Text(student.studentId)),
