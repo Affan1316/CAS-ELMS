@@ -177,7 +177,7 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                                   DataColumn(label: Text("Paid Date")),
                                   DataColumn(label: Text("Status")),
                                   DataColumn(label: Text("Action")),
-                                  DataColumn(label: Text("edit due date")),
+                                  // DataColumn(label: Text("edit due date")),
                                 ],
                                 rows:
                                     student.installments.map((installment) {
@@ -236,11 +236,15 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                                 (_) => DecreaseFeeModal(
                                   currentTotalFee: student.totalFee,
                                   currentPaidAmount: student.paidAmount,
-                                  onDecrease: (favouredAmount) {
+
+                                  onDecrease: (favouredAmount, description) {
+                                    // NEW: Added description parameter
                                     context.read<FeeAdminBloc>().add(
                                       DecreaseFeeInFavourEvent(
                                         student: student,
                                         favouredAmount: favouredAmount,
+                                        description:
+                                            description, // NEW: Pass description to event
                                       ),
                                     );
                                   },
@@ -423,7 +427,51 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
     return DataRow(
       cells: [
         DataCell(Text(installment.title)),
-        DataCell(Text(DateFormat('MMM dd, yyyy').format(installment.dueDate))),
+        // DataCell(Text(DateFormat('MMM dd, yyyy').format(installment.dueDate))),
+        // NEW: Due Date cell with edit button
+        DataCell(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(DateFormat('MMM dd, yyyy').format(installment.dueDate)),
+              const SizedBox(width: 4),
+              IconButton(
+                icon: const Icon(Icons.edit_calendar, size: 18),
+                color: const Color(0xFF3B82F6),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                onPressed: () {
+                  if (!isRefreshed) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Please refresh first")),
+                    );
+                    return;
+                  }
+
+                  showDialog(
+                    context: context,
+                    builder:
+                        (_) => EditDueDateModal(
+                          currentDueDate: installment.dueDate,
+                          onUpdate: (newDueDate) {
+                            context.read<FeeAdminBloc>().add(
+                              UpdateInstallmentDueDateEvent(
+                                studentId: student.id,
+                                installmentId: installment.id,
+                                newDueDate: newDueDate,
+                              ),
+                            );
+                          },
+                        ),
+                  ).then((_) {
+                    isRefreshed = false;
+                  });
+                },
+                tooltip: 'Edit Due Date',
+              ),
+            ],
+          ),
+        ),
         DataCell(Text(currencyFormat.format(installment.totalAmount))),
         DataCell(Text(currencyFormat.format(installment.paidAmount))),
         DataCell(
@@ -549,50 +597,6 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
                   "Skip",
                   style: TextStyle(color: Colors.white),
                 ),
-              ),
-            ],
-          ),
-        ),
-        // NEW: Due Date cell with edit button
-        DataCell(
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(DateFormat('MMM dd, yyyy').format(installment.dueDate)),
-              const SizedBox(width: 4),
-              IconButton(
-                icon: const Icon(Icons.edit_calendar, size: 18),
-                color: const Color(0xFF3B82F6),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () {
-                  if (!isRefreshed) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Please refresh first")),
-                    );
-                    return;
-                  }
-
-                  showDialog(
-                    context: context,
-                    builder:
-                        (_) => EditDueDateModal(
-                          currentDueDate: installment.dueDate,
-                          onUpdate: (newDueDate) {
-                            context.read<FeeAdminBloc>().add(
-                              UpdateInstallmentDueDateEvent(
-                                studentId: student.id,
-                                installmentId: installment.id,
-                                newDueDate: newDueDate,
-                              ),
-                            );
-                          },
-                        ),
-                  ).then((_) {
-                    isRefreshed = false;
-                  });
-                },
-                tooltip: 'Edit Due Date',
               ),
             ],
           ),

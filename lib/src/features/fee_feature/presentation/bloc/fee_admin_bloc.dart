@@ -814,6 +814,8 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     }
   }
 
+  // UPDATE the _handleDecreaseFeeInFavour method in FeeAdminBloc with this version
+
   Future<void> _handleDecreaseFeeInFavour(
     DecreaseFeeInFavourEvent event,
     Emitter<FeeAdminState> emit,
@@ -823,6 +825,7 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
     debugPrint("Student ID: ${event.student.id}");
     debugPrint("Student Name: ${event.student.name}");
     debugPrint("Favoured Amount: ${event.favouredAmount}");
+    debugPrint("Description: ${event.description}"); // NEW
     debugPrint("========================================");
 
     emit(StudentInstalmentLoadingState());
@@ -834,6 +837,7 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
             studentName: event.student.name,
             groupId: event.student.groupId,
             favouredAmount: event.favouredAmount,
+            description: event.description, // NEW: Pass description
           );
 
       if (updatedStudent != null) {

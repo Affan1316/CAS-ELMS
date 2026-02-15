@@ -695,6 +695,7 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
     required String studentName,
     required String groupId,
     required double favouredAmount,
+    required String description, // NEW: Add description parameter
   }) async {
     try {
       debugPrint("========================================");
@@ -703,6 +704,7 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
       debugPrint("Student Name: $studentName");
       debugPrint("Group ID: $groupId");
       debugPrint("Favoured Amount: $favouredAmount");
+      debugPrint("Description: $description"); // NEW
       debugPrint("========================================");
 
       // 1. Get current student data
@@ -782,12 +784,13 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
         'favouredAmount': favouredAmount,
         'previousTotalFee': currentTotalFee,
         'newTotalFee': newTotalFee,
+        'description': description, // NEW: Save description
         'installmentsRemoved':
             installments.length - adjustedInstallments.length,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      debugPrint("✅ Added record to fee_favours collection");
+      debugPrint("✅ Added record to fee_favours collection with description");
 
       // 6. Return updated student data
       final updatedStudent = await getStudent(studentId);
