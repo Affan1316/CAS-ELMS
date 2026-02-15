@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/FavouredStudentEntity .dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/FavouredStudentEntity%20.dart';
+// import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/favoured_student_entity.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_state.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/gradient_background.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/neu_card.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_padding.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_text.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/screen_header.dart';
 import 'package:intl/intl.dart';
 
@@ -21,12 +23,13 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
   @override
   void initState() {
     super.initState();
+    // Load favoured students on screen init
     context.read<FeeAdminBloc>().add(const ReadFavouredStudentsEvent());
   }
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = MediaQuery.of(context).size.width >= 700;
+    final isTablet = MediaQuery.of(context).size.width > 600;
     final currencyFormat = NumberFormat.currency(locale: 'en_US', symbol: '');
 
     return GradientBackground(
@@ -40,55 +43,105 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
                 ScreenHeader(
                   title: 'Favoured Students',
                   trailing: IconButton(
-                    icon: const Icon(Icons.refresh_rounded),
                     onPressed: () {
                       context.read<FeeAdminBloc>().add(
                         const ReadFavouredStudentsEvent(),
                       );
                     },
+                    icon: const Icon(Icons.refresh),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
+
+                // BLoC Consumer
                 Expanded(
                   child: BlocBuilder<FeeAdminBloc, FeeAdminState>(
                     builder: (context, state) {
                       if (state is FavouredStudentsLoadingState) {
-                        return const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        );
+                        return const Center(child: CircularProgressIndicator());
                       }
 
                       if (state is FavouredStudentsErrorState) {
-                        return _ErrorState(message: state.error);
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                size: 64,
+                                color: Colors.red.shade400,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Error loading favoured students',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.red.shade700,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                state.error,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black54,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        );
                       }
 
                       if (state is FavouredStudentsLoadedState) {
                         if (state.favouredStudents.isEmpty) {
-                          return const _EmptyState();
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  size: 64,
+                                  color: Colors.grey.shade400,
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'No favoured students yet',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.black54,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
                         }
 
                         return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _GroupFilterCard(state: state),
+                            // Group Filter Dropdown
+                            _buildGroupFilter(state, context),
                             const SizedBox(height: 20),
-                            _SummaryRow(
-                              state: state,
-                              currencyFormat: currencyFormat,
-                            ),
-                            const SizedBox(height: 24),
+
+                            // Summary Cards
+                            _buildSummaryCards(state, currencyFormat),
+                            const SizedBox(height: 20),
+
+                            // Students List (grouped)
                             Expanded(
-                              child: _GroupedStudentsList(
-                                state: state,
-                                currencyFormat: currencyFormat,
-                                isTablet: isTablet,
+                              child: _buildGroupedStudentsList(
+                                state,
+                                currencyFormat,
+                                isTablet,
                               ),
                             ),
                           ],
                         );
                       }
 
-                      return const SizedBox.shrink();
+                      return const Center(child: Text('Unknown state'));
                     },
                   ),
                 ),
@@ -99,54 +152,46 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
       ),
     );
   }
-}
 
-/* ----------------------------- FILTER ----------------------------- */
-
-class _GroupFilterCard extends StatelessWidget {
-  final FavouredStudentsLoadedState state;
-
-  const _GroupFilterCard({required this.state});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildGroupFilter(
+    FavouredStudentsLoadedState state,
+    BuildContext context,
+  ) {
     final groups = state.groupedByGroup.keys.toList()..sort();
 
     return NeuCard(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         child: Row(
           children: [
-            const Icon(Icons.filter_list_rounded, color: Color(0xFF3B82F6)),
+            const Icon(Icons.filter_list, color: Color(0xFF3B82F6)),
             const SizedBox(width: 12),
             const Text(
-              'Filter by Group',
-              style: TextStyle(fontWeight: FontWeight.w600),
+              'Filter by Group:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             Expanded(
               child: DropdownButton<String?>(
                 value: state.selectedGroupId,
                 isExpanded: true,
-                underline: const SizedBox.shrink(),
                 hint: const Text('All Groups'),
                 items: [
                   const DropdownMenuItem<String?>(
                     value: null,
                     child: Text('All Groups'),
                   ),
-                  ...groups.map(
-                    (groupId) => DropdownMenuItem<String?>(
+                  ...groups.map((groupId) {
+                    final count = state.groupedByGroup[groupId]!.length;
+                    return DropdownMenuItem<String?>(
                       value: groupId,
-                      child: Text(
-                        '$groupId (${state.groupedByGroup[groupId]!.length})',
-                      ),
-                    ),
-                  ),
+                      child: Text('$groupId ($count students)'),
+                    );
+                  }),
                 ],
-                onChanged: (value) {
+                onChanged: (String? newGroupId) {
                   context.read<FeeAdminBloc>().add(
-                    FilterFavouredStudentsByGroupEvent(groupId: value),
+                    FilterFavouredStudentsByGroupEvent(groupId: newGroupId),
                   );
                 },
               ),
@@ -156,95 +201,82 @@ class _GroupFilterCard extends StatelessWidget {
       ),
     );
   }
-}
 
-/* ---------------------------- SUMMARY ----------------------------- */
+  Widget _buildSummaryCards(
+    FavouredStudentsLoadedState state,
+    NumberFormat currencyFormat,
+  ) {
+    // Calculate totals based on selected filter
+    List<FavouredStudentEntity> displayedStudents;
 
-class _SummaryRow extends StatelessWidget {
-  final FavouredStudentsLoadedState state;
-  final NumberFormat currencyFormat;
+    if (state.selectedGroupId == null) {
+      displayedStudents = state.favouredStudents;
+    } else {
+      displayedStudents = state.groupedByGroup[state.selectedGroupId] ?? [];
+    }
 
-  const _SummaryRow({required this.state, required this.currencyFormat});
-
-  @override
-  Widget build(BuildContext context) {
-    final students =
-        state.selectedGroupId == null
-            ? state.favouredStudents
-            : state.groupedByGroup[state.selectedGroupId] ?? [];
-
-    final totalStudents = students.length;
-    final totalFavoured = students.fold<double>(
-      0,
-      (sum, s) => sum + s.favouredAmount,
+    final totalStudents = displayedStudents.length;
+    final totalFavouredAmount = displayedStudents.fold<double>(
+      0.0,
+      (sum, student) => sum + student.favouredAmount,
     );
-    final groups = students.map((e) => e.groupId).toSet().length;
+    final uniqueGroups = displayedStudents.map((s) => s.groupId).toSet().length;
 
     return Row(
       children: [
         Expanded(
-          child: _SummaryCard(
-            icon: Icons.people_alt_rounded,
-            label: 'Students',
+          child: _buildSummaryCard(
+            icon: Icons.people,
+            title: 'Total Students',
             value: totalStudents.toString(),
             color: Colors.blue,
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: _SummaryCard(
-            icon: Icons.money_off_csred_rounded,
-            label: 'Favoured',
-            value: currencyFormat.format(totalFavoured),
+          child: _buildSummaryCard(
+            icon: Icons.money_off,
+            title: 'Total Favoured',
+            value: currencyFormat.format(totalFavouredAmount),
             color: Colors.purple,
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: _SummaryCard(
-            icon: Icons.groups_rounded,
-            label: 'Groups',
-            value: groups.toString(),
+          child: _buildSummaryCard(
+            icon: Icons.group,
+            title: 'Groups',
+            value: uniqueGroups.toString(),
             color: Colors.green,
           ),
         ),
       ],
     );
   }
-}
 
-class _SummaryCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final MaterialColor color;
-
-  const _SummaryCard({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildSummaryCard({
+    required IconData icon,
+    required String title,
+    required String value,
+    required MaterialColor color,
+  }) {
     return NeuCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: color.shade600),
+            Icon(icon, color: color.shade600, size: 32),
             const SizedBox(height: 8),
             Text(
-              label,
+              title,
               style: const TextStyle(fontSize: 12, color: Colors.black54),
             ),
             const SizedBox(height: 4),
             Text(
               value,
               style: TextStyle(
-                fontWeight: FontWeight.bold,
                 fontSize: 18,
+                fontWeight: FontWeight.bold,
                 color: color.shade700,
               ),
             ),
@@ -253,102 +285,83 @@ class _SummaryCard extends StatelessWidget {
       ),
     );
   }
-}
 
-/* -------------------------- GROUP LIST ---------------------------- */
+  Widget _buildGroupedStudentsList(
+    FavouredStudentsLoadedState state,
+    NumberFormat currencyFormat,
+    bool isTablet,
+  ) {
+    // Get groups to display
+    Map<String, List<FavouredStudentEntity>> displayGroups;
 
-class _GroupedStudentsList extends StatelessWidget {
-  final FavouredStudentsLoadedState state;
-  final NumberFormat currencyFormat;
-  final bool isTablet;
+    if (state.selectedGroupId == null) {
+      displayGroups = state.groupedByGroup;
+    } else {
+      displayGroups = {
+        state.selectedGroupId!: state.groupedByGroup[state.selectedGroupId!]!,
+      };
+    }
 
-  const _GroupedStudentsList({
-    required this.state,
-    required this.currencyFormat,
-    required this.isTablet,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final displayGroups =
-        state.selectedGroupId == null
-            ? state.groupedByGroup
-            : {
-              state.selectedGroupId!:
-                  state.groupedByGroup[state.selectedGroupId!]!,
-            };
-
-    final groupIds = displayGroups.keys.toList()..sort();
+    final sortedGroupIds = displayGroups.keys.toList()..sort();
 
     return ListView.builder(
-      itemCount: groupIds.length,
+      itemCount: sortedGroupIds.length,
       itemBuilder: (context, index) {
-        final groupId = groupIds[index];
+        final groupId = sortedGroupIds[index];
         final students = displayGroups[groupId]!;
 
-        return _GroupSection(
-          groupId: groupId,
-          students: students,
-          currencyFormat: currencyFormat,
-          isTablet: isTablet,
-        );
+        return _buildGroupSection(groupId, students, currencyFormat, isTablet);
       },
     );
   }
-}
 
-/* -------------------------- GROUP CARD ---------------------------- */
-
-class _GroupSection extends StatelessWidget {
-  final String groupId;
-  final List<FavouredStudentEntity> students;
-  final NumberFormat currencyFormat;
-  final bool isTablet;
-
-  const _GroupSection({
-    required this.groupId,
-    required this.students,
-    required this.currencyFormat,
-    required this.isTablet,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final total = students.fold<double>(0, (sum, s) => sum + s.favouredAmount);
+  Widget _buildGroupSection(
+    String groupId,
+    List<FavouredStudentEntity> students,
+    NumberFormat currencyFormat,
+    bool isTablet,
+  ) {
+    final totalFavouredInGroup = students.fold<double>(
+      0.0,
+      (sum, student) => sum + student.favouredAmount,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Group Header
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
+                  horizontal: 12,
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF3B82F6),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   groupId,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
               ),
               const SizedBox(width: 12),
               Text(
-                '${students.length} students',
-                style: TextStyle(color: Colors.grey.shade600),
+                '${students.length} student${students.length > 1 ? 's' : ''}',
+                style: const TextStyle(fontSize: 14, color: Colors.black54),
               ),
               const Spacer(),
               Text(
-                currencyFormat.format(total),
+                'Total: ${currencyFormat.format(totalFavouredInGroup)}',
                 style: TextStyle(
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.purple.shade700,
                 ),
@@ -356,119 +369,131 @@ class _GroupSection extends StatelessWidget {
             ],
           ),
         ),
+
+        // Students Table
         NeuCard(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              columnSpacing: isTablet ? 48 : 24,
-              dataRowHeight: 52,
-              headingRowHeight: 48,
-              headingRowColor: MaterialStateProperty.all(Colors.grey.shade100),
-              columns: const [
-                DataColumn(label: Text('Student')),
-                DataColumn(label: Text('ID')),
-                DataColumn(label: Text('Previous')),
-                DataColumn(label: Text('Favoured')),
-                DataColumn(label: Text('New Fee')),
-                DataColumn(label: Text('Date')),
-              ],
-              rows:
-                  students.map((s) {
-                    return DataRow(
-                      cells: [
-                        DataCell(
-                          Text(
-                            s.studentName,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                        DataCell(Text(s.studentId)),
-                        DataCell(
-                          Text(currencyFormat.format(s.previousTotalFee)),
-                        ),
-                        DataCell(
-                          Text(
-                            currencyFormat.format(s.favouredAmount),
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.purple.shade700,
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columnSpacing: isTablet ? 40 : 20,
+                headingRowColor: MaterialStateProperty.all(
+                  Colors.grey.shade100,
+                ),
+                columns: const [
+                  DataColumn(
+                    label: Text(
+                      'Student Name',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Student ID',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Previous Fee',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Favoured Amount',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'New Fee',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Reason',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Date',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+                rows:
+                    students.map((student) {
+                      return DataRow(
+                        cells: [
+                          DataCell(
+                            Text(
+                              student.studentName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                        ),
-                        DataCell(
-                          Text(
-                            currencyFormat.format(s.newTotalFee),
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green.shade700,
+                          DataCell(Text(student.studentId)),
+                          DataCell(
+                            Text(
+                              currencyFormat.format(student.previousTotalFee),
                             ),
                           ),
-                        ),
-                        DataCell(
-                          Text(DateFormat('MMM dd, yyyy').format(s.createdAt)),
-                        ),
-                      ],
-                    );
-                  }).toList(),
+                          DataCell(
+                            Text(
+                              currencyFormat.format(student.favouredAmount),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.purple.shade700,
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              currencyFormat.format(student.newTotalFee),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green.shade700,
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Container(
+                              constraints: const BoxConstraints(maxWidth: 200),
+                              child: Tooltip(
+                                message: student.description,
+                                child: Text(
+                                  student.description,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              DateFormat(
+                                'MMM dd, yyyy',
+                              ).format(student.createdAt),
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+              ),
             ),
           ),
         ),
         const SizedBox(height: 24),
       ],
-    );
-  }
-}
-
-/* ---------------------- STATES (EMPTY / ERROR) -------------------- */
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(Icons.info_outline_rounded, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text(
-            'No favoured students yet',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  final String message;
-
-  const _ErrorState({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: 64,
-              color: Colors.red.shade400,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.red.shade700),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

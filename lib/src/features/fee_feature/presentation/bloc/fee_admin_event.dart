@@ -266,14 +266,16 @@ class FetchDayWiseFees extends FeeAdminEvent {
 class DecreaseFeeInFavourEvent extends FeeAdminEvent {
   final StudentFeeFeatureEntityClass student;
   final double favouredAmount;
+  final String description; // NEW: Add description field
 
   const DecreaseFeeInFavourEvent({
     required this.student,
     required this.favouredAmount,
+    required this.description, // NEW
   });
 
   @override
-  List<Object?> get props => [student, favouredAmount];
+  List<Object?> get props => [student, favouredAmount, description]; // NEW: Add to props
 }
 
 class ReadFavouredStudentsEvent extends FeeAdminEvent {
