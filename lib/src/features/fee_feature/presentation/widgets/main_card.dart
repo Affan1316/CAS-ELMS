@@ -16,6 +16,7 @@ class MainCard extends StatelessWidget {
     required this.installmentAmountController,
     required this.installmentAmount,
     required this.isLoading,
+    required this.admissionFeeController,
   });
 
   final String studentId;
@@ -26,6 +27,7 @@ class MainCard extends StatelessWidget {
   final TextEditingController installmentAmountController;
   final double installmentAmount;
   final bool isLoading;
+  final TextEditingController admissionFeeController;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +87,18 @@ class MainCard extends StatelessWidget {
                     hint: "Enter total fee",
                     keyboardType: TextInputType.number, // ✅ numeric
                   ),
-
+                  const SizedBox(height: 20),
+                  // --- Admission Fee ---
+                  const Text(
+                    "Admission Fee (Optional)",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 10),
+                  InputField(
+                    controller: admissionFeeController,
+                    hint: "Enter admission fee (leave empty if none)",
+                    keyboardType: TextInputType.number,
+                  ),
                   const SizedBox(height: 20),
                   // --- Installments Count ---
                   const Text(
@@ -169,7 +182,21 @@ class MainCard extends StatelessWidget {
                                 );
                                 return;
                               }
+                              final admissionFee =
+                                  admissionFeeController.text.trim().isEmpty
+                                      ? 0.0
+                                      : double.tryParse(
+                                            admissionFeeController.text.trim(),
+                                          ) ??
+                                          0.0;
 
+                              if (admissionFee < 0) {
+                                _showErrorSnackBar(
+                                  context,
+                                  'Admission fee cannot be negative',
+                                );
+                                return;
+                              }
                               if (installmentsController.text.trim().isEmpty) {
                                 _showErrorSnackBar(
                                   context,
@@ -232,6 +259,7 @@ class MainCard extends StatelessWidget {
                                   numberOfInstallments: installments,
                                   paidAmount: 0,
                                   amountPerMonth: installmentAmount,
+                                  admissionFee: admissionFee, // NEW
                                 ),
                               );
                             },

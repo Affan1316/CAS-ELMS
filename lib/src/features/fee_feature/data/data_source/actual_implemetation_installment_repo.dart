@@ -14,6 +14,7 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
   final Uuid _uuid = const Uuid();
   @override
   /// Creates / replaces the document in student_installment/{studentId}
+  @override
   Future<void> createStudentWithInstallments({
     required double paidAmount,
     required String studentId,
@@ -22,38 +23,65 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
     required double totalFee,
     required int numberOfInstallments,
     required double amountPerMonth,
+    double admissionFee = 0.0, // NEW parameter
   }) async {
     try {
-      // final double amountPerMonth = totalFee / numberOfInstallments;
+      List<Map<String, dynamic>> installments = [];
 
-      final List<Map<String, dynamic>> installments = List.generate(
-        numberOfInstallments,
-        (i) {
-          final dueDate = DateTime.now().add(Duration(days: 30 * (i + 1)));
-          final FeeInstallmentEntityClass inst = FeeInstallmentEntityClass(
-            id: _uuid.v4(),
-            title: 'Installment ${i + 1}',
-            totalAmount: amountPerMonth,
-            dueDate: dueDate,
-            paidDate: null,
-            paymentMethod: null,
-            status: 'Unpaid',
-            paidAmount: paidAmount,
-          );
-          return inst.toMap();
-        },
-      );
+      // If admission fee is provided, create first installment with admission fee
+      if (admissionFee > 0) {
+        debugPrint("Creating admission fee installment: $admissionFee");
+
+        final DateTime admissionDueDate = DateTime.now().add(
+          const Duration(days: 30),
+        );
+        final FeeInstallmentEntityClass admissionInstallment =
+            FeeInstallmentEntityClass(
+              id: _uuid.v4(),
+              title: 'Admission Fee',
+              totalAmount: admissionFee,
+              dueDate: admissionDueDate,
+              paidDate: null,
+              paymentMethod: null,
+              status: 'Unpaid',
+              paidAmount: 0,
+            );
+
+        installments.add(admissionInstallment.toMap());
+      }
+
+      // Create regular installments
+      final int startIndex =
+          admissionFee > 0 ? 2 : 1; // Start from 2 if admission fee exists
+
+      for (int i = 0; i < numberOfInstallments; i++) {
+        final dueDate = DateTime.now().add(
+          Duration(days: 30 * (i + startIndex)),
+        );
+        final FeeInstallmentEntityClass inst = FeeInstallmentEntityClass(
+          id: _uuid.v4(),
+          title: 'Installment ${i + 1}',
+          totalAmount: amountPerMonth,
+          dueDate: dueDate,
+          paidDate: null,
+          paymentMethod: null,
+          status: 'Unpaid',
+          paidAmount: paidAmount,
+        );
+        installments.add(inst.toMap());
+      }
+
+      debugPrint("Total installments created: ${installments.length}");
 
       final Map<String, dynamic> payload = {
         'id': studentId,
         'name': name,
-
         "paidAmount": paidAmount,
-
         'groupId': groupId,
         'totalFee': totalFee,
         'numberOfInstallments': numberOfInstallments,
         'amountPerMonth': amountPerMonth,
+        'admissionFee': admissionFee, // NEW: Store admission fee
         'installments': installments,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
@@ -63,29 +91,23 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
           .collection('student_installment')
           .doc(studentId)
           .set(payload, SetOptions(merge: true));
+
       var docRef = FirebaseFirestore.instance
           .collection('fee_history_group_wise')
           .doc(groupId);
       DocumentSnapshot<Map<String, dynamic>> snapshot = await docRef.get();
+
       if (!snapshot.exists) {
-        await docRef.set({
-          "total": totalFee,
-          "received": 0,
-          // "remaining": totalFee,
-        });
+        await docRef.set({"total": totalFee, "received": 0});
       } else {
         Map<String, dynamic>? mapOfData = snapshot.data();
         double previousTotal;
         double newTotal;
-        // double newRemaining;
-        // double previousRemaining;
+
         if (mapOfData != null) {
           previousTotal = mapOfData["total"];
-          // previousRemaining = mapOfData["remaining"];
           newTotal = totalFee + previousTotal;
-          // newRemaining = newTotal - previousRemaining;
           mapOfData["total"] = newTotal;
-          // mapOfData["remaining"] = newRemaining;
           docRef.set(mapOfData);
         }
       }

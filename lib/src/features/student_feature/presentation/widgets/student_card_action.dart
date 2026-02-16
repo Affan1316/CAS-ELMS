@@ -35,12 +35,13 @@ class StudentCardActions {
           label: 'Edit',
         ),
         SlidableAction(
-          onPressed: (_) => _showDeleteConfirmation(
-            context,
-            studentId,
-            studentName,
-            groupName,
-          ),
+          onPressed:
+              (_) => _showDeleteConfirmation(
+                context,
+                studentId,
+                studentName,
+                groupName,
+              ),
           backgroundColor: const Color(0xFFEF4444),
           foregroundColor: Colors.white,
           icon: Icons.delete_rounded,
@@ -60,6 +61,7 @@ class StudentCardActions {
     String studentName,
     String groupName,
   ) {
+    final studentBloc = context.read<StudentFeatureBloc>();
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -93,7 +95,7 @@ class StudentCardActions {
                   ),
                 ),
                 const SizedBox(height: 20),
-                
+
                 // Title
                 const Text(
                   'Delete Student?',
@@ -104,7 +106,7 @@ class StudentCardActions {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 // Message
                 Text(
                   'Are you sure you want to delete "$studentName"?\n\nThis action cannot be undone.',
@@ -116,7 +118,7 @@ class StudentCardActions {
                   ),
                 ),
                 const SizedBox(height: 28),
-                
+
                 // Buttons
                 Row(
                   children: [
@@ -163,9 +165,9 @@ class StudentCardActions {
                           onPressed: () {
                             // Close dialog
                             Navigator.of(dialogContext).pop();
-                            
+
                             // Trigger delete event
-                            context.read<StudentFeatureBloc>().add(
+                            studentBloc.add(
                               DeleteStudentEvent(
                                 studentId: studentId,
                                 groupName: groupName,

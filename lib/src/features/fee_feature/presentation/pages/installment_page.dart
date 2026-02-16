@@ -36,6 +36,8 @@ class _CreateFeePlanPageState extends State<CreateFeePlanPage> {
   final TextEditingController installmentAmountController =
       TextEditingController();
 
+  final TextEditingController admissionFeeController = TextEditingController();
+
   late FeeAdminBloc bloc;
 
   @override
@@ -63,6 +65,7 @@ class _CreateFeePlanPageState extends State<CreateFeePlanPage> {
     totalFeeController.dispose();
     installmentsController.dispose();
     installmentAmountController.dispose();
+    admissionFeeController.dispose();
     super.dispose();
   }
 
@@ -122,6 +125,7 @@ class _CreateFeePlanPageState extends State<CreateFeePlanPage> {
                   totalFeeController: totalFeeController,
                   installmentsController: installmentsController,
                   installmentAmountController: installmentAmountController,
+                  admissionFeeController: admissionFeeController,
                   installmentAmount:
                       state is InstallmentPageInstallmentCalculatedState
                           ? state.installment

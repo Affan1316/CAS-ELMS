@@ -71,6 +71,7 @@ class CreateStudentInstallmentEvent extends FeeAdminEvent {
   final int numberOfInstallments;
   final double paidAmount;
   final double amountPerMonth;
+  final double admissionFee; // NEW
 
   const CreateStudentInstallmentEvent({
     required this.studentId,
@@ -80,6 +81,7 @@ class CreateStudentInstallmentEvent extends FeeAdminEvent {
     required this.numberOfInstallments,
     required this.paidAmount,
     required this.amountPerMonth,
+    this.admissionFee = 0.0, // NEW - default to 0
   });
 
   @override
@@ -91,6 +93,7 @@ class CreateStudentInstallmentEvent extends FeeAdminEvent {
     numberOfInstallments,
     paidAmount,
     amountPerMonth,
+    admissionFee, // NEW
   ];
 }
 
