@@ -30,7 +30,7 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
   List<String> listOfGroupNamesForDropDownMenu = [];
   bool _isNavigating = false;
   bool _isUpdatingGroup = false;
-  bool _isDeletingStudent = false;
+  final bool _isDeletingStudent = false;
 
   @override
   void initState() {
@@ -689,7 +689,7 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                             canvasColor: Colors.white,
                           ),
                           child: DropdownButtonFormField<String>(
-                            value: selectedGroup ??
+                            initialValue: selectedGroup ??
                                 listOfGroupNamesForDropDownMenu.first,
                             decoration: const InputDecoration(
                               contentPadding: EdgeInsets.symmetric(
