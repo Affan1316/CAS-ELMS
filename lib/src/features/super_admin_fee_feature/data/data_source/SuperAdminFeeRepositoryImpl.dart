@@ -106,10 +106,7 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
   ) async {
     Map<String, dynamic>? paymentHistoryData;
 
-    // Use a batch for atomic writes across collections
-    final batch = _remoteDataSource.batch();
-
-    // Update collection 1 (without history)
+    // Update student_installment collection
     await _remoteDataSource.runTransaction((transaction) async {
       final docRef = _remoteDataSource
           .collection(_collectionPath2)
@@ -119,10 +116,9 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
       _validateSnapshot(snapshot, studentId, _collectionPath2);
 
       final data = snapshot.data()!;
-
       final installments = _extractInstallments(data);
-
       final result = _processInstallments(installments, installmentId);
+
       _updateGroupWisePaymentHistory(
         data["groupId"],
         _currentInstallment["paidAmount"],
@@ -144,7 +140,7 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
       );
     });
 
-    // Update collection 2 (with history data collection)
+    // Update not_approved_fee_installments collection and collect payment history data
     await _remoteDataSource.runTransaction((transaction) async {
       final docRef = _remoteDataSource
           .collection(_collectionPath1)
@@ -163,16 +159,22 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
         );
       }
 
-      // Collect payment history data (but don't write yet)
       final updatedInstallment = result.installments.firstWhere(
         (inst) => inst['id'] == installmentId,
       );
+
+      // Use paidDate from installment as createdAt, fallback to serverTimestamp if null
+      final String? paidDateStr = updatedInstallment['paidDate'];
+      final createdAt =
+          paidDateStr != null
+              ? Timestamp.fromDate(DateTime.parse(paidDateStr))
+              : FieldValue.serverTimestamp();
 
       paymentHistoryData = {
         'paidAmount':
             (updatedInstallment['paidAmount'] as num?)?.toDouble() ?? 0.0,
         'paymentMethod': updatedInstallment['paymentMethod'] ?? 'Unknown',
-        'createdAt': FieldValue.serverTimestamp(),
+        'createdAt': createdAt,
         'name': data['name'] ?? 'Unknown',
         'rollnumber': data['id'] ?? 'Unknown',
         'installmentId': installmentId,
