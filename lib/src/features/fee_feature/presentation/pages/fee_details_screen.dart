@@ -501,7 +501,8 @@ class _FeeDetailsScreenState extends State<FeeDetailsScreen> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  if (installment.status == "Paid") {
+                  if (installment.status == "Paid" ||
+                      installment.status == "pending") {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text("This installment is already paid."),
