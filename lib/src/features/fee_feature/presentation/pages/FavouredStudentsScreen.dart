@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/FavouredStudentEntity%20.dart';
-// import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/favoured_student_entity.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_state.dart';
@@ -23,7 +22,6 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
   @override
   void initState() {
     super.initState();
-    // Load favoured students on screen init
     context.read<FeeAdminBloc>().add(const ReadFavouredStudentsEvent());
   }
 
@@ -53,7 +51,6 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // BLoC Consumer
                 Expanded(
                   child: BlocBuilder<FeeAdminBloc, FeeAdminState>(
                     builder: (context, state) {
@@ -119,26 +116,17 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
                           );
                         }
 
-                        return Column(
-                          children: [
-                            // Group Filter Dropdown
-                            _buildGroupFilter(state, context),
-                            const SizedBox(height: 20),
-
-                            // Summary Cards
-                            _buildSummaryCards(state, currencyFormat),
-                            const SizedBox(height: 20),
-
-                            // Students List (grouped)
-                            Expanded(
-                              child: _buildGroupedStudentsList(
-                                state,
-                                currencyFormat,
-                                isTablet,
-                              ),
-                            ),
-                          ],
-                        );
+                        return isTablet
+                            ? _buildTabletLayout(
+                              state,
+                              currencyFormat,
+                              isTablet,
+                            )
+                            : _buildMobileLayout(
+                              state,
+                              currencyFormat,
+                              isTablet,
+                            );
                       }
 
                       return const Center(child: Text('Unknown state'));
@@ -153,6 +141,56 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
     );
   }
 
+  // Tablet/Desktop Layout (side-by-side with full scrollable)
+  Widget _buildTabletLayout(
+    FavouredStudentsLoadedState state,
+    NumberFormat currencyFormat,
+    bool isTablet,
+  ) {
+    return SingleChildScrollView(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Left sidebar with filters and summary
+          SizedBox(
+            width: 320,
+            child: Column(
+              children: [
+                _buildGroupFilter(state, context),
+                const SizedBox(height: 20),
+                _buildSummaryCards(state, currencyFormat),
+              ],
+            ),
+          ),
+          const SizedBox(width: 20),
+          // Right content area with students list
+          Expanded(
+            child: _buildGroupedStudentsList(state, currencyFormat, isTablet),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Mobile Layout (stacked with full scrollable)
+  Widget _buildMobileLayout(
+    FavouredStudentsLoadedState state,
+    NumberFormat currencyFormat,
+    bool isTablet,
+  ) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _buildGroupFilter(state, context),
+          const SizedBox(height: 16),
+          _buildSummaryCards(state, currencyFormat),
+          const SizedBox(height: 20),
+          _buildGroupedStudentsList(state, currencyFormat, isTablet),
+        ],
+      ),
+    );
+  }
+
   Widget _buildGroupFilter(
     FavouredStudentsLoadedState state,
     BuildContext context,
@@ -161,31 +199,98 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
 
     return NeuCard(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        child: Row(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.filter_list, color: Color(0xFF3B82F6)),
-            const SizedBox(width: 12),
-            const Text(
-              'Filter by Group:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF3B82F6).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.filter_list,
+                    color: Color(0xFF3B82F6),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Filter by Group',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Color(0xFF1F2937),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               child: DropdownButton<String?>(
                 value: state.selectedGroupId,
                 isExpanded: true,
+                underline: const SizedBox(),
+                icon: const Icon(Icons.keyboard_arrow_down),
                 hint: const Text('All Groups'),
                 items: [
                   const DropdownMenuItem<String?>(
                     value: null,
-                    child: Text('All Groups'),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.select_all,
+                          size: 18,
+                          color: Color(0xFF6B7280),
+                        ),
+                        SizedBox(width: 8),
+                        Text('All Groups'),
+                      ],
+                    ),
                   ),
                   ...groups.map((groupId) {
                     final count = state.groupedByGroup[groupId]!.length;
                     return DropdownMenuItem<String?>(
                       value: groupId,
-                      child: Text('$groupId ($count students)'),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.group,
+                            size: 18,
+                            color: Colors.blue.shade600,
+                          ),
+                          const SizedBox(width: 8),
+                          Text('$groupId'),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '$count',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.blue.shade700,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   }),
                 ],
@@ -206,7 +311,6 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
     FavouredStudentsLoadedState state,
     NumberFormat currencyFormat,
   ) {
-    // Calculate totals based on selected filter
     List<FavouredStudentEntity> displayedStudents;
 
     if (state.selectedGroupId == null) {
@@ -222,33 +326,27 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
     );
     final uniqueGroups = displayedStudents.map((s) => s.groupId).toSet().length;
 
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: _buildSummaryCard(
-            icon: Icons.people,
-            title: 'Total Students',
-            value: totalStudents.toString(),
-            color: Colors.blue,
-          ),
+        _buildSummaryCard(
+          icon: Icons.people,
+          title: 'Total Students',
+          value: totalStudents.toString(),
+          gradient: [const Color(0xFF3B82F6), const Color(0xFF2563EB)],
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildSummaryCard(
-            icon: Icons.money_off,
-            title: 'Total Favoured',
-            value: currencyFormat.format(totalFavouredAmount),
-            color: Colors.purple,
-          ),
+        const SizedBox(height: 12),
+        _buildSummaryCard(
+          icon: Icons.money_off,
+          title: 'Total Favoured',
+          value: currencyFormat.format(totalFavouredAmount),
+          gradient: [const Color(0xFF9333EA), const Color(0xFF7E22CE)],
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildSummaryCard(
-            icon: Icons.group,
-            title: 'Groups',
-            value: uniqueGroups.toString(),
-            color: Colors.green,
-          ),
+        const SizedBox(height: 12),
+        _buildSummaryCard(
+          icon: Icons.group,
+          title: 'Groups',
+          value: uniqueGroups.toString(),
+          gradient: [const Color(0xFF10B981), const Color(0xFF059669)],
         ),
       ],
     );
@@ -258,26 +356,66 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
     required IconData icon,
     required String title,
     required String value,
-    required MaterialColor color,
+    required List<Color> gradient,
   }) {
     return NeuCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              gradient[0].withOpacity(0.1),
+              gradient[1].withOpacity(0.05),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Row(
           children: [
-            Icon(icon, color: color.shade600, size: 32),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 12, color: Colors.black54),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: gradient,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: gradient[0].withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(icon, color: Colors.white, size: 28),
             ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: color.shade700,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF6B7280),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: gradient[1],
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -291,7 +429,6 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
     NumberFormat currencyFormat,
     bool isTablet,
   ) {
-    // Get groups to display
     Map<String, List<FavouredStudentEntity>> displayGroups;
 
     if (state.selectedGroupId == null) {
@@ -304,14 +441,17 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
 
     final sortedGroupIds = displayGroups.keys.toList()..sort();
 
-    return ListView.builder(
-      itemCount: sortedGroupIds.length,
-      itemBuilder: (context, index) {
-        final groupId = sortedGroupIds[index];
-        final students = displayGroups[groupId]!;
-
-        return _buildGroupSection(groupId, students, currencyFormat, isTablet);
-      },
+    return Column(
+      children:
+          sortedGroupIds.map((groupId) {
+            final students = displayGroups[groupId]!;
+            return _buildGroupSection(
+              groupId,
+              students,
+              currencyFormat,
+              isTablet,
+            );
+          }).toList(),
     );
   }
 
@@ -329,42 +469,80 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Group Header
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+        // Enhanced Group Header
+        Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF3B82F6).withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF3B82F6),
+                  color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  groupId,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
+                child: const Icon(Icons.group, color: Colors.white, size: 20),
               ),
               const SizedBox(width: 12),
               Text(
-                '${students.length} student${students.length > 1 ? 's' : ''}',
-                style: const TextStyle(fontSize: 14, color: Colors.black54),
+                groupId,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${students.length} student${students.length > 1 ? 's' : ''}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
               const Spacer(),
-              Text(
-                'Total: ${currencyFormat.format(totalFavouredInGroup)}',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.purple.shade700,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Text(
+                    'Total Favoured',
+                    style: TextStyle(fontSize: 11, color: Colors.white70),
+                  ),
+                  Text(
+                    currencyFormat.format(totalFavouredInGroup),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -373,55 +551,88 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
         // Students Table
         NeuCard(
           child: Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(16.0),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
-                columnSpacing: isTablet ? 40 : 20,
+                columnSpacing: isTablet ? 50 : 24,
+                headingRowHeight: 56,
+                dataRowHeight: 64,
                 headingRowColor: MaterialStateProperty.all(
-                  Colors.grey.shade100,
+                  const Color(0xFFF3F4F6),
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 columns: const [
                   DataColumn(
                     label: Text(
                       'Student Name',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Color(0xFF1F2937),
+                      ),
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       'Student ID',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Color(0xFF1F2937),
+                      ),
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       'Previous Fee',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Color(0xFF1F2937),
+                      ),
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       'Favoured Amount',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Color(0xFF1F2937),
+                      ),
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       'New Fee',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Color(0xFF1F2937),
+                      ),
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       'Reason',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Color(0xFF1F2937),
+                      ),
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       'Date',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Color(0xFF1F2937),
+                      ),
                     ),
                   ),
                 ],
@@ -430,40 +641,105 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
                       return DataRow(
                         cells: [
                           DataCell(
-                            Text(
-                              student.studentName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: const Color(
+                                    0xFF3B82F6,
+                                  ).withOpacity(0.1),
+                                  child: Text(
+                                    student.studentName[0].toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Color(0xFF3B82F6),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  student.studentName,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                    color: Color(0xFF1F2937),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          DataCell(
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                student.studentId,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ),
-                          DataCell(Text(student.studentId)),
                           DataCell(
                             Text(
                               currencyFormat.format(student.previousTotalFee),
-                            ),
-                          ),
-                          DataCell(
-                            Text(
-                              currencyFormat.format(student.favouredAmount),
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.purple.shade700,
-                              ),
-                            ),
-                          ),
-                          DataCell(
-                            Text(
-                              currencyFormat.format(student.newTotalFee),
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green.shade700,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF6B7280),
                               ),
                             ),
                           ),
                           DataCell(
                             Container(
-                              constraints: const BoxConstraints(maxWidth: 200),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF9333EA).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                currencyFormat.format(student.favouredAmount),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF9333EA),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF10B981).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                currencyFormat.format(student.newTotalFee),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF10B981),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Container(
+                              constraints: const BoxConstraints(maxWidth: 220),
                               child: Tooltip(
                                 message: student.description,
                                 child: Text(
@@ -473,16 +749,31 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen> {
                                   style: const TextStyle(
                                     fontSize: 13,
                                     fontStyle: FontStyle.italic,
+                                    color: Color(0xFF6B7280),
                                   ),
                                 ),
                               ),
                             ),
                           ),
                           DataCell(
-                            Text(
-                              DateFormat(
-                                'MMM dd, yyyy',
-                              ).format(student.createdAt),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.calendar_today,
+                                  size: 14,
+                                  color: Color(0xFF9CA3AF),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  DateFormat(
+                                    'MMM dd, yyyy',
+                                  ).format(student.createdAt),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF6B7280),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],

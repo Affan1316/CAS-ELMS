@@ -34,7 +34,7 @@ android {
         applicationId = "com.cas.elms"
         minSdk = 29
         targetSdk = 36
-        versionCode = 8
+        versionCode = 9
         versionName = "1.0.0"
         multiDexEnabled = true
     }
