@@ -5,9 +5,6 @@ import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/data/e
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_event.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_state.dart';
-import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/widgets/all_group_fee_card.dart';
-
-import '../widgets/list_tile.dart';
 
 /// Improved Groups report page with totals card added.
 /// - Shows totals of all groups and totals of visible groups (when searching)
@@ -220,7 +217,6 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
     );
   }
 
-  //  Align(alignment: Alignment.bottomCenter,child: AllGroupsFeeCard(),)
   Widget _buildStateContent(BuildContext context, SuperAdminFeeState state) {
     if (state is LoadingGroupNames) {
       return const Center(child: CircularProgressIndicator());
@@ -244,36 +240,27 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
         ),
       );
     }
-    //TOD0: add TotalsCard
+
     // primary loaded state
     if (state is GroupNamesLoaded) {
       final names = _filterNames(state.listOfNames);
 
       // show search + totals card + grid/list
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: _baseSpacing,
-              vertical: _baseSpacing,
-            ),
-            child: Column(
-              children: [
-                _buildSearchRow(),
-                const SizedBox(height: _baseSpacing),
-                // totals card inserted here
-                // _buildTotalsCard(context, names),
-                const SizedBox(height: _baseSpacing),
-                Expanded(child: _buildResponsiveGrid(context, names)),
-              ],
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: AllGroupsFeeCard(names: names),
-          ),
-        ],
+      return Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: _baseSpacing,
+          vertical: _baseSpacing,
+        ),
+        child: Column(
+          children: [
+            _buildSearchRow(),
+            const SizedBox(height: _baseSpacing),
+            // totals card inserted here
+            _buildTotalsCard(context, names),
+            const SizedBox(height: _baseSpacing),
+            Expanded(child: _buildResponsiveGrid(context, names)),
+          ],
+        ),
       );
     }
 
@@ -306,7 +293,6 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
     return TextField(
       controller: _searchController,
       onChanged: (_) => setState(() {}),
-      style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
       decoration: InputDecoration(
         hintText: 'Search groups',
         isDense: true,
@@ -445,179 +431,239 @@ class ResponsiveGroupCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return summary == null
-        ? _buildContent(theme, context, true)
-        : _buildContent(theme, context);
+    return Semantics(
+      label: 'Group card for $groupName',
+      button: true,
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(cornerRadius),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(cornerRadius),
+          onTap:
+              summary == null
+                  ? null
+                  : () {
+                    // Navigator.of(context).push(
+                    //   MaterialPageRoute(
+                    //     builder:
+                    //         (_) => GroupFeeHistoryPage(groupName: groupName),
+                    //   ),
+                    // );
+                  },
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(cornerRadius),
+              border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.06),
+                  offset: const Offset(0, 2),
+                  blurRadius: 8,
+                ),
+              ],
+            ),
+            child:
+                summary == null
+                    ? _buildLoading(theme)
+                    : _buildContent(theme, context),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildLoading(ThemeData theme) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(
-        minHeight: 80,
-        maxWidth: 320,
-        minWidth: 280,
-      ),
+      constraints: const BoxConstraints(minHeight: 120),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                '👥 ',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF64748B),
-                  fontSize: 22,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                groupName,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF1E293B),
-                  fontSize: 22,
-                ),
-              ),
-              Expanded(child: Container()),
-            ],
+          Text(
+            '👥 GROUP',
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF64748B),
+            ),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 6),
+          Text(
+            groupName,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF1E293B),
+            ),
+          ),
+          const SizedBox(height: 10),
           const SizedBox(height: 8, child: LinearProgressIndicator()),
         ],
       ),
     );
   }
 
-  Widget _buildContent(
-    ThemeData theme,
-    BuildContext context, [
-    bool isNull = false,
-  ]) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Color(0xFFE0E2E7),
-          width: 1,
-        ), // Thin border for M3 look
-      ),
-      color: Color(0xFFF8FAFC), // Very light grey surface
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        // M3 ripple color
-        splashColor: Color(0xFFE2E8F0),
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder:
-                  (_) => GroupMembersScreen(
-                    groupId: groupName,
-                    isNavigateToAttendence: false,
-                    isNavigateToStudentFeeDetails: true,
-                    isNavigateToWorkShopGraphPage: false,
-                  ),
-            ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 320),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header Row
-                Row(
+  Widget _buildContent(ThemeData theme, BuildContext context) {
+    final double total = summary!.total;
+    final double received = summary!.received;
+    final double remaining = summary!.remaining;
+    final double progress =
+        total > 0 ? (received / total).clamp(0.0, 1.0) : 0.0;
+    final int percent = (progress * 100).round();
+    final statusColor = _statusColor(remaining, percent.toDouble());
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 120),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // header row with chip
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
-                      Icons.groups_rounded,
-                      color: Color(0xFF6366F1), // Static Indigo Primary
-                      size: 28,
+                    Text(
+                      '👥 GROUP',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF64748B),
+                      ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        groupName,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E293B), // Dark Slate
-                          letterSpacing: -0.5,
-                        ),
-                        overflow: TextOverflow.ellipsis,
+                    const SizedBox(height: 6),
+                    Text(
+                      groupName,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF1E293B),
                       ),
                     ),
                   ],
                 ),
+              ),
 
-                const SizedBox(height: 18),
-
-                // Stats Container
-                Builder(
-                  builder: (context) {
-                    if (!isNull) {
-                      final double total = summary!.total;
-                      final double received = summary!.received;
-                      final double remaining = summary!.remaining;
-                      final double progress =
-                          total > 0 ? (received / total).clamp(0.0, 1.0) : 0.0;
-                      final int percent = (progress * 100).round();
-                      final statusColor = _statusColor(
-                        remaining,
-                        percent.toDouble(),
-                      );
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFF1F5F9)),
-                        ),
-                        child: Column(
-                          children: [
-                            ListTileForGroupFee(
-                              label: "Total",
-                              value: _compactAmount(total),
-                            ),
-                            const Divider(
-                              height: 1,
-                              color: Color(0xFFF1F5F9),
-                              indent: 12,
-                              endIndent: 12,
-                            ),
-                            ListTileForGroupFee(
-                              label: "Received",
-                              value: _compactAmount(received),
-                              valueColor: const Color(0xFF10B981),
-                            ), // Green
-                            const Divider(
-                              height: 1,
-                              color: Color(0xFFF1F5F9),
-                              indent: 12,
-                              endIndent: 12,
-                            ),
-                            ListTileForGroupFee(
-                              label: "Remaining",
-                              value: _compactAmount(remaining),
-                              valueColor: const Color(0xFFEF4444),
-                            ), // Red
-                          ],
-                        ),
-                      );
-                    } else {
-                      return const SizedBox(
-                        height: 8,
-                        child: LinearProgressIndicator(),
-                      );
-                    }
-                  },
+              // status chip
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 350),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
                 ),
-              ],
-            ),
+                decoration: BoxDecoration(
+                  color: statusColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      remaining <= 0 ? '🎉' : '🔔',
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      remaining <= 0 ? 'Done' : 'Pending',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ),
+
+          const SizedBox(height: 10),
+
+          // stats row
+          Row(
+            children: [
+              _statBlock('💰', 'Total', _compactAmount(total)),
+              const SizedBox(width: 12),
+              _statBlock('✅', 'Received', _compactAmount(received)),
+              const SizedBox(width: 12),
+              _statBlock('⏳', 'Remaining', _compactAmount(remaining)),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          // progress and actions
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // progress bar
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: SizedBox(
+                        height: 10,
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          backgroundColor: const Color(0xFFE2E8F0),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            statusColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    // percent with tooltip
+                    Tooltip(
+                      message: '$percent% collected',
+                      child: Text(
+                        '$percent%',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          color: Color(0xFF475569),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 8),
+
+              SizedBox(
+                height: 36,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder:
+                            (_) => GroupMembersScreen(
+                              groupId: groupName,
+                              isNavigateToAttendence: false,
+                              isNavigateToStudentFeeDetails: true,
+                              isNavigateToWorkShopGraphPage: false,
+                            ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF3B82F6),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Details'),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

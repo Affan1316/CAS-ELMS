@@ -99,7 +99,7 @@ class _SuperAdminFeeNotificationsScreenState
   }
 
   Widget _buildListBody(SuperAdminFeeState state) {
-    if (state is SuperAdminFeeLoadingState || state is ConfirmingPayment) {
+    if (state is SuperAdminFeeLoadingState) {
       return const Center(
         key: ValueKey("loading"),
         child: CircularProgressIndicator(color: Colors.blueGrey),

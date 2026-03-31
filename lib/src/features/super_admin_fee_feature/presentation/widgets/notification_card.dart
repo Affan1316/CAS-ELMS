@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_event.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/widgets/student_profile_data.dart';
 import 'package:intl/intl.dart';
 
 class NotificationCard extends StatefulWidget {
@@ -112,13 +113,20 @@ class _NotificationCardState extends State<NotificationCard>
                   activeColor: Colors.green,
                 ),
               Expanded(
-                child: Text(
-                  widget.n["name"]?.toString() ?? '-',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                child: GestureDetector(
+                  onTap:
+                      () => showStudentProfileDialog(
+                        context,
+                        studentId: widget.n["studentId"],
+                      ),
+                  child: Text(
+                    widget.n["name"]?.toString() ?? '-',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               const SizedBox(width: 8),

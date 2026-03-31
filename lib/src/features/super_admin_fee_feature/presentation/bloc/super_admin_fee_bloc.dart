@@ -9,8 +9,6 @@ import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain
 import 'super_admin_fee_event.dart';
 import 'super_admin_fee_state.dart';
 
-
-
 class SuperAdminFeeBloc extends Bloc<SuperAdminFeeEvent, SuperAdminFeeState> {
   final GetSuperAdminFeeNotificationsUsecase getNotifications;
   final ConfirmSuperAdminFeePaymentUseCase confirmPayment;
@@ -75,19 +73,74 @@ class SuperAdminFeeBloc extends Bloc<SuperAdminFeeEvent, SuperAdminFeeState> {
     ConfirmBulkSuperAdminFeePayments event,
     Emitter emit,
   ) async {
+    final currentState = state;
+    if (currentState is! SuperAdminFeeLoadedState) return;
+
+    final originalNotifications = currentState.notifications;
+    final confirmedIds = event.payments.map((p) => p['id'] as String).toSet();
+
+    // Optimistically mark confirmed ones as Paid
+    final optimisticNotifications =
+        originalNotifications.map((n) {
+          final updatedInstallments =
+              ((n['installments'] as List?) ?? []).map((i) {
+                final installment = i as Map<String, dynamic>;
+                if (confirmedIds.contains(installment['id'])) {
+                  return {...installment, 'status': 'Paid'};
+                }
+                return installment;
+              }).toList();
+          return {...n, 'installments': updatedInstallments};
+        }).toList();
+
+    // Cards disappear instantly
+    emit(
+      SuperAdminFeeLoadedState(
+        optimisticNotifications,
+        version: currentState.version + 1,
+      ),
+    );
+
     try {
-      emit(ConfirmingPayment());
       await confirmBulkPayments(event.payments);
     } catch (e) {
-      emit(SuperAdminFeeErrorState(e.toString()));
+      if (!isClosed) {
+        emit(
+          BulkPaymentFailed(
+            restoredNotifications: originalNotifications,
+            message: 'Network error. Please check connection and try again.',
+            version: currentState.version + 2,
+          ),
+        );
+      }
       return;
     }
 
+    // ✅ Fetch fresh data first, then signal completed
+    // BulkPaymentCompleted now CARRIES the fresh notifications
     try {
-      final notifications = await getNotifications();
-      emit(SuperAdminFeeLoadedState(notifications));
-    } catch (e) {
-      emit(SuperAdminFeeErrorState(e.toString()));
+      final fresh = await getNotifications();
+      if (!isClosed) {
+        // ✅ Only ONE emit — loaded state with fresh data + completed signal combined
+        emit(
+          SuperAdminFeeLoadedState(
+            fresh,
+            version: currentState.version + 2,
+            isJustCompleted: true, // ← add this flag
+          ),
+        );
+      }
+    } catch (_) {
+      // Refresh failed but payments went through
+      if (!isClosed) {
+        emit(
+          SuperAdminFeeLoadedState(
+            optimisticNotifications,
+            version: currentState.version + 2,
+            isJustCompleted: true,
+          ),
+        );
+      }
     }
   }
 

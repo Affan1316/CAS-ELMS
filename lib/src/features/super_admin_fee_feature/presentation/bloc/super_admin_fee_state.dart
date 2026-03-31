@@ -8,8 +8,14 @@ class SuperAdminFeeLoadingState extends SuperAdminFeeState {}
 
 class SuperAdminFeeLoadedState extends SuperAdminFeeState {
   final List<Map<String, dynamic>> notifications;
+  final int version;
+  final bool isJustCompleted; // ← add this
 
-  SuperAdminFeeLoadedState(this.notifications);
+  SuperAdminFeeLoadedState(
+    this.notifications, {
+    this.version = 0,
+    this.isJustCompleted = false, // ← defaults false
+  });
 }
 
 class SuperAdminFeeErrorState extends SuperAdminFeeState {
@@ -53,4 +59,25 @@ class LoadingGroupNames extends SuperAdminFeeState {
 class GroupNamesLoaded extends SuperAdminFeeState {
   final List<String> listOfNames;
   const GroupNamesLoaded({required this.listOfNames});
+}
+
+class BulkPaymentInProgress extends SuperAdminFeeState {
+  final List<Map<String, dynamic>> notifications; // keep showing old data
+  const BulkPaymentInProgress(this.notifications);
+}
+
+class BulkPaymentCompleted extends SuperAdminFeeState {
+  const BulkPaymentCompleted();
+}
+
+class BulkPaymentFailed extends SuperAdminFeeState {
+  final List<Map<String, dynamic>> restoredNotifications;
+  final String message;
+  final int version;
+
+  const BulkPaymentFailed({
+    required this.restoredNotifications,
+    required this.message,
+    required this.version,
+  });
 }
