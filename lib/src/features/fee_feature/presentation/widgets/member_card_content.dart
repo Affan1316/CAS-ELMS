@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/full_screen_image.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_text.dart';
@@ -34,19 +36,19 @@ class MemberCardContent extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder:
-                    (_) => const FullScreenImage(
-                      imagePath:
-                          "assets/images/orignal_student_image_placeholder.jpg",
+                    (_) => FullScreenImage(
+                      imageBase64String: student.profileImage,
                     ),
               ),
             );
           },
-          child: const CircleAvatar(
+          child: CircleAvatar(
             radius: 28,
             backgroundColor: Color(0xFF5D5FEF),
-            backgroundImage: AssetImage(
-              "assets/images/orignal_student_image_placeholder.jpg",
-            ),
+            backgroundImage:
+                student.profileImage.isEmpty || student.profileImage == ''
+                    ? AssetImage("assets/images/student-male.png")
+                    : MemoryImage(base64Decode(student.profileImage)),
           ),
         ),
 

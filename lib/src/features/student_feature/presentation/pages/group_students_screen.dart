@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,10 +19,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 class GroupStudentsScreen extends StatefulWidget {
   final String groupTitle;
 
-  const GroupStudentsScreen({
-    super.key,
-    required this.groupTitle,
-  });
+  const GroupStudentsScreen({super.key, required this.groupTitle});
 
   @override
   State<GroupStudentsScreen> createState() => _GroupStudentsScreenState();
@@ -71,10 +70,7 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFF3B82F6),
-                        Color(0xFF5D5FEF),
-                      ],
+                      colors: [Color(0xFF3B82F6), Color(0xFF5D5FEF)],
                     ),
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -142,10 +138,7 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFF3B82F6),
-                        Color(0xFF5D5FEF),
-                      ],
+                      colors: [Color(0xFF3B82F6), Color(0xFF5D5FEF)],
                     ),
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -206,10 +199,7 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFFEF4444),
-                        Color(0xFFDC2626),
-                      ],
+                      colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
                     ),
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -240,7 +230,7 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
   // Navigate to edit screen with loading dialog
   Future<void> _navigateToEditScreen(String studentId) async {
     if (_isNavigating) return;
-    
+
     _isNavigating = true;
     _showLoadingDialog();
 
@@ -252,8 +242,10 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
 
       // Wait for the BLoC to emit the data
       final completer = Completer<StudentEntityClass>();
-      
-      final subscription = context.read<StudentFeatureBloc>().stream.listen((state) {
+
+      final subscription = context.read<StudentFeatureBloc>().stream.listen((
+        state,
+      ) {
         if (state is GroupStudentsDatafetched && !completer.isCompleted) {
           final studentData = StudentEntityClass(
             id: state.id,
@@ -287,10 +279,11 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => StudentEnrollmentScreen(
-              isEditMode: true,
-              studentData: studentData,
-            ),
+            builder:
+                (context) => StudentEnrollmentScreen(
+                  isEditMode: true,
+                  studentData: studentData,
+                ),
           ),
         );
       }
@@ -326,27 +319,20 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
       appBar: AppBar(
         title: Text(
           "Students of ${widget.groupTitle}",
-          style: const TextStyle(
-            color: Colors.white,
-          ),
+          style: const TextStyle(color: Colors.white),
         ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF3B82F6),
-                Color(0xFF5D5FEF),
-              ],
+              colors: [Color(0xFF3B82F6), Color(0xFF5D5FEF)],
             ),
           ),
         ),
         backgroundColor: Colors.transparent,
         centerTitle: true,
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: BlocConsumer<StudentFeatureBloc, StudentFeatureState>(
         listener: (context, state) {
@@ -392,7 +378,7 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
               Navigator.of(context, rootNavigator: true).pop();
               _isUpdatingGroup = false;
             }
-            
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -413,7 +399,7 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
               Navigator.of(context, rootNavigator: true).pop();
               _isUpdatingGroup = false;
             }
-            
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Failed to update group: ${state.error}'),
@@ -455,9 +441,7 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                   children: [
                     const Icon(Icons.error_outline, color: Colors.white),
                     const SizedBox(width: 12),
-                    Expanded(
-                      child: Text('Delete failed: ${state.error}'),
-                    ),
+                    Expanded(child: Text('Delete failed: ${state.error}')),
                   ],
                 ),
                 backgroundColor: const Color(0xFFEF4444),
@@ -486,26 +470,23 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
               if (snapshot.hasError) {
                 return Center(
                   child: Scaffold(
-                    body: Center(
-                      child: Text("Error: ${snapshot.error}"),
-                    ),
+                    body: Center(child: Text("Error: ${snapshot.error}")),
                   ),
                 );
               }
 
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return const Center(
-                  child: Text("No students found"),
-                );
+                return const Center(child: Text("No students found"));
               }
 
-              final students = snapshot.data!.docs
-                  .map(
-                    (doc) => StudentFeatureGroupStudentEntityClass.fromMap(
-                      doc.data(),
-                    ),
-                  )
-                  .toList();
+              final students =
+                  snapshot.data!.docs
+                      .map(
+                        (doc) => StudentFeatureGroupStudentEntityClass.fromMap(
+                          doc.data(),
+                        ),
+                      )
+                      .toList();
 
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
@@ -535,10 +516,11 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                         onEditGroup: () {
                           showDialog(
                             context: context,
-                            builder: (context) => _buildGroupSelectionDialog(
-                              context,
-                              student.rollNum,
-                            ),
+                            builder:
+                                (context) => _buildGroupSelectionDialog(
+                                  context,
+                                  student.rollNum,
+                                ),
                           );
                         },
                         onUpdateStudent: () {
@@ -550,10 +532,10 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                         onTap: () {
                           // Prevent action if already navigating
                           if (_isNavigating) return;
-                          
+
                           context.read<StudentFeatureBloc>().add(
-                                FetchGroupStudentsEvent(id: student.rollNum),
-                              );
+                            FetchGroupStudentsEvent(id: student.rollNum),
+                          );
                         },
                         child: Container(
                           margin: const EdgeInsets.only(bottom: 18),
@@ -581,19 +563,27 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => const FullScreenImage(
-                                        imagePath:
-                                            "assets/images/student-male.png",
-                                      ),
+                                      builder:
+                                          (_) => FullScreenImage(
+                                            imageBase64String:
+                                                student.profileImage,
+                                          ),
                                     ),
                                   );
                                 },
-                                child: const CircleAvatar(
+                                //TODO: replace withactual pic
+                                child: CircleAvatar(
                                   radius: 28,
                                   backgroundColor: Color(0xFF3B82F6),
-                                  backgroundImage: AssetImage(
-                                    "assets/images/student-male.png",
-                                  ),
+                                  backgroundImage:
+                                      student.profileImage.isEmpty ||
+                                              student.profileImage == ''
+                                          ? AssetImage(
+                                            "assets/images/student-male.png",
+                                          )
+                                          : MemoryImage(
+                                            base64Decode(student.profileImage!),
+                                          ),
                                 ),
                               ),
                               const SizedBox(width: 16),
@@ -672,85 +662,90 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                 listOfGroupNamesForDropDownMenu.isEmpty
                     ? const CircularProgressIndicator()
                     : Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              offset: const Offset(0, 1),
-                              blurRadius: 2,
-                              spreadRadius: 0,
-                              color: const Color(0xFFE5E7EB),
-                            ),
-                          ],
-                        ),
-                        child: Theme(
-                          data: ThemeData.light().copyWith(
-                            canvasColor: Colors.white,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            offset: const Offset(0, 1),
+                            blurRadius: 2,
+                            spreadRadius: 0,
+                            color: const Color(0xFFE5E7EB),
                           ),
-                          child: DropdownButtonFormField<String>(
-                            initialValue: selectedGroup ??
-                                listOfGroupNamesForDropDownMenu.first,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 15,
-                                vertical: 15,
-                              ),
-                              border: InputBorder.none,
-                              prefixIcon: Icon(
-                                Icons.group,
-                                color: Color(0xFF6B7280),
-                              ),
+                        ],
+                      ),
+                      child: Theme(
+                        data: ThemeData.light().copyWith(
+                          canvasColor: Colors.white,
+                        ),
+                        child: DropdownButtonFormField<String>(
+                          initialValue:
+                              selectedGroup ??
+                              listOfGroupNamesForDropDownMenu.first,
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 15,
+                              vertical: 15,
                             ),
-                            icon: const Icon(
-                              Icons.arrow_drop_down,
+                            border: InputBorder.none,
+                            prefixIcon: Icon(
+                              Icons.group,
                               color: Color(0xFF6B7280),
                             ),
-                            style: const TextStyle(
-                              color: Color(0xFF111827),
-                              fontSize: 16,
-                            ),
-                            dropdownColor: Colors.white,
-                            items: listOfGroupNamesForDropDownMenu
-                                .map((String group) {
-                              return DropdownMenuItem<String>(
-                                value: group,
-                                child: Text(group),
-                              );
-                            }).toList(),
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                selectedGroup = newValue;
-                              });
-                            },
                           ),
+                          icon: const Icon(
+                            Icons.arrow_drop_down,
+                            color: Color(0xFF6B7280),
+                          ),
+                          style: const TextStyle(
+                            color: Color(0xFF111827),
+                            fontSize: 16,
+                          ),
+                          dropdownColor: Colors.white,
+                          items:
+                              listOfGroupNamesForDropDownMenu.map((
+                                String group,
+                              ) {
+                                return DropdownMenuItem<String>(
+                                  value: group,
+                                  child: Text(group),
+                                );
+                              }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedGroup = newValue;
+                            });
+                          },
                         ),
                       ),
+                    ),
                 const SizedBox(height: 24),
                 InkWell(
-                  onTap: listOfGroupNamesForDropDownMenu.isEmpty
-                      ? null
-                      : () {
-                          final groupToAssign = selectedGroup ??
-                              listOfGroupNamesForDropDownMenu.first;
+                  onTap:
+                      listOfGroupNamesForDropDownMenu.isEmpty
+                          ? null
+                          : () {
+                            final groupToAssign =
+                                selectedGroup ??
+                                listOfGroupNamesForDropDownMenu.first;
 
-                          // Close the group selection dialog first
-                          Navigator.of(context).pop();
-                          
-                          // Show loading dialog and set flag
-                          setState(() {
-                            _isUpdatingGroup = true;
-                          });
-                          _showGroupUpdateLoadingDialog();
-                          
-                          // Trigger update event
-                          context.read<StudentFeatureBloc>().add(
-                                UpdateStudentGroupEvent(
-                                  studentId: studentId,
-                                  newGroupName: groupToAssign,
-                                ),
-                              );
-                        },
+                            // Close the group selection dialog first
+                            Navigator.of(context).pop();
+
+                            // Show loading dialog and set flag
+                            setState(() {
+                              _isUpdatingGroup = true;
+                            });
+                            _showGroupUpdateLoadingDialog();
+
+                            // Trigger update event
+                            context.read<StudentFeatureBloc>().add(
+                              UpdateStudentGroupEvent(
+                                studentId: studentId,
+                                newGroupName: groupToAssign,
+                              ),
+                            );
+                          },
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
                     width: double.infinity,
@@ -759,12 +754,13 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: listOfGroupNamesForDropDownMenu.isEmpty
-                            ? [Colors.grey, Colors.grey]
-                            : [
-                                const Color(0xFF3B82F6),
-                                const Color(0xFF5D5FEF),
-                              ],
+                        colors:
+                            listOfGroupNamesForDropDownMenu.isEmpty
+                                ? [Colors.grey, Colors.grey]
+                                : [
+                                  const Color(0xFF3B82F6),
+                                  const Color(0xFF5D5FEF),
+                                ],
                       ),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [

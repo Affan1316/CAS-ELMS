@@ -76,6 +76,8 @@ dependencies:
   webview_flutter: ^4.13.0
   google_generative_ai: ^0.4.7
   flutter_launcher_icons: ^0.14.4
+  share_plus: ^12.0.1
+  syncfusion_flutter_pdf: ^33.1.45
 
 dev_dependencies:
   flutter_test:
@@ -104,6 +106,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/markDown/
+    - assets/certificate/
   shaders:
     - shaders/avatar_glow.frag
 
