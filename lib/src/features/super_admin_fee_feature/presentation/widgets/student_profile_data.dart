@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/full_screen_image.dart';
 
 /// Call this anywhere you have a studentId:
 ///
@@ -84,6 +87,7 @@ class _ProfileCard extends StatelessWidget {
     final phone = data['phone'] ?? '—';
     final gender = data['gender'] ?? '—';
     final fatherName = data['fatherName'] ?? '—';
+    final imageUrl = data['profile_image'] ?? '—';
 
     // Dummy avatar — first letter of name as initials
     final initials = name.isNotEmpty ? name[0].toUpperCase() : '?';
@@ -141,16 +145,40 @@ class _ProfileCard extends StatelessWidget {
                       ),
                     ],
                   ),
+
                   // 👇 Replace CircleAvatar with Image.network when you have imageUrl
                   child: Center(
-                    child: Text(
-                      initials,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child:
+                        imageUrl == "—"
+                            ? Text(
+                              initials,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                            : GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) {
+                                      return FullScreenImage(
+                                        imageBase64String: imageUrl,
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
+                              child: CircleAvatar(
+                                maxRadius: 42,
+                                minRadius: 40,
+                                backgroundImage: MemoryImage(
+                                  base64Decode(imageUrl),
+                                ),
+                              ),
+                            ),
                   ),
                 ),
                 const SizedBox(height: 14),

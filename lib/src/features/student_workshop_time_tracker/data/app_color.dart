@@ -1,8 +1,5 @@
-
-
 class CourseNames {
-  static const String ai = "Ai";
-  static const String android = "Android Studio";
-  static const String flutter = "Flutter";
-  
+  static const String ai = "Artificial intelligence";
+  static const String android = "Android Development";
+  static const String flutter = "Flutter Development";
 }

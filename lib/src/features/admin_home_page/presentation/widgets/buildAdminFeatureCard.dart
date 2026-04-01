@@ -7,7 +7,6 @@ import 'package:flutter_cas_app_main/src/features/add_courses/presentation/pages
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/DayWiseFeePage.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/FavouredStudentsScreen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_history_screen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/groups_list_screen.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/create_group_page.dart';
 import 'package:flutter_cas_app_main/src/features/group/presentation/pages/read_group_page.dart';
@@ -15,7 +14,6 @@ import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/add
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/inquiry_detail_page.dart';
 import 'package:flutter_cas_app_main/src/features/leave_request/presentation/pages/admin_leave_request_management.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_enrollment_screen.dart';
-import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/pages/workshop_time_group_page.dart';
 
 import '../../../certificate_creation_page/presentation/pages/createCertificatePage.dart';
 
@@ -513,7 +511,13 @@ void _navigateToScreen(BuildContext context, int index) {
       case 9:
         print('Navigating to Workshop Time');
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => GroupWorkshopTimePage()),
+          MaterialPageRoute(
+            builder:
+                (context) => GroupsListScreen(
+                  isNavigateToAttendence: false,
+                  isNavigateToWorkShopGraphPage: true,
+                ),
+          ),
         );
         break;
 

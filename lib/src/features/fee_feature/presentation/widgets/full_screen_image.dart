@@ -82,7 +82,9 @@ class _FullScreenImageState extends State<FullScreenImage>
                     width: context.width * 0.8,
                     height: context.height * 0.6,
                     child:
-                        widget.imageBase64String.isEmpty
+                        widget.imageBase64String.isEmpty ||
+                                widget.imageBase64String == '' ||
+                                widget.imageBase64String == '—'
                             ? Image.asset(
                               "assets/images/student-male.png",
                               fit: BoxFit.contain,
