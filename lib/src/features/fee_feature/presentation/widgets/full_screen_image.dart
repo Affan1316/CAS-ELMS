@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:responsive_ui_kit/responsive_ui_kit.dart';
 
 class FullScreenImage extends StatefulWidget {
   final String imageBase64String;
@@ -61,12 +62,6 @@ class _FullScreenImageState extends State<FullScreenImage>
 
   @override
   Widget build(BuildContext context) {
-    // final isNetwork = widget.imagePath.startsWith('http');
-    // final imageProvider =
-    //     isNetwork
-    //         ? NetworkImage(widget.imagePath)
-    //         : AssetImage(widget.imagePath) as ImageProvider;
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -77,22 +72,26 @@ class _FullScreenImageState extends State<FullScreenImage>
                 (details) => _handleDoubleTap(details.localPosition),
             child: Center(
               child: Hero(
-                tag: widget.imageBase64String ?? '',
+                tag: widget.imageBase64String,
                 child: InteractiveViewer(
                   transformationController: _controller,
                   minScale: 1.0,
                   maxScale: 4.0,
                   clipBehavior: Clip.none,
-                  child:
-                      widget.imageBase64String.isEmpty ||
-                              widget.imageBase64String == ''
-                          ? Image.asset("assets/images/student-male.png")
-                          : Image(
-                            image: MemoryImage(
-                              base64Decode(widget.imageBase64String!),
+                  child: SizedBox(
+                    width: context.width * 0.8,
+                    height: context.height * 0.6,
+                    child:
+                        widget.imageBase64String.isEmpty
+                            ? Image.asset(
+                              "assets/images/student-male.png",
+                              fit: BoxFit.contain,
+                            )
+                            : Image.memory(
+                              base64Decode(widget.imageBase64String),
+                              fit: BoxFit.contain,
                             ),
-                            fit: BoxFit.contain,
-                          ),
+                  ),
                   onInteractionUpdate: (_) {
                     setState(() {
                       _currentScale = _controller.value
