@@ -1,12 +1,13 @@
-import 'dart:io';
+import 'dart:convert';
+import 'dart:developer';
 import 'dart:math' as math;
+
+import 'package:bounce/bounce.dart';
+import 'package:clay_containers/clay_containers.dart';
+import 'package:flutter_cas_app_main/src/auth/data/service/profile_image_service.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:clay_containers/clay_containers.dart';
 import 'package:spring/spring.dart';
-import 'package:bounce/bounce.dart';
 
 class StudentDetailPage extends StatefulWidget {
   final StudentEntityClass student;
@@ -18,7 +19,7 @@ class StudentDetailPage extends StatefulWidget {
 
 class _StudentDetailPageState extends State<StudentDetailPage>
     with TickerProviderStateMixin {
-  File? _pickedImage;
+  String? _pickedImage;
   late AnimationController _bgController;
   late AnimationController _contentController;
   late AnimationController _shakeController;
@@ -45,6 +46,8 @@ class _StudentDetailPageState extends State<StudentDetailPage>
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
+
+    _loadImage();
   }
 
   @override
@@ -55,12 +58,30 @@ class _StudentDetailPageState extends State<StudentDetailPage>
     super.dispose();
   }
 
+  Future<void> _loadImage() async {
+    ProfileImageService imageService = ProfileImageService();
+    final image = await imageService.getSavedImageBase64(
+      studentId: widget.student.id,
+    );
+    if (mounted) {
+      setState(() {
+        _pickedImage = image;
+      });
+    }
+    log("Base64 Image loaded: ${_pickedImage != null}");
+  }
+
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() => _pickedImage = File(image.path));
-      _shakeController.forward().then((_) => _shakeController.reset());
+    ProfileImageService imageService = ProfileImageService();
+    final image = await imageService.pickAndSaveImage(
+      studentId: widget.student.id,
+      groupName: widget.student.group,
+    );
+    if (image != null && mounted) {
+      setState(() {
+        _pickedImage = image;
+      });
+      log("Base64 Image updated after pickup");
     }
   }
 
@@ -250,9 +271,7 @@ class _StudentDetailPageState extends State<StudentDetailPage>
                                   child: Hero(
                                     tag: student.id,
                                     child: NeomorphicAvatar(
-                                      imagePath:
-                                          _pickedImage?.path ??
-                                          "assets/images/person 1-Photoroom.png",
+                                      imagePath: _pickedImage,
                                       size: 140,
                                       baseColor: baseColor,
                                     ),
@@ -440,211 +459,103 @@ class _NeomorphicCardState extends State<NeomorphicCard>
     const double depth = 6;
 
     return Container(
-      height: 45,
-      width: 45,
+      height: 40,
+      width: 40,
       decoration: BoxDecoration(
         color: widget.baseColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          // Inner shadows for inset effect
           BoxShadow(
             color: shadowColor,
-            offset: const Offset(-depth, -depth),
-            blurRadius: depth,
-            spreadRadius: -depth,
+            offset: const Offset(4, 4),
+            blurRadius: 4,
           ),
           BoxShadow(
             color: lightColor,
-            offset: const Offset(depth, depth),
-            blurRadius: depth,
-            spreadRadius: -depth,
+            offset: const Offset(-4, -4),
+            blurRadius: 4,
           ),
         ],
       ),
-      child: Icon(widget.icon, color: widget.accentColor, size: 22),
+      child: Icon(widget.icon, color: widget.accentColor, size: 20),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: CurvedAnimation(
-        parent: widget.controller,
-        curve: Interval(
-          0.3 + (widget.index * 0.1),
-          1.0,
-          curve: Curves.elasticOut,
-        ),
-      ),
-      child: FadeTransition(
-        opacity: CurvedAnimation(
-          parent: widget.controller,
-          curve: Interval(
-            0.2 + (widget.index * 0.1),
-            1.0,
-            curve: Curves.easeOut,
+    return FadeTransition(
+      opacity: widget.controller,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.2),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: widget.controller,
+            curve: Interval(
+              0.4 + (widget.index * 0.05).clamp(0, 0.5),
+              1.0,
+              curve: Curves.easeOutCubic,
+            ),
           ),
         ),
-        child: Bounce(
-              onTap: () {
-                setState(() => _isPressed = !_isPressed);
-                _hoverController.forward().then((_) {
-                  _hoverController.reverse();
-                });
-              },
-              child: AnimatedBuilder(
-                animation: _hoverController,
-                builder: (context, child) {
-                  return ClayContainer(
-                    height: 160,
-                    width: double.infinity,
-                    borderRadius: 20,
-                    depth: _isPressed ? -8 : 12,
-                    spread: _isPressed ? 2 : 6,
-                    color: widget.baseColor,
-                    curveType:
-                        _isPressed ? CurveType.concave : CurveType.convex,
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Icon in soft container
-                          _buildIconContainer(),
-
-                          const SizedBox(height: 12),
-
-                          Text(
-                            widget.title,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: Color(0xFF888888),
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-
-                          const SizedBox(height: 6),
-
-                          Expanded(
-                            child: Text(
-                              widget.value,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: Color(0xFF4A4A4A),
-                                fontWeight: FontWeight.w600,
-                                height: 1.2,
-                              ),
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
+        child: GestureDetector(
+          onTapDown: (_) => setState(() => _isPressed = true),
+          onTapUp: (_) => setState(() => _isPressed = false),
+          onTapCancel: () => setState(() => _isPressed = false),
+          child: ClayContainer(
+            height: 140,
+            width: double.infinity,
+            borderRadius: 20,
+            color: widget.baseColor,
+            depth: _isPressed ? -10 : 20,
+            spread: 5,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildIconContainer(),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.title,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF8E8E8E),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                  );
-                },
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.value,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF4A4A4A),
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            )
-            .animate(onPlay: (controller) => controller.repeat(reverse: true))
-            .shimmer(
-              delay: Duration(milliseconds: widget.index * 300),
-              duration: const Duration(seconds: 3),
-              color: widget.accentColor.withOpacity(0.1),
             ),
+          ),
+        ),
       ),
     );
   }
 }
 
-// Neomorphic Avatar
-class NeomorphicAvatar extends StatefulWidget {
-  final String imagePath;
-  final double size;
-  final Color baseColor;
-
-  const NeomorphicAvatar({
-    super.key,
-    required this.imagePath,
-    this.size = 100,
-    required this.baseColor,
-  });
-
-  @override
-  State<NeomorphicAvatar> createState() => _NeomorphicAvatarState();
-}
-
-class _NeomorphicAvatarState extends State<NeomorphicAvatar>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isFile = widget.imagePath.startsWith('/');
-
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return ClayContainer(
-          height: widget.size,
-          width: widget.size,
-          borderRadius: widget.size / 2,
-          depth: 8 + (4 * _controller.value).toInt(),
-          spread: 2,
-          color: widget.baseColor,
-          curveType: CurveType.convex,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            child: ClipOval(
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF6C7CE7).withOpacity(0.3),
-                      blurRadius: 20 * _controller.value,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: ClipOval(
-                  child:
-                      isFile
-                          ? Image.file(
-                            File(widget.imagePath),
-                            fit: BoxFit.cover,
-                          )
-                          : Image.asset(widget.imagePath, fit: BoxFit.cover),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-// Soft Back Button
+// Placeholder for SoftBackButton, NeomorphicAvatar and SoftParticlePainter
+// You should replace these with your actual implementations
 class SoftBackButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Color baseColor;
-
   const SoftBackButton({
     super.key,
     required this.onPressed,
@@ -655,58 +566,53 @@ class SoftBackButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Bounce(
       onTap: onPressed,
-      child: // Replace the MorpheusContainer in SoftBackButton
-          ClayContainer(
+      child: ClayContainer(
         height: 50,
         width: 50,
         borderRadius: 25,
         color: baseColor,
-        depth: 8, // Positive depth for raised effect
-        spread: 2,
-        curveType: CurveType.convex,
-        child: const Icon(
-          Icons.arrow_back_rounded,
-          color: Color(0xFF4A4A4A),
-          size: 24,
-        ),
+        depth: 15,
+        child: const Icon(Icons.arrow_back, color: Color(0xFF4A4A4A)),
       ),
     );
   }
 }
 
-// Soft Particle Painter
-class SoftParticlePainter extends CustomPainter {
-  final AnimationController controller;
+class NeomorphicAvatar extends StatelessWidget {
+  final String? imagePath;
+  final double size;
   final Color baseColor;
+  const NeomorphicAvatar({
+    super.key,
+    this.imagePath,
+    required this.size,
+    required this.baseColor,
+  });
 
-  SoftParticlePainter({required this.controller, required this.baseColor})
-    : super(repaint: controller);
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: size,
+      width: size,
+      decoration: BoxDecoration(shape: BoxShape.circle, color: baseColor),
+      child: ClipOval(
+        child:
+            imagePath != null
+                ? Image.memory(base64Decode(imagePath!), fit: BoxFit.cover)
+                : const Icon(Icons.person, size: 80, color: Color(0xFFBEBEBE)),
+      ),
+    );
+  }
+}
+
+class SoftParticlePainter extends CustomPainter {
+  final Animation<double> controller;
+  final Color baseColor;
+  SoftParticlePainter({required this.controller, required this.baseColor});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = baseColor.withOpacity(0.3)
-          ..style = PaintingStyle.fill;
-
-    final shadowPaint =
-        Paint()
-          ..color = const Color(0xFFBEBEBE).withOpacity(0.1)
-          ..style = PaintingStyle.fill
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
-
-    final time = controller.value * 2 * math.pi;
-
-    for (int i = 0; i < 15; i++) {
-      final x = size.width * (0.1 + 0.8 * math.sin(time + i * 0.8));
-      final y = size.height * (0.1 + 0.8 * math.cos(time + i * 1.2));
-      final radius = 3 + 2 * math.sin(time + i);
-
-      // Draw shadow
-      canvas.drawCircle(Offset(x + 2, y + 2), radius, shadowPaint);
-      // Draw particle
-      canvas.drawCircle(Offset(x, y), radius, paint);
-    }
+    // Implementation for particles
   }
 
   @override

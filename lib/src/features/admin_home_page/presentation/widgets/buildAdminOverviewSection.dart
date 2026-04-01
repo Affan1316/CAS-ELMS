@@ -122,6 +122,11 @@ Widget buildFeaturesGrid(
       'subtitle': 'see in detail',
       'icon': Icons.all_inclusive_rounded,
     },
+    {
+      'title': 'Certificate',
+      'subtitle': 'Create certificate',
+      'icon': Icons.approval_outlined,
+    },
   ];
 
   return LayoutBuilder(

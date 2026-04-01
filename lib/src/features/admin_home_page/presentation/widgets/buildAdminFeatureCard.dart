@@ -17,6 +17,8 @@ import 'package:flutter_cas_app_main/src/features/leave_request/presentation/pag
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_enrollment_screen.dart';
 import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/pages/workshop_time_group_page.dart';
 
+import '../../../certificate_creation_page/presentation/pages/createCertificatePage.dart';
+
 /// Responsive Admin Feature Card with Geometric Design Principles
 ///
 /// Design Principles:
@@ -538,6 +540,12 @@ void _navigateToScreen(BuildContext context, int index) {
         Navigator.of(context).push(
           MaterialPageRoute(builder: (context) => FavouredStudentsScreen()),
         );
+        break;
+      case 13:
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => CreateCertificatePage()),
+        );
+        break;
 
       default:
         print('Invalid index: $index');
