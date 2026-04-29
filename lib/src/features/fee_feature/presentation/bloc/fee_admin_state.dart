@@ -327,3 +327,20 @@ class InstallmentDueDateUpdatedState extends FeeAdminState {
   @override
   List<Object?> get props => [student];
 }
+
+class InstallmentPaidDateUpdatedState extends FeeAdminState {
+  final StudentFeeFeatureEntityClass student;
+
+  const InstallmentPaidDateUpdatedState({required this.student});
+
+  @override
+  List<Object?> get props => [student];
+}
+
+class FeeHistoryRepairComplete extends FeeAdminState {
+  final int repairedCount;
+  const FeeHistoryRepairComplete({required this.repairedCount});
+
+  @override
+  List<Object?> get props => [repairedCount];
+}

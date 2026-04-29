@@ -1,5 +1,6 @@
 // =========================
 // PRESENTATION LAYER (UI) - RESPONSIVE VERSION WITH PAYMENT SUMMARY
+// DARK MODE FIX: All colors are now static (light mode) using Theme override
 // =========================
 
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ class DayWiseFeePage extends StatelessWidget {
       builder:
           (context) => const Center(
             child: Card(
+              color: Colors.white, // FIX: static color
               child: Padding(
                 padding: EdgeInsets.all(24.0),
                 child: Column(
@@ -39,7 +41,10 @@ class DayWiseFeePage extends StatelessWidget {
                   children: [
                     CircularProgressIndicator(),
                     SizedBox(height: 16),
-                    Text('Loading payment details...'),
+                    Text(
+                      'Loading payment details...',
+                      style: TextStyle(color: Colors.black87), // FIX
+                    ),
                   ],
                 ),
               ),
@@ -95,66 +100,165 @@ class DayWiseFeePage extends StatelessWidget {
     debugPrint("DayWiseFeePage: build() called");
     debugPrint("========================================");
 
-    return BlocProvider(
-      create: (_) {
-        debugPrint("DayWiseFeePage: Creating FeeAdminBloc");
-        final bloc = FeeAdminBloc();
-        final now = DateTime.now();
+    // FIX: Wrap entire page in ThemeData.light() to force light mode colors
+    return Theme(
+      data: ThemeData.light().copyWith(
+        scaffoldBackgroundColor: Colors.white,
+        cardColor: Colors.white,
+        colorScheme: const ColorScheme.light(
+          primary: Colors.blue,
+          onPrimary: Colors.white,
+          surface: Colors.white,
+          onSurface: Colors.black87,
+        ),
+        dialogTheme: DialogThemeData(backgroundColor: Colors.white),
+      ),
+      child: BlocProvider(
+        create: (_) {
+          debugPrint("DayWiseFeePage: Creating FeeAdminBloc");
+          final bloc = FeeAdminBloc();
+          final now = DateTime.now();
 
-        // Get the first and last day of the current month
-        final firstDayOfMonth = DateTime(now.year, now.month, 1);
-        final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+          // Get the first and last day of the current month
+          final firstDayOfMonth = DateTime(now.year, now.month, 1);
+          final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
 
-        debugPrint(
-          "DayWiseFeePage: Dispatching FetchDayWiseFees for current month",
-        );
-        debugPrint("Start Date (First day of month): $firstDayOfMonth");
-        debugPrint("End Date (Last day of month): $lastDayOfMonth");
+          debugPrint(
+            "DayWiseFeePage: Dispatching FetchDayWiseFees for current month",
+          );
+          debugPrint("Start Date (First day of month): $firstDayOfMonth");
+          debugPrint("End Date (Last day of month): $lastDayOfMonth");
 
-        bloc.add(FetchDayWiseFees(firstDayOfMonth, lastDayOfMonth));
-        return bloc;
-      },
-      child: Builder(
-        builder:
-            (context) => Scaffold(
-              appBar: AppBar(
-                title: const Text('Day Wise Fee History'),
-                backgroundColor: Colors.blue,
-                elevation: 2,
-                actions: [
-                  // Add Payment Summary button
-                  BlocBuilder<FeeAdminBloc, FeeAdminState>(
-                    builder: (context, state) {
-                      if (state is DayWiseFeesLoaded &&
-                          state.startDate != null &&
-                          state.endDate != null) {
-                        return IconButton(
-                          icon: const Icon(Icons.payment, color: Colors.white),
-                          onPressed:
-                              () => _showPaymentSummaryForDateRange(
-                                context,
-                                state.startDate!,
-                                state.endDate!,
+          bloc.add(FetchDayWiseFees(firstDayOfMonth, lastDayOfMonth));
+          return bloc;
+        },
+        child: Builder(
+          builder:
+              (context) => Scaffold(
+                backgroundColor: Colors.white, // FIX: static white background
+                appBar: AppBar(
+                  title: const Text('Day Wise Fee History'),
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white, // FIX: ensure white icons/text
+                  elevation: 2,
+                  actions: [
+                    // 🧹 One-time cleanup button — remove after running once
+                    IconButton(
+                      icon: const Icon(
+                        Icons.cleaning_services,
+                        color: Colors.yellow,
+                      ),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder:
+                              (ctx) => AlertDialog(
+                                backgroundColor: Colors.white, // FIX
+                                title: const Text(
+                                  'Cleanup Duplicate Records',
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                  ), // FIX
+                                ),
+                                content: const Text(
+                                  'This will scan fee history and remove any '
+                                  'duplicate records. Run this once to fix duplicates.',
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                  ), // FIX
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(ctx);
+                                      context.read<FeeAdminBloc>().add(
+                                        const CleanupDuplicateFeeHistory(),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue, // FIX
+                                      foregroundColor: Colors.white, // FIX
+                                    ),
+                                    child: const Text('Cleanup'),
+                                  ),
+                                ],
                               ),
-                          tooltip: 'Payment Summary',
                         );
-                      }
-                      return const SizedBox.shrink();
-                    },
+                      },
+                      tooltip: 'Cleanup Duplicates',
+                    ),
+                    // Add Payment Summary button
+                    BlocBuilder<FeeAdminBloc, FeeAdminState>(
+                      builder: (context, state) {
+                        if (state is DayWiseFeesLoaded &&
+                            state.startDate != null &&
+                            state.endDate != null) {
+                          return IconButton(
+                            icon: const Icon(
+                              Icons.payment,
+                              color: Colors.white,
+                            ),
+                            onPressed:
+                                () => _showPaymentSummaryForDateRange(
+                                  context,
+                                  state.startDate!,
+                                  state.endDate!,
+                                ),
+                            tooltip: 'Payment Summary',
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                ),
+                body: BlocListener<FeeAdminBloc, FeeAdminState>(
+                  listener: (context, state) {
+                    if (state is FeeHistoryRepairComplete) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            state.repairedCount > 0
+                                ? '✅ Removed ${state.repairedCount} duplicate records!'
+                                : '✅ No duplicates found — all data is clean.',
+                          ),
+                          backgroundColor: Colors.green,
+                          duration: const Duration(seconds: 5),
+                        ),
+                      );
+                      // Auto-refresh after repair
+                      final now = DateTime.now();
+                      final firstDay = DateTime(now.year, now.month, 1);
+                      final lastDay = DateTime(now.year, now.month + 1, 0);
+                      context.read<FeeAdminBloc>().add(
+                        FetchDayWiseFees(firstDay, lastDay),
+                      );
+                    }
+                  },
+                  child: ColoredBox(
+                    color: Colors.white, // FIX: static white body background
+                    child: Column(
+                      children: [
+                        _DateFilterBar(
+                          onShowPaymentSummary: _showPaymentSummaryForDateRange,
+                        ),
+                        const Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: Color(0xFFE0E0E0), // FIX: static divider color
+                        ),
+                        const Expanded(child: _FeeList()),
+                      ],
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                ],
+                ),
               ),
-              body: Column(
-                children: [
-                  _DateFilterBar(
-                    onShowPaymentSummary: _showPaymentSummaryForDateRange,
-                  ),
-                  const Divider(height: 1, thickness: 1),
-                  Expanded(child: _FeeList()),
-                ],
-              ),
-            ),
+        ),
       ),
     );
   }
@@ -198,7 +302,7 @@ class _DateFilterBar extends StatelessWidget {
             final isSmallScreen = constraints.maxWidth < 400;
 
             return Container(
-              color: Colors.blue,
+              color: Colors.blue, // already static
               padding: EdgeInsets.all(isSmallScreen ? 8 : 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -251,7 +355,6 @@ class _DateFilterBar extends StatelessWidget {
     debugPrint("========================================");
 
     final now = DateTime.now();
-    // Ensure initialDate doesn't exceed today
     final initialDate =
         currentStartDate != null && currentStartDate.isAfter(now)
             ? now
@@ -265,7 +368,7 @@ class _DateFilterBar extends StatelessWidget {
       helpText: 'Select Start Date',
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
+          data: ThemeData.light().copyWith(
             colorScheme: const ColorScheme.light(
               primary: Colors.blue,
               onPrimary: Colors.white,
@@ -307,7 +410,6 @@ class _DateFilterBar extends StatelessWidget {
     debugPrint("========================================");
 
     final now = DateTime.now();
-    // Ensure initialDate doesn't exceed today
     final initialDate =
         currentEndDate != null && currentEndDate.isAfter(now)
             ? now
@@ -321,7 +423,7 @@ class _DateFilterBar extends StatelessWidget {
       helpText: 'Select End Date',
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
+          data: ThemeData.light().copyWith(
             colorScheme: const ColorScheme.light(
               primary: Colors.blue,
               onPrimary: Colors.white,
@@ -386,7 +488,7 @@ class _DateChip extends StatelessWidget {
           vertical: isSmallScreen ? 8 : 10,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white, // FIX: static white
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
@@ -459,6 +561,8 @@ class _DateChip extends StatelessWidget {
 // FEE LIST WIDGET - RESPONSIVE
 // ========================================
 class _FeeList extends StatelessWidget {
+  const _FeeList();
+
   @override
   Widget build(BuildContext context) {
     debugPrint("_FeeList: build() called");
@@ -472,17 +576,20 @@ class _FeeList extends StatelessWidget {
 
         if (state is FeeHistoryLoading) {
           debugPrint("_FeeList: Showing loading indicator");
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(color: Colors.teal),
-                SizedBox(height: 16),
-                Text(
-                  'Loading fees...',
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
-                ),
-              ],
+          return const ColoredBox(
+            color: Colors.white, // FIX
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: Colors.teal),
+                  SizedBox(height: 16),
+                  Text(
+                    'Loading fees...',
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+                ],
+              ),
             ),
           );
         }
@@ -495,51 +602,57 @@ class _FeeList extends StatelessWidget {
 
           if (state.dayWiseFees.isEmpty) {
             debugPrint("_FeeList: No fees available for display");
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.inbox_outlined,
-                      size: 64,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'No fees found',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+            return ColoredBox(
+              color: Colors.white, // FIX
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.inbox_outlined,
+                        size: 64,
                         color: Colors.grey,
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    if (state.startDate != null && state.endDate != null) ...[
-                      Text(
-                        'for the selected date range',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${_formatDate(state.startDate!)} to ${_formatDate(state.endDate!)}',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.teal,
-                          fontWeight: FontWeight.w500,
+                      const SizedBox(height: 16),
+                      const Text(
+                        'No fees found',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (state.startDate != null && state.endDate != null) ...[
+                        Text(
+                          'for the selected date range',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${_formatDate(state.startDate!)} to ${_formatDate(state.endDate!)}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.teal,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                      const SizedBox(height: 24),
+                      Text(
+                        'Try selecting a different date range',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                         textAlign: TextAlign.center,
                       ),
                     ],
-                    const SizedBox(height: 24),
-                    Text(
-                      'Try selecting a different date range',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                  ),
                 ),
               ),
             );
@@ -561,108 +674,67 @@ class _FeeList extends StatelessWidget {
               final isSmallScreen = constraints.maxWidth < 400;
               final isTablet = constraints.maxWidth >= 600;
 
-              return Column(
-                children: [
-                  // Enhanced Summary Card with responsive layout
-                  Container(
-                    margin: EdgeInsets.all(isSmallScreen ? 8 : 12),
-                    padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade300, width: 1),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+              return ColoredBox(
+                color:
+                    Colors.white, // FIX: static white background for list area
+                child: Column(
+                  children: [
+                    // Enhanced Summary Card with responsive layout
+                    Container(
+                      margin: EdgeInsets.all(isSmallScreen ? 8 : 12),
+                      padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white, // FIX: static white
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFFE0E0E0), // FIX: static grey
+                          width: 1,
                         ),
-                      ],
-                    ),
-                    child:
-                        isTablet
-                            ? Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                _SummaryItem(
-                                  icon: Icons.event_note,
-                                  label: 'Total Days',
-                                  value: '${sortedDates.length}',
-                                  isSmallScreen: isSmallScreen,
-                                ),
-                                Container(
-                                  height: 50,
-                                  width: 1,
-                                  color: Colors.grey.shade300,
-                                ),
-                                _SummaryItem(
-                                  icon: Icons.account_balance_wallet,
-                                  label: 'Total Received',
-                                  value: _formatCurrency(
-                                    state.dayWiseFees.values.fold(
-                                      0.0,
-                                      (sum, amount) => sum + amount,
-                                    ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child:
+                          isTablet
+                              ? Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  _SummaryItem(
+                                    icon: Icons.event_note,
+                                    label: 'Total Days',
+                                    value: '${sortedDates.length}',
+                                    isSmallScreen: isSmallScreen,
                                   ),
-                                  isSmallScreen: isSmallScreen,
-                                  isAmount: true,
-                                ),
-                                Container(
-                                  height: 50,
-                                  width: 1,
-                                  color: Colors.grey.shade300,
-                                ),
-                                _SummaryItem(
-                                  icon: Icons.insights,
-                                  label: 'Average/Day',
-                                  value: _formatCurrency(
-                                    state.dayWiseFees.values.fold(
-                                          0.0,
-                                          (sum, amount) => sum + amount,
-                                        ) /
-                                        sortedDates.length,
+                                  Container(
+                                    height: 50,
+                                    width: 1,
+                                    color: const Color(0xFFE0E0E0), // FIX
                                   ),
-                                  isSmallScreen: isSmallScreen,
-                                  isAmount: true,
-                                ),
-                              ],
-                            )
-                            : Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    _SummaryItem(
-                                      icon: Icons.event_note,
-                                      label: 'Total Days',
-                                      value: '${sortedDates.length}',
-                                      isSmallScreen: isSmallScreen,
-                                    ),
-                                    _SummaryItem(
-                                      icon: Icons.account_balance_wallet,
-                                      label: 'Total Received',
-                                      value: _formatCurrency(
-                                        state.dayWiseFees.values.fold(
-                                          0.0,
-                                          (sum, amount) => sum + amount,
-                                        ),
+                                  _SummaryItem(
+                                    icon: Icons.account_balance_wallet,
+                                    label: 'Total Received',
+                                    value: _formatCurrency(
+                                      state.dayWiseFees.values.fold(
+                                        0.0,
+                                        (sum, amount) => sum + amount,
                                       ),
-                                      isSmallScreen: isSmallScreen,
-                                      isAmount: true,
                                     ),
-                                  ],
-                                ),
-                                if (!isSmallScreen) ...[
-                                  const SizedBox(height: 12),
-                                  Divider(
-                                    color: Colors.grey.shade300,
-                                    thickness: 1,
+                                    isSmallScreen: isSmallScreen,
+                                    isAmount: true,
                                   ),
-                                  const SizedBox(height: 12),
+                                  Container(
+                                    height: 50,
+                                    width: 1,
+                                    color: const Color(0xFFE0E0E0), // FIX
+                                  ),
                                   _SummaryItem(
                                     icon: Icons.insights,
-                                    label: 'Average per Day',
+                                    label: 'Average/Day',
                                     value: _formatCurrency(
                                       state.dayWiseFees.values.fold(
                                             0.0,
@@ -672,43 +744,96 @@ class _FeeList extends StatelessWidget {
                                     ),
                                     isSmallScreen: isSmallScreen,
                                     isAmount: true,
-                                    centered: true,
                                   ),
                                 ],
-                              ],
-                            ),
-                  ),
-                  // List Header
-                  _HeaderRow(isSmallScreen: isSmallScreen),
-                  const Divider(height: 1, thickness: 1),
-                  // List Items
-                  Expanded(
-                    child: ListView.builder(
-                      padding: EdgeInsets.only(
-                        top: isSmallScreen ? 8 : 12,
-                        bottom: isSmallScreen ? 8 : 16,
-                      ),
-                      itemCount: sortedDates.length,
-                      itemBuilder: (context, index) {
-                        final date = sortedDates[index];
-                        final amount = state.dayWiseFees[date]!;
-                        final dateKey = _formatDateForDisplay(date);
-
-                        debugPrint(
-                          "_FeeList: Building row $index for $dateKey with amount $amount",
-                        );
-
-                        return _FeeListItem(
-                          date: dateKey,
-                          amount: amount,
-                          dateTime: date,
-                          isToday: _isToday(date),
-                          isSmallScreen: isSmallScreen,
-                        );
-                      },
+                              )
+                              : Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      _SummaryItem(
+                                        icon: Icons.event_note,
+                                        label: 'Total Days',
+                                        value: '${sortedDates.length}',
+                                        isSmallScreen: isSmallScreen,
+                                      ),
+                                      _SummaryItem(
+                                        icon: Icons.account_balance_wallet,
+                                        label: 'Total Received',
+                                        value: _formatCurrency(
+                                          state.dayWiseFees.values.fold(
+                                            0.0,
+                                            (sum, amount) => sum + amount,
+                                          ),
+                                        ),
+                                        isSmallScreen: isSmallScreen,
+                                        isAmount: true,
+                                      ),
+                                    ],
+                                  ),
+                                  if (!isSmallScreen) ...[
+                                    const SizedBox(height: 12),
+                                    const Divider(
+                                      color: Color(0xFFE0E0E0), // FIX
+                                      thickness: 1,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _SummaryItem(
+                                      icon: Icons.insights,
+                                      label: 'Average per Day',
+                                      value: _formatCurrency(
+                                        state.dayWiseFees.values.fold(
+                                              0.0,
+                                              (sum, amount) => sum + amount,
+                                            ) /
+                                            sortedDates.length,
+                                      ),
+                                      isSmallScreen: isSmallScreen,
+                                      isAmount: true,
+                                      centered: true,
+                                    ),
+                                  ],
+                                ],
+                              ),
                     ),
-                  ),
-                ],
+                    // List Header
+                    _HeaderRow(isSmallScreen: isSmallScreen),
+                    const Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: Color(0xFFE0E0E0), // FIX: static color
+                    ),
+                    // List Items
+                    Expanded(
+                      child: ListView.builder(
+                        padding: EdgeInsets.only(
+                          top: isSmallScreen ? 8 : 12,
+                          bottom: isSmallScreen ? 8 : 16,
+                        ),
+                        itemCount: sortedDates.length,
+                        itemBuilder: (context, index) {
+                          final date = sortedDates[index];
+                          final amount = state.dayWiseFees[date]!;
+                          final dateKey = _formatDateForDisplay(date);
+
+                          debugPrint(
+                            "_FeeList: Building row $index for $dateKey with amount $amount",
+                          );
+
+                          return _FeeListItem(
+                            date: dateKey,
+                            amount: amount,
+                            dateTime: date,
+                            isToday: _isToday(date),
+                            isSmallScreen: isSmallScreen,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               );
             },
           );
@@ -716,68 +841,82 @@ class _FeeList extends StatelessWidget {
 
         if (state is FeeHistoryError) {
           debugPrint("_FeeList: Error state - ${state.message}");
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Oops! Something went wrong',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+          return ColoredBox(
+            color: Colors.white, // FIX
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
                       color: Colors.red,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    state.message,
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      final now = DateTime.now();
-                      final firstDayOfMonth = DateTime(now.year, now.month, 1);
-                      final lastDayOfMonth = DateTime(
-                        now.year,
-                        now.month + 1,
-                        0,
-                      );
-                      context.read<FeeAdminBloc>().add(
-                        FetchDayWiseFees(firstDayOfMonth, lastDayOfMonth),
-                      );
-                    },
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Oops! Something went wrong',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      state.message,
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        final now = DateTime.now();
+                        final firstDayOfMonth = DateTime(
+                          now.year,
+                          now.month,
+                          1,
+                        );
+                        final lastDayOfMonth = DateTime(
+                          now.year,
+                          now.month + 1,
+                          0,
+                        );
+                        context.read<FeeAdminBloc>().add(
+                          FetchDayWiseFees(firstDayOfMonth, lastDayOfMonth),
+                        );
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retry'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
         }
 
         debugPrint("_FeeList: No data available (initial state)");
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Select a date range to view fees',
-              style: TextStyle(color: Colors.grey, fontSize: 14),
-              textAlign: TextAlign.center,
+        return const ColoredBox(
+          color: Colors.white, // FIX
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'Select a date range to view fees',
+                style: TextStyle(color: Colors.grey, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
         );
@@ -855,7 +994,7 @@ class _SummaryItem extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: isSmallScreen ? 11 : 12,
-                color: Colors.black87,
+                color: Colors.black87, // FIX: static dark color
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -867,7 +1006,7 @@ class _SummaryItem extends StatelessWidget {
           style: TextStyle(
             fontSize: isSmallScreen ? 20 : 24,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: Colors.black, // FIX: static black
           ),
         ),
       ],
@@ -901,10 +1040,16 @@ class _FeeListItem extends StatelessWidget {
         vertical: isSmallScreen ? 4 : 6,
       ),
       decoration: BoxDecoration(
-        color: isToday ? Colors.blue.shade50 : Colors.white,
+        color:
+            isToday
+                ? const Color(0xFFE3F2FD) // FIX: static Colors.blue.shade50
+                : Colors.white, // FIX: static white
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isToday ? Colors.blue.shade200 : Colors.grey.shade200,
+          color:
+              isToday
+                  ? const Color(0xFF90CAF9) // FIX: static Colors.blue.shade200
+                  : const Color(0xFFEEEEEE), // FIX: static Colors.grey.shade200
           width: 1,
         ),
         boxShadow: [
@@ -916,6 +1061,8 @@ class _FeeListItem extends StatelessWidget {
         ],
       ),
       child: ListTile(
+        tileColor:
+            Colors.transparent, // FIX: prevent ListTile from using theme color
         contentPadding: EdgeInsets.symmetric(
           horizontal: isSmallScreen ? 12 : 16,
           vertical: isSmallScreen ? 6 : 8,
@@ -924,7 +1071,12 @@ class _FeeListItem extends StatelessWidget {
           width: isSmallScreen ? 40 : 48,
           height: isSmallScreen ? 40 : 48,
           decoration: BoxDecoration(
-            color: isToday ? Colors.blue : Colors.blue.shade100,
+            color:
+                isToday
+                    ? Colors.blue
+                    : const Color(
+                      0xFFBBDEFB,
+                    ), // FIX: static Colors.blue.shade100
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -941,6 +1093,7 @@ class _FeeListItem extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
                   fontSize: isSmallScreen ? 13 : 15,
+                  color: Colors.black, // FIX: static dark color
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -968,7 +1121,7 @@ class _FeeListItem extends StatelessWidget {
         subtitle: Text(
           'Received',
           style: TextStyle(
-            color: Colors.grey[600],
+            color: const Color(0xFF757575), // FIX: static Colors.grey[600]
             fontSize: isSmallScreen ? 11 : 13,
           ),
         ),
@@ -984,13 +1137,18 @@ class _FeeListItem extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: isSmallScreen ? 14 : 16,
-                    color: isToday ? Colors.blue : Colors.black87,
+                    color:
+                        isToday
+                            ? Colors.blue
+                            : Colors.black87, // FIX: static color
                   ),
                 ),
                 Text(
                   'View Details',
                   style: TextStyle(
-                    color: Colors.blue.shade700,
+                    color: const Color(
+                      0xFF1565C0,
+                    ), // FIX: static Colors.blue.shade700
                     fontSize: isSmallScreen ? 10 : 12,
                   ),
                 ),
@@ -1000,7 +1158,7 @@ class _FeeListItem extends StatelessWidget {
             Icon(
               Icons.arrow_forward_ios,
               size: isSmallScreen ? 14 : 16,
-              color: Colors.grey[400],
+              color: const Color(0xFFBDBDBD), // FIX: static Colors.grey[400]
             ),
           ],
         ),
@@ -1041,7 +1199,7 @@ class _HeaderRow extends StatelessWidget {
         horizontal: isSmallScreen ? 12 : 16,
         vertical: isSmallScreen ? 10 : 12,
       ),
-      color: Colors.grey.shade200,
+      color: const Color(0xFFEEEEEE), // FIX: static Colors.grey.shade200
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -1050,7 +1208,7 @@ class _HeaderRow extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: isSmallScreen ? 13 : 14,
-              color: Colors.black87,
+              color: Colors.black87, // FIX: static color
             ),
           ),
           Text(
@@ -1058,7 +1216,7 @@ class _HeaderRow extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: isSmallScreen ? 13 : 14,
-              color: Colors.black87,
+              color: Colors.black87, // FIX: static color
             ),
           ),
           Text(
@@ -1066,7 +1224,7 @@ class _HeaderRow extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: isSmallScreen ? 13 : 14,
-              color: Colors.black87,
+              color: Colors.black87, // FIX: static color
             ),
           ),
         ],

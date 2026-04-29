@@ -4,11 +4,7 @@ import 'package:flutter_cas_app_main/src/features/fee_feature/data/entities/Favo
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_event.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/bloc/fee_admin_state.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/gradient_background.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/neu_card.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_padding.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/responsive_text.dart';
-import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/widgets/screen_header.dart';
 import 'package:intl/intl.dart';
 
 class FavouredStudentsScreen extends StatefulWidget {
@@ -103,7 +99,11 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen>
         children: [
           // Back Button
           _buildNeomorphicButton(
-            child: const Icon(Icons.arrow_back_ios_new, size: 20),
+            child: const Icon(
+              Icons.arrow_back_ios_new,
+              size: 20,
+              color: Colors.black,
+            ),
             onTap: () => Navigator.of(context).pop(),
           ),
           const SizedBox(width: 16),
@@ -137,7 +137,11 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen>
 
           // Refresh Button
           _buildNeomorphicButton(
-            child: const Icon(Icons.refresh_rounded, size: 22),
+            child: const Icon(
+              Icons.refresh_rounded,
+              size: 22,
+              color: Colors.black,
+            ),
             onTap: () {
               context.read<FeeAdminBloc>().add(
                 const ReadFavouredStudentsEvent(),
@@ -875,7 +879,7 @@ class _FavouredStudentsScreenState extends State<FavouredStudentsScreen>
           columnSpacing: isTablet ? 40 : 20,
           headingRowHeight: 56,
           dataRowHeight: 72,
-          headingRowColor: MaterialStateProperty.all(_backgroundColor),
+          headingRowColor: WidgetStateProperty.all(_backgroundColor),
           decoration: BoxDecoration(
             color: _backgroundColor,
             borderRadius: BorderRadius.circular(12),

@@ -39,7 +39,8 @@ class StudentFeatureBloc
 
   final FeeCleanupRepository? feeCleanupRepository;
 
-  StudentFeatureBloc({this.feeCleanupRepository}) : super(StudentEnrollmentInitial()) {
+  StudentFeatureBloc({this.feeCleanupRepository})
+    : super(StudentEnrollmentInitial()) {
     on<UpdateStudentDataEvent>(_handleStudentDataUpdate);
     on<SubmitEnrollmentFormEvent>(_handleEnrollmentSubmission);
     on<FetchGroupStudentsEvent>(_handleGroupDataLoading);
@@ -47,7 +48,6 @@ class StudentFeatureBloc
     on<CheckPermissionEvent>(onCheckPermissionEvent);
     on<RequestPermissionEvent>(onRequestPermissionEvent);
     on<DeleteStudentEvent>(_handleStudentDelete);
-
 
     on<CreateGeofenceEvent>(onCreateGeofenceEvent);
     on<ReCreateGeofenceEvent>(onReCreateGeofenceEvent);
@@ -68,35 +68,22 @@ class StudentFeatureBloc
     );
 
     try {
-      await studentUsecase.provideStudentData(event); // returns void (null)
-    } catch (e) {
+      // FIXED: Call provideStudentData only ONCE (was being called twice before)
+      debugPrint('📝 Starting enrollment for student: ${event.id}');
+      await studentUsecase.provideStudentData(event);
+      debugPrint('✅ Enrollment successful for: ${event.id}');
+      emit(StudentEnrollmentSuccess());
+    } catch (e, stackTrace) {
+      debugPrint('❌ Enrollment failed for ${event.id}: $e');
+      debugPrint('Stack: $stackTrace');
       emit(StudentEnrollmentFailure(e.toString()));
     }
-    try {
-      await studentUsecase.provideStudentData(event);
-      emit(StudentEnrollmentSuccess());
-    } catch (e) {
-      print(e);
-    }
-    // final StudentUsecase studentUsecase = StudentUsecase(firestoreRepositry);
-    // var result = await studentUsecase.provideStudentData(event);
-    // if (result is Void) {
-    //   print("successfully entred");
-    //   StudentEnrollmentSuccess();
-    // } else {
-    //   StudentEnrollmentFailure(result as String);
-    // }
-    // await Future.delayed(const Duration(seconds: 5));
-    // print(event.address);
-    // print(event.cnic);
-    // if (event.name.isEmpty) {
-    //   emit(StudentEnrollmentFailure("Student name can't be empty"));
-    // } else {
-    //   emit(StudentEnrollmentSuccess());
-    // }
 
-    // await Future.delayed(const Duration(seconds: 5));
-    emit(StudentEnrollmentInitial());
+    // Reset to initial state after a short delay
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!isClosed) {
+      emit(StudentEnrollmentInitial());
+    }
   }
 
   Future<void> _handleGroupDataLoading(
@@ -275,90 +262,92 @@ class StudentFeatureBloc
   }
 
   Future<void> _handleStudentGroupUpdate(
-  UpdateStudentGroupEvent event,
-  Emitter<StudentFeatureState> emit,
-) async {
-  emit(StudentGroupUpdating());
-  
-  final UpdateStudentGroupUseCase updateStudentGroupUseCase = 
-      UpdateStudentGroupUseCase(firestoreRepositry: _firestoreRepositry);
+    UpdateStudentGroupEvent event,
+    Emitter<StudentFeatureState> emit,
+  ) async {
+    emit(StudentGroupUpdating());
 
-  try {
-    await updateStudentGroupUseCase.updateStudentGroup(
-      studentId: event.studentId,
-      newGroupName: event.newGroupName,
-    );
-    
-    // Clear cache for this student so fresh data is loaded next time
-    CachedData.listOfAlreadyFetchedStudentsData.remove(event.studentId);
-    
-    emit(StudentGroupUpdateSuccess(
-      studentId: event.studentId,
-      newGroupName: event.newGroupName,
-    ));
-  } catch (e) {
-    emit(StudentGroupUpdateFailure(e.toString()));
-  }
-}
+    final UpdateStudentGroupUseCase updateStudentGroupUseCase =
+        UpdateStudentGroupUseCase(firestoreRepositry: _firestoreRepositry);
 
-Future<void> _handleStudentDataUpdate(
-  UpdateStudentDataEvent event,
-  Emitter<StudentFeatureState> emit,
-) async {
-  emit(StudentDataUpdating());
-  
-  final UpdateStudentUseCase updateStudentUseCase = 
-      UpdateStudentUseCase(firestoreRepositry: _firestoreRepositry);
-
-  try {
-    final studentEntity = StudentEntityClass(
-      id: event.id,
-      name: event.name,
-      email: event.email,
-      cnic: event.cnic,
-      phone: event.phone,
-      address: event.address,
-      gender: event.gender,
-      fatherName: event.fatherName,
-      fatherOccupation: event.fatherOccupation,
-      group: event.group,
-    );
-
-    await updateStudentUseCase.updateStudentData(studentEntity);
-    
-    // Clear cache for this student so fresh data is loaded next time
-    CachedData.listOfAlreadyFetchedStudentsData.remove(event.id);
-    
-    emit(StudentDataUpdateSuccess());
-  } catch (e) {
-    emit(StudentDataUpdateFailure(e.toString()));
-  }
-}
-
-Future<void> _handleStudentDelete(
-  DeleteStudentEvent event,
-  Emitter<StudentFeatureState> emit,
-) async {
-  emit(StudentDeleting());
-  
-  final DeleteStudentUseCase deleteStudentUseCase = 
-      DeleteStudentUseCase(
-        firestoreRepositry: _firestoreRepositry,
-        feeCleanupRepository: feeCleanupRepository,
+    try {
+      await updateStudentGroupUseCase.updateStudentGroup(
+        studentId: event.studentId,
+        newGroupName: event.newGroupName,
       );
 
-  try {
-    await deleteStudentUseCase.deleteStudent(
-      studentId: event.studentId,
-      groupName: event.groupName,
-    );
-    
-    // Clear cache for this student
-    CachedData.listOfAlreadyFetchedStudentsData.remove(event.studentId);
-    
-    emit(StudentDeleteSuccess(studentId: event.studentId));
-  } catch (e) {
-    emit(StudentDeleteFailure(e.toString()));
+      // Clear cache for this student so fresh data is loaded next time
+      CachedData.listOfAlreadyFetchedStudentsData.remove(event.studentId);
+
+      emit(
+        StudentGroupUpdateSuccess(
+          studentId: event.studentId,
+          newGroupName: event.newGroupName,
+        ),
+      );
+    } catch (e) {
+      emit(StudentGroupUpdateFailure(e.toString()));
+    }
   }
-}
+
+  Future<void> _handleStudentDataUpdate(
+    UpdateStudentDataEvent event,
+    Emitter<StudentFeatureState> emit,
+  ) async {
+    emit(StudentDataUpdating());
+
+    final UpdateStudentUseCase updateStudentUseCase = UpdateStudentUseCase(
+      firestoreRepositry: _firestoreRepositry,
+    );
+
+    try {
+      final studentEntity = StudentEntityClass(
+        id: event.id,
+        name: event.name,
+        email: event.email,
+        cnic: event.cnic,
+        phone: event.phone,
+        address: event.address,
+        gender: event.gender,
+        fatherName: event.fatherName,
+        fatherOccupation: event.fatherOccupation,
+        group: event.group,
+      );
+
+      await updateStudentUseCase.updateStudentData(studentEntity);
+
+      // Clear cache for this student so fresh data is loaded next time
+      CachedData.listOfAlreadyFetchedStudentsData.remove(event.id);
+
+      emit(StudentDataUpdateSuccess());
+    } catch (e) {
+      emit(StudentDataUpdateFailure(e.toString()));
+    }
+  }
+
+  Future<void> _handleStudentDelete(
+    DeleteStudentEvent event,
+    Emitter<StudentFeatureState> emit,
+  ) async {
+    emit(StudentDeleting());
+
+    final DeleteStudentUseCase deleteStudentUseCase = DeleteStudentUseCase(
+      firestoreRepositry: _firestoreRepositry,
+      feeCleanupRepository: feeCleanupRepository,
+    );
+
+    try {
+      await deleteStudentUseCase.deleteStudent(
+        studentId: event.studentId,
+        groupName: event.groupName,
+      );
+
+      // Clear cache for this student
+      CachedData.listOfAlreadyFetchedStudentsData.remove(event.studentId);
+
+      emit(StudentDeleteSuccess(studentId: event.studentId));
+    } catch (e) {
+      emit(StudentDeleteFailure(e.toString()));
+    }
+  }
 }

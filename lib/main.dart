@@ -38,7 +38,9 @@ import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/bloc/super_admin_fee_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/student_workshop_time_tracker/presentation/bloc/time_graph_page_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/time_track_groups_page/presentation/bloc/group_time_tracker_bloc.dart';
+import 'package:flutter_cas_app_main/src/scripts/migrate_missing_installments.dart';
 import 'package:responsive_ui_kit/responsive_ui_kit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'src/features/my_student_attendence/presentation/bloc/student_attendence_bloc_bloc.dart';
 // import 'package:flutter_cas_app_main/src/features/course_catalog/presentation/pages/course_catalog_screen_state.dart';
 
@@ -52,7 +54,52 @@ void main() async {
 
   await init();
 
+  // CRITICAL: Run migration to fix existing missing students
+  // This creates installment documents for students enrolled BEFORE the code fix
+  // await _runMigrationIfNeeded();
+
   runApp(const MyApp());
+}
+
+/// Runs migration once on app startup to fix missing student installments
+Future<void> _runMigrationIfNeeded() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    const migrationKey = 'migration_installments_completed';
+
+    // FORCE CLEAR: Remove this after migration runs successfully once
+    // TODO: Remove this line after seeing migration logs in console
+    await prefs.remove(migrationKey);
+    debugPrint('⚠️ FORCE CLEAR: Migration flag cleared for re-run');
+
+    // Check if migration already completed
+    if (prefs.getBool(migrationKey) ?? false) {
+      debugPrint('✅ Migration already completed, skipping');
+      return;
+    }
+
+    debugPrint('🚀 Running installment migration (first-time setup)...');
+
+    // Run actual migration
+    final result = await runInstallmentMigration(dryRun: false);
+
+    if (result.fatalError == null) {
+      // Mark migration as completed
+      await prefs.setBool(migrationKey, true);
+      debugPrint('✅ Migration completed successfully!');
+      debugPrint('   Students migrated: ${result.migratedStudents.length}');
+      debugPrint('   Errors: ${result.errors.length}');
+      if (result.migratedStudents.isNotEmpty) {
+        debugPrint('   Migrated IDs: ${result.migratedStudents.join(", ")}');
+      }
+    } else {
+      debugPrint('❌ Migration failed: ${result.fatalError}');
+    }
+  } catch (e, stackTrace) {
+    debugPrint('⚠️ Migration check/execution failed: $e');
+    debugPrint('Stack: $stackTrace');
+    // Don't block app startup if migration fails
+  }
 }
 
 class MyApp extends StatelessWidget {

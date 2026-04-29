@@ -15,6 +15,7 @@ import 'package:flutter_cas_app_main/src/features/my_student_attendence/presenta
 import 'package:flutter_cas_app_main/src/features/student_feature/data/group_student_entity_class.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/pages/student_side_fee_details_screen .dart';
 import 'package:flutter_cas_app_main/src/features/student_workshop_time_tracker/presentation/pages/student_workshop_time_tracker.dart';
+import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/widgets/student_profile_data.dart';
 import 'fee_details_screen.dart';
 
 class GroupMembersScreen extends StatefulWidget {
@@ -223,6 +224,12 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
                                         isNavigateToWorkShopGraphPage:
                                             widget
                                                 .isNavigateToWorkShopGraphPage,
+                                        onNameTap: () {
+                                          showStudentProfileDialog(
+                                            context,
+                                            studentId: student.rollNum,
+                                          );
+                                        },
                                         onViewFee: (s) {
                                           _selectedStudent = s;
                                           context.read<FeeAdminBloc>().add(
@@ -251,6 +258,12 @@ class _GroupMembersScreenState extends State<GroupMembersScreen> {
                                         isNavigateToWorkShopGraphPage:
                                             widget
                                                 .isNavigateToWorkShopGraphPage,
+                                        onNameTap: () {
+                                          showStudentProfileDialog(
+                                            context,
+                                            studentId: student.rollNum,
+                                          );
+                                        },
                                         onViewFee: (s) {
                                           _selectedStudent = s;
                                           context.read<FeeAdminBloc>().add(

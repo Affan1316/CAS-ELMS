@@ -25,8 +25,11 @@ class FeeEntityClass {
   });
 
   factory FeeEntityClass.fromMap(Map<String, dynamic> map, {String? id}) {
-    final ts = map['createdAt'] as Timestamp?;
-    final date = ts?.toDate() ?? DateTime.now();
+    // createdAt is always set to the paid date (not the approval date).
+    // paidDate is also stored for explicit clarity on newer records.
+    final createdTs = map['createdAt'] as Timestamp?;
+    final paidTs = map['paidDate'] as Timestamp?;
+    final date = createdTs?.toDate() ?? paidTs?.toDate() ?? DateTime.now();
     final paidAmount = map['paidAmount'] ?? 0.0;
     final pmRaw = map['paymentMethod'];
     final status = map['status'] as String? ?? 'Paid';

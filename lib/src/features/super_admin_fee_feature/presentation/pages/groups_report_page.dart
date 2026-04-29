@@ -46,9 +46,26 @@ class _GroupsReportPageState extends State<GroupsReportPage> {
 
   // simple K/M formatter (same style as the card)
   String _compactAmount(double value) {
-    if (value.abs() >= 1e6) return '${(value / 1e6).toStringAsFixed(1)}M';
-    if (value.abs() >= 1e3) return '${(value / 1e3).toStringAsFixed(1)}K';
-    return value.toStringAsFixed(2);
+    final isNegative = value < 0;
+    final abs = value.abs();
+    final intPart = abs.truncate(); // no rounding
+    final decPart = abs - intPart;
+
+    // Add thousand separators to integer part
+    final intStr = intPart.toString();
+    final buffer = StringBuffer();
+    for (int i = 0; i < intStr.length; i++) {
+      if (i > 0 && (intStr.length - i) % 3 == 0) buffer.write(',');
+      buffer.write(intStr[i]);
+    }
+
+    // Only show decimals if non-zero
+    if (decPart > 0) {
+      final decStr = decPart.toStringAsFixed(2).substring(1); // ".XX"
+      buffer.write(decStr);
+    }
+
+    return isNegative ? '-${buffer.toString()}' : buffer.toString();
   }
 
   /// Totals card that shows overall totals computed from the bloc's cache.
@@ -421,10 +438,26 @@ class ResponsiveGroupCard extends StatelessWidget {
   }
 
   String _compactAmount(double value) {
-    // simple K/M formatter
-    if (value.abs() >= 1e6) return '${(value / 1e6).toStringAsFixed(1)}M';
-    if (value.abs() >= 1e3) return '${(value / 1e3).toStringAsFixed(1)}K';
-    return value.toStringAsFixed(2);
+    final isNegative = value < 0;
+    final abs = value.abs();
+    final intPart = abs.truncate(); // no rounding
+    final decPart = abs - intPart;
+
+    // Add thousand separators to integer part
+    final intStr = intPart.toString();
+    final buffer = StringBuffer();
+    for (int i = 0; i < intStr.length; i++) {
+      if (i > 0 && (intStr.length - i) % 3 == 0) buffer.write(',');
+      buffer.write(intStr[i]);
+    }
+
+    // Only show decimals if non-zero
+    if (decPart > 0) {
+      final decStr = decPart.toStringAsFixed(2).substring(1); // ".XX"
+      buffer.write(decStr);
+    }
+
+    return isNegative ? '-${buffer.toString()}' : buffer.toString();
   }
 
   @override
@@ -466,7 +499,10 @@ class ResponsiveGroupCard extends StatelessWidget {
             ),
             child:
                 summary == null
-                    ? _buildLoading(theme)
+                    ? _buildNoFeeData(
+                      theme,
+                      context,
+                    ) // Show 0 values instead of loading
                     : _buildContent(theme, context),
           ),
         ),
@@ -474,29 +510,155 @@ class ResponsiveGroupCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLoading(ThemeData theme) {
+  Widget _buildNoFeeData(ThemeData theme, BuildContext context) {
+    // Show 0 values instead of loading spinner for groups with no fee data
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 120),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '👥 GROUP',
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF64748B),
-            ),
+          // header row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '👥 GROUP',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      groupName,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF1E293B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // status chip - show "No Data"
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF94A3B8), // grey for no data
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      '📊',
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'No Data',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            groupName,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: const Color(0xFF1E293B),
-            ),
-          ),
+
           const SizedBox(height: 10),
-          const SizedBox(height: 8, child: LinearProgressIndicator()),
+
+          // stats row showing 0 values
+          Row(
+            children: [
+              _statBlock('💰', 'Total', '0'),
+              const SizedBox(width: 12),
+              _statBlock('✅', 'Received', '0'),
+              const SizedBox(width: 12),
+              _statBlock('⏳', 'Remaining', '0'),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          // progress bar at 0% and details button
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // progress bar at 0%
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: SizedBox(
+                        height: 10,
+                        child: LinearProgressIndicator(
+                          value: 0.0, // 0% progress
+                          backgroundColor: const Color(0xFFE2E8F0),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Color(0xFF94A3B8), // grey
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '0%',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                        color: Color(0xFF475569),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 8),
+
+              SizedBox(
+                height: 36,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder:
+                            (_) => GroupMembersScreen(
+                              groupId: groupName,
+                              isNavigateToAttendence: false,
+                              isNavigateToStudentFeeDetails: true,
+                              isNavigateToWorkShopGraphPage: false,
+                            ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF3B82F6),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Details'),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

@@ -149,6 +149,7 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
         }
 
         if (current is BulkPaymentFailed) return true;
+        if (current is BulkPaymentProgress) return true;
 
         return false;
       },
@@ -233,6 +234,13 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
           return _buildGroupList(context);
         }
 
+        // ── Bulk approval in progress (with progress tracking) ───────────
+        if (state is BulkPaymentProgress) {
+          // Rebuild cache with optimistic notifications to show items marking as 'Paid'
+          _rebuildCache(state.notifications, -2); // Use -2 to indicate progress state
+          return _buildProgressView(context, state);
+        }
+
         // ── BulkPaymentCompleted ─────────────────────────────────────────────
         if (state is BulkPaymentCompleted) {
           return _buildGroupList(context);
@@ -240,6 +248,98 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
 
         return const SizedBox.shrink();
       },
+    );
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Builds a progress view during bulk approval
+  // ───────────────────────────────────────────────────────────────────────────
+  Widget _buildProgressView(BuildContext context, BulkPaymentProgress state) {
+    final progress = state.total > 0 ? state.completed / state.total : 0.0;
+
+    return Column(
+      children: [
+        // Progress banner
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue.shade50, Colors.indigo.shade50],
+            ),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.blue.shade200),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor: AlwaysStoppedAnimation(Colors.blue.shade600),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Approving Fees...',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.blue.shade800,
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${state.completed} / ${state.total}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue.shade800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 6,
+                  backgroundColor: Colors.blue.shade100,
+                  valueColor: AlwaysStoppedAnimation(Colors.blue.shade600),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Processing continues even if you leave this screen',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.blue.shade600,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+        ).animate().fadeIn(duration: 300.ms).slideY(begin: -0.1),
+
+        // Still show the list underneath
+        Expanded(child: _buildGroupList(context)),
+      ],
     );
   }
 
@@ -281,7 +381,7 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
             child: widget.header!,
           ).animate().fadeIn(duration: 250.ms).slideY(begin: -0.1),
 
-        // ── Selection mode hint banner ─────────────────────────────────────
+        // ── Selection mode hint banner (always visible when items selected) ──
         AnimatedSize(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeInOut,
@@ -370,6 +470,8 @@ class _NotificationListWidgetState extends State<NotificationListWidget> {
                             _onItemSelected(itemId, selected, groupName),
                     onSelectAll: () {
                       setState(() {
+                        // Auto-enter selection mode when Select All is tapped
+                        _isSelectionMode = true;
                         _selectedItemsByGroup.putIfAbsent(groupName, () => {});
                         final groupSet = _selectedItemsByGroup[groupName]!;
 
@@ -580,8 +682,8 @@ class _GroupCard extends StatelessWidget {
             ),
           ),
 
-          // ── Select all + confirm row (only in selection mode when expanded) ─
-          if (isExpanded && isSelectionMode)
+          // ── Select all + confirm row (always visible when group is expanded) ─
+          if (isExpanded)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(

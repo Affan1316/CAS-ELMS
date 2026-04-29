@@ -83,8 +83,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
                 Expanded(
                   child: ListView(
                     children: [
-                      for (var item in leaveItems)
-                        LeaveItemWidget(item: item),
+                      for (var item in leaveItems) LeaveItemWidget(item: item),
                     ],
                   ),
                 ),

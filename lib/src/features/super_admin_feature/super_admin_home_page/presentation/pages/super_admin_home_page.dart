@@ -5,6 +5,7 @@ import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentatio
 import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/bloc/admin_login_state.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/pages/OnboardingScreen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/DayWiseFeePage.dart';
+import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/FavouredStudentsScreen.dart';
 import 'package:flutter_cas_app_main/src/features/fee_feature/presentation/pages/fee_defaulters.dart';
 import 'package:flutter_cas_app_main/src/features/inquiry/presentation/pages/inquiry_detail_page.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/presentation/pages/groups_report_page.dart';
@@ -550,7 +551,7 @@ class SuperAdminDashboard extends StatelessWidget {
       DashboardItem(
         title: "Reports",
         icon: Icons.assessment,
-        color: const Color(0xFFffecd2),
+        color: const Color.fromARGB(255, 253, 192, 108),
         onTap: () => _navigateToScreen(context, "Reports"),
       ),
       // DashboardItem(
@@ -568,7 +569,7 @@ class SuperAdminDashboard extends StatelessWidget {
       DashboardItem(
         title: "Notifications",
         icon: Icons.notifications,
-        color: const Color(0xFFfed6e3),
+        color: const Color.fromARGB(255, 253, 145, 179),
         onTap: () => _navigateToScreen(context, "Notifications"),
       ),
       DashboardItem(
@@ -576,6 +577,12 @@ class SuperAdminDashboard extends StatelessWidget {
         icon: Icons.info_outline,
         color: const Color.fromARGB(255, 0, 0, 0),
         onTap: () => _navigateToScreen(context, "Inquiry"),
+      ),
+      DashboardItem(
+        title: "Favoured",
+        icon: Icons.request_page,
+        color: const Color.fromARGB(255, 92, 145, 159),
+        onTap: () => _navigateToScreen(context, "Favoured"),
       ),
     ];
 
@@ -752,6 +759,16 @@ class SuperAdminDashboard extends StatelessWidget {
         MaterialPageRoute(
           builder: (context) {
             return InquiryDetailPage();
+          },
+        ),
+      );
+    }
+    if (screenName == 'Favoured') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return FavouredStudentsScreen();
           },
         ),
       );

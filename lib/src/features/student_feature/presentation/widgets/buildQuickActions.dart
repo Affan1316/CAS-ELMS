@@ -8,15 +8,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../my_student_attendence/presentation/student_adentence_page.dart';
 
-/// Responsive Quick Actions Widget with Geometric Design Principles
-///
-/// Design Principles:
-/// - 8dp grid system for precise spacing
-/// - Golden ratio (φ ≈ 1.618) for proportional scaling
-/// - Material Design 3 responsive breakpoints
-/// - Euclidean geometry for card dimensions
-/// - Neumorphic design with proper shadow calculations
-
 Widget buildQuickActions(String section, String studentName, String studentId) {
   final List<Map<String, dynamic>> studentFeatures = [
     {

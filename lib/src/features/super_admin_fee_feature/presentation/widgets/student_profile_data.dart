@@ -107,188 +107,190 @@ class _ProfileCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // ── Header (gradient bg with avatar) ─────────────────────────────
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blueGrey.shade700, Colors.blueGrey.shade900],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ── Header (gradient bg with avatar) ─────────────────────────────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blueGrey.shade700, Colors.blueGrey.shade900],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
               ),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(24),
-              ),
-            ),
-            child: Column(
-              children: [
-                // ── Avatar ─────────────────────────────────────────────────
-                Container(
-                  width: 84,
-                  height: 84,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.15),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.4),
-                      width: 2.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.25),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
+              child: Column(
+                children: [
+                  // ── Avatar ─────────────────────────────────────────────────
+                  Container(
+                    width: 84,
+                    height: 84,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.15),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.4),
+                        width: 2.5,
                       ),
-                    ],
-                  ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.25),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
 
-                  // 👇 Replace CircleAvatar with Image.network when you have imageUrl
-                  child: Center(
-                    child:
-                        imageUrl == "—"
-                            ? Text(
-                              initials,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
-                            : GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) {
-                                      return FullScreenImage(
-                                        imageBase64String: imageUrl,
-                                      );
-                                    },
+                    // 👇 Replace CircleAvatar with Image.network when you have imageUrl
+                    child: Center(
+                      child:
+                          imageUrl == "—"
+                              ? Text(
+                                initials,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 36,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                              : GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) {
+                                        return FullScreenImage(
+                                          imageBase64String: imageUrl,
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                                child: CircleAvatar(
+                                  maxRadius: 42,
+                                  minRadius: 40,
+                                  backgroundImage: MemoryImage(
+                                    base64Decode(imageUrl),
                                   ),
-                                );
-                              },
-                              child: CircleAvatar(
-                                maxRadius: 42,
-                                minRadius: 40,
-                                backgroundImage: MemoryImage(
-                                  base64Decode(imageUrl),
                                 ),
                               ),
-                            ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-
-                // ── Name ───────────────────────────────────────────────────
-                Text(
-                  name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.3,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-
-                // ── Group badge ────────────────────────────────────────────
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: groupColor.withOpacity(0.25),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: groupColor.withOpacity(0.6),
-                      width: 1.2,
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.group_rounded, size: 14, color: groupColor),
-                      const SizedBox(width: 6),
-                      Text(
-                        group,
-                        style: TextStyle(
-                          color: groupColor,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                        ),
+                  const SizedBox(height: 14),
+
+                  // ── Name ───────────────────────────────────────────────────
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.3,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+
+                  // ── Group badge ────────────────────────────────────────────
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: groupColor.withOpacity(0.25),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: groupColor.withOpacity(0.6),
+                        width: 1.2,
                       ),
-                    ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.group_rounded, size: 14, color: groupColor),
+                        const SizedBox(width: 6),
+                        Text(
+                          group,
+                          style: TextStyle(
+                            color: groupColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          // ── Info rows ─────────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: Column(
-              children: [
-                _InfoRow(
-                  icon: Icons.badge_rounded,
-                  label: 'Student ID',
-                  value: studentId,
-                ),
-                _InfoRow(
-                  icon: Icons.person_rounded,
-                  label: 'Father Name',
-                  value: fatherName,
-                ),
-                _InfoRow(
-                  icon: Icons.email_rounded,
-                  label: 'Email',
-                  value: email,
-                ),
-                _InfoRow(
-                  icon: Icons.phone_rounded,
-                  label: 'Phone',
-                  value: phone,
-                ),
-                _InfoRow(
-                  icon: Icons.wc_rounded,
-                  label: 'Gender',
-                  value: gender,
-                  isLast: true,
-                ),
-              ],
-            ),
-          ),
-
-          // ── Close button ──────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueGrey.shade700,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 13),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            // ── Info rows ─────────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Column(
+                children: [
+                  _InfoRow(
+                    icon: Icons.badge_rounded,
+                    label: 'Student ID',
+                    value: studentId,
                   ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  'Close',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                  _InfoRow(
+                    icon: Icons.person_rounded,
+                    label: 'Father Name',
+                    value: fatherName,
+                  ),
+                  _InfoRow(
+                    icon: Icons.email_rounded,
+                    label: 'Email',
+                    value: email,
+                  ),
+                  _InfoRow(
+                    icon: Icons.phone_rounded,
+                    label: 'Phone',
+                    value: phone,
+                  ),
+                  _InfoRow(
+                    icon: Icons.wc_rounded,
+                    label: 'Gender',
+                    value: gender,
+                    isLast: true,
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Close button ──────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueGrey.shade700,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Close',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

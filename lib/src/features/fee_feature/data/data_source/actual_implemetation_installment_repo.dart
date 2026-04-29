@@ -233,6 +233,58 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
     }
   }
 
+  /// One-time cleanup: removes duplicate fee_history_daywise records.
+  /// Keeps the oldest record per installmentId, deletes newer duplicates.
+  Future<int> cleanupDuplicateFeeHistory() async {
+    int removed = 0;
+    try {
+      final historySnap =
+          await _firestore.collection("fee_history_daywise").get();
+
+      debugPrint("🧹 Cleanup: scanning ${historySnap.docs.length} history records");
+
+      // Group documents by installmentId
+      final Map<String, List<QueryDocumentSnapshot<Map<String, dynamic>>>> byInstId = {};
+      for (final doc in historySnap.docs) {
+        final instId = doc.data()['installmentId'] as String?;
+        if (instId != null) {
+          byInstId.putIfAbsent(instId, () => []).add(doc);
+        }
+      }
+
+      // Find and remove duplicates (keep oldest, delete newer ones)
+      for (final entry in byInstId.entries) {
+        if (entry.value.length > 1) {
+          debugPrint("🧹 Found ${entry.value.length} duplicates for installmentId: ${entry.key}");
+
+          // Sort by createdAt ascending — keep the first (oldest)
+          entry.value.sort((a, b) {
+            final aTs = a.data()['createdAt'] as Timestamp?;
+            final bTs = b.data()['createdAt'] as Timestamp?;
+            if (aTs == null) return 1;
+            if (bTs == null) return -1;
+            return aTs.compareTo(bTs);
+          });
+
+          // Delete all except the first (oldest)
+          for (int i = 1; i < entry.value.length; i++) {
+            final dupDoc = entry.value[i];
+            final d = dupDoc.data();
+            debugPrint("  🗑️ Deleting duplicate ${dupDoc.id}: name=${d['name']}, amt=${d['paidAmount']}, repairedAt=${d['repairedAt']}");
+            await _firestore.collection("fee_history_daywise").doc(dupDoc.id).delete();
+            removed++;
+          }
+        }
+      }
+
+      debugPrint("🧹 Cleanup complete: $removed duplicate records removed");
+    } catch (e, stack) {
+      debugPrint("❌ Cleanup failed: $e");
+      debugPrint("📍 $stack");
+    }
+    return removed;
+  }
+
   @override
   Future<List<FeeEntityClass>> fetchFeesByDateRange(
     DateTime start,
@@ -252,10 +304,7 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
             .where('createdAt', isLessThanOrEqualTo: endTs)
             .orderBy('createdAt', descending: true)
             .get();
-    var forPrint = snapshot.docs.toList();
-    for (var element in forPrint) {
-      debugPrint("||||||||||||${element.data()}|||||||||||||");
-    }
+    debugPrint("fetchFeesByDateRange: $start→$end returned ${snapshot.docs.length} docs");
     return snapshot.docs
         .map((d) => FeeEntityClass.fromMap(d.data(), id: d.id))
         .toList();
@@ -1057,6 +1106,120 @@ class ActualImplemetationInstallmentRepo implements AbstractInstallmentRepo {
       return updatedStudent;
     } catch (e) {
       debugPrint("❌ ERROR in updateInstallmentDueDate: $e");
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StudentFeeFeatureEntityClass?> updateInstallmentPaidDate({
+    required String studentId,
+    required String installmentId,
+    required DateTime newPaidDate,
+  }) async {
+    try {
+      debugPrint("========================================");
+      debugPrint("updateInstallmentPaidDate: START");
+      debugPrint("Student ID: $studentId");
+      debugPrint("Installment ID: $installmentId");
+      debugPrint("New Paid Date: $newPaidDate");
+      debugPrint("========================================");
+
+      // 1. Get current student data
+      final docRef = _firestore
+          .collection('student_installment')
+          .doc(studentId);
+      final doc = await docRef.get();
+
+      if (!doc.exists) {
+        debugPrint("❌ Student document not found");
+        throw Exception('Student installment document not found');
+      }
+
+      final data = doc.data()!;
+      final List<Map<String, dynamic>> installments =
+          List<Map<String, dynamic>>.from(data['installments'] ?? []);
+
+      debugPrint("Current installments count: ${installments.length}");
+
+      // 2. Find and update the specific installment
+      bool installmentFound = false;
+      for (int i = 0; i < installments.length; i++) {
+        if (installments[i]['id'] == installmentId) {
+          installmentFound = true;
+
+          final status = installments[i]['status'] as String? ?? 'Unpaid';
+
+          // Guard: Only allow update if status is "pending"
+          if (status != 'pending') {
+            debugPrint("❌ Cannot update paid date: status is '$status' (must be 'pending')");
+            throw Exception(
+              'Paid date can only be updated for pending installments. Current status: $status',
+            );
+          }
+
+          final oldPaidDate = installments[i]['paidDate'];
+          debugPrint("Old paid date: $oldPaidDate");
+
+          // Update the paid date
+          installments[i]['paidDate'] = newPaidDate.toIso8601String();
+
+          debugPrint("✅ Updated installment paid date at index $i");
+          break;
+        }
+      }
+
+      if (!installmentFound) {
+        debugPrint("❌ Installment with ID $installmentId not found");
+        throw Exception('Installment not found');
+      }
+
+      // 3. Update the student_installment document in Firestore
+      await docRef.update({
+        'installments': installments,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      debugPrint("✅ Updated student_installment document in Firestore");
+
+      // 4. Also update not_approved_fee_installments if it exists
+      // (pending installments are stored in both collections)
+      final approvalDocRef = _firestore
+          .collection('not_approved_fee_installments')
+          .doc(studentId);
+      final approvalDoc = await approvalDocRef.get();
+
+      if (approvalDoc.exists) {
+        final approvalData = approvalDoc.data()!;
+        final List<Map<String, dynamic>> approvalInstallments =
+            List<Map<String, dynamic>>.from(approvalData['installments'] ?? []);
+
+        for (int i = 0; i < approvalInstallments.length; i++) {
+          if (approvalInstallments[i]['id'] == installmentId) {
+            approvalInstallments[i]['paidDate'] = newPaidDate.toIso8601String();
+            debugPrint("✅ Updated paid date in not_approved_fee_installments");
+            break;
+          }
+        }
+
+        await approvalDocRef.update({
+          'installments': approvalInstallments,
+        });
+
+        debugPrint("✅ Updated not_approved_fee_installments document in Firestore");
+      } else {
+        debugPrint("ℹ️ No not_approved_fee_installments document found (OK if not yet submitted)");
+      }
+
+      // 5. Return updated student data
+      final updatedStudent = await getStudent(studentId);
+
+      debugPrint("========================================");
+      debugPrint("updateInstallmentPaidDate: COMPLETE");
+      debugPrint("========================================");
+
+      return updatedStudent;
+    } catch (e) {
+      debugPrint("❌ ERROR in updateInstallmentPaidDate: $e");
       rethrow;
     }
   }

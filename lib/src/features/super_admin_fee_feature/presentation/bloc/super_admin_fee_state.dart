@@ -66,6 +66,20 @@ class BulkPaymentInProgress extends SuperAdminFeeState {
   const BulkPaymentInProgress(this.notifications);
 }
 
+class BulkPaymentProgress extends SuperAdminFeeState {
+  final List<Map<String, dynamic>> notifications;
+  final int completed;
+  final int total;
+  final String currentStudent;
+
+  const BulkPaymentProgress({
+    required this.notifications,
+    required this.completed,
+    required this.total,
+    required this.currentStudent,
+  });
+}
+
 class BulkPaymentCompleted extends SuperAdminFeeState {
   const BulkPaymentCompleted();
 }

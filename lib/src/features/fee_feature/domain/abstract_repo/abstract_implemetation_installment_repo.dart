@@ -74,4 +74,9 @@ abstract class AbstractInstallmentRepo {
     required String installmentId,
     required DateTime newDueDate,
   });
+  Future<StudentFeeFeatureEntityClass?> updateInstallmentPaidDate({
+    required String studentId,
+    required String installmentId,
+    required DateTime newPaidDate,
+  });
 }

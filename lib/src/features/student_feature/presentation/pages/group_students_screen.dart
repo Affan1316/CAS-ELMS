@@ -582,7 +582,7 @@ class _GroupStudentsScreenState extends State<GroupStudentsScreen> {
                                             "assets/images/student-male.png",
                                           )
                                           : MemoryImage(
-                                            base64Decode(student.profileImage!),
+                                            base64Decode(student.profileImage),
                                           ),
                                 ),
                               ),

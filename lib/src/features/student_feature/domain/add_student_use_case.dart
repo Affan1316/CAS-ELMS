@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/domain/firestore_repositry.dart';
 import 'package:flutter_cas_app_main/src/features/student_feature/presentation/bloc/Student_feature_event.dart';
 
@@ -8,7 +9,8 @@ class AddStudentUseCase {
   StudentEntityClass? s;
 
   AddStudentUseCase(this.firestoreRepositry);
-  provideStudentData(SubmitEnrollmentFormEvent studentData) {
+
+  Future<void> provideStudentData(SubmitEnrollmentFormEvent studentData) async {
     s = StudentEntityClass(
       id: studentData.id,
       name: studentData.name,
@@ -21,18 +23,22 @@ class AddStudentUseCase {
       fatherOccupation: studentData.fatherOccupation,
       group: studentData.group,
     );
-    return _addStudent();
+    await _addStudent();
   }
 
-  _addStudent() {
-    print(
-      "++++++++++++++++++++++Calling fitst function___________________________",
-    );
-    firestoreRepositry.addStudentDataAccordingToGroupsToFirebase(s!);
-    print(
-      "++++++++++++++++++++++Calling second function___________________________",
-    );
+  Future<void> _addStudent() async {
+    debugPrint("📝 Creating student: ${s!.id} (${s!.name})");
 
-    return firestoreRepositry.addStudentDataToFirebase(s!);
+    // Step 1: Write to group students collection
+    await firestoreRepositry.addStudentDataAccordingToGroupsToFirebase(s!);
+    debugPrint("✅ Written to group students: ${s!.group} students");
+
+    // Step 2: Write to main students collection
+    // This method internally calls addStudentDataAccordingToGroupsToFirebase again
+    // and also creates the student_installment document (auto-created fix)
+    await firestoreRepositry.addStudentDataToFirebase(s!);
+    debugPrint("✅ Written to main students collection");
+
+    debugPrint("🎉 Student creation complete: ${s!.id}");
   }
 }

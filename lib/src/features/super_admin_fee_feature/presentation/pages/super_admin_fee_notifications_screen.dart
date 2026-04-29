@@ -116,7 +116,10 @@ class _SuperAdminFeeNotificationsScreenState
       );
     }
 
-    if (state is SuperAdminFeeLoadedState) {
+    if (state is SuperAdminFeeLoadedState ||
+        state is BulkPaymentProgress ||
+        state is BulkPaymentFailed ||
+        state is BulkPaymentInProgress) {
       return const NotificationListWidget(
         key: ValueKey("data"),
         filterStatus: "Pending",

@@ -21,12 +21,23 @@ class LeaveItemWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item['type'], style: const TextStyle(color: Colors.grey)),
+                  Text(
+                    item['type'],
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                   const SizedBox(height: 6),
-                  Text(item['date'],
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(
+                    item['date'],
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(item['category'], style: const TextStyle(color: Colors.blueGrey)),
+                  Text(
+                    item['category'],
+                    style: const TextStyle(color: Colors.blueGrey),
+                  ),
                 ],
               ),
             ),

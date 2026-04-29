@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/data/entity/group_fee_history.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/data/entity/installment_process_result.dart';
 import 'package:flutter_cas_app_main/src/features/super_admin_fee_feature/domain/abstract_repo/super_admin_fee_repository.dart';
@@ -105,8 +106,10 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
     String studentId,
   ) async {
     Map<String, dynamic>? paymentHistoryData;
+    String? groupId;
+    double? paidAmount;
 
-    // Update student_installment collection
+    // ✅ Transaction 1: Update student_installment
     await _remoteDataSource.runTransaction((transaction) async {
       final docRef = _remoteDataSource
           .collection(_collectionPath2)
@@ -117,30 +120,40 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
 
       final data = snapshot.data()!;
       final installments = _extractInstallments(data);
-      final result = _processInstallments(installments, installmentId);
 
-      _updateGroupWisePaymentHistory(
-        data["groupId"],
-        _currentInstallment["paidAmount"],
-      );
+      // ✅ Use local variable, not shared instance variable
+      Map<String, dynamic>? matchedInstallment;
+      double totalPaidAmount = 0.0;
+      bool updated = false;
 
-      if (!result.updated) {
+      for (final inst in installments) {
+        final amount = (inst['paidAmount'] as num?)?.toDouble() ?? 0.0;
+        totalPaidAmount += amount;
+        if (inst['id'] == installmentId) {
+          inst['status'] = 'Paid';
+          updated = true;
+          matchedInstallment = inst;
+        }
+      }
+
+      if (!updated || matchedInstallment == null) {
         throw Exception(
-          'Installment with ID $installmentId not found for student $studentId',
+          'Installment $installmentId not found for student $studentId',
         );
       }
 
-      transaction.update(docRef, {
-        'installments': result.installments,
-        'paidAmount': result.totalPaidAmount,
-      });
+      // ✅ Capture values LOCALLY before transaction ends
+      groupId = data["groupId"] as String?;
+      paidAmount =
+          (matchedInstallment['paidAmount'] as num?)?.toDouble() ?? 0.0;
 
-      print(
-        'Payment confirmed in $_collectionPath2 for installment $installmentId',
-      );
+      transaction.update(docRef, {
+        'installments': installments,
+        'paidAmount': totalPaidAmount,
+      });
     });
 
-    // Update not_approved_fee_installments collection and collect payment history data
+    // ✅ Transaction 2: Update not_approved_fee_installments
     await _remoteDataSource.runTransaction((transaction) async {
       final docRef = _remoteDataSource
           .collection(_collectionPath1)
@@ -151,30 +164,39 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
 
       final data = snapshot.data()!;
       final installments = _extractInstallments(data);
-      final result = _processInstallments(installments, installmentId);
 
-      if (!result.updated) {
+      double totalPaidAmount = 0.0;
+      bool updated = false;
+      Map<String, dynamic>? updatedInstallment;
+
+      for (final inst in installments) {
+        totalPaidAmount += (inst['paidAmount'] as num?)?.toDouble() ?? 0.0;
+        if (inst['id'] == installmentId) {
+          inst['status'] = 'Paid';
+          updated = true;
+          updatedInstallment = inst;
+        }
+      }
+
+      if (!updated || updatedInstallment == null) {
         throw Exception(
-          'Installment with ID $installmentId not found for student $studentId',
+          'Installment $installmentId not found in pending collection',
         );
       }
 
-      final updatedInstallment = result.installments.firstWhere(
-        (inst) => inst['id'] == installmentId,
-      );
-
-      // Use paidDate from installment as createdAt, fallback to serverTimestamp if null
       final String? paidDateStr = updatedInstallment['paidDate'];
-      final createdAt =
+      final paidDate =
           paidDateStr != null
-              ? Timestamp.fromDate(DateTime.parse(paidDateStr))
-              : FieldValue.serverTimestamp();
+              ? Timestamp.fromDate(DateTime.parse(paidDateStr).toUtc())
+              : Timestamp.now();
 
       paymentHistoryData = {
         'paidAmount':
             (updatedInstallment['paidAmount'] as num?)?.toDouble() ?? 0.0,
         'paymentMethod': updatedInstallment['paymentMethod'] ?? 'Unknown',
-        'createdAt': createdAt,
+        'createdAt': paidDate,
+        'paidDate': paidDate,
+        'approvedAt': FieldValue.serverTimestamp(),
         'name': data['name'] ?? 'Unknown',
         'rollnumber': data['id'] ?? 'Unknown',
         'installmentId': installmentId,
@@ -182,53 +204,72 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
       };
 
       transaction.update(docRef, {
-        'installments': result.installments,
-        'paidAmount': result.totalPaidAmount,
+        'installments': installments,
+        'paidAmount': totalPaidAmount,
       });
-
-      print(
-        'Payment confirmed in $_collectionPath1 for installment $installmentId',
-      );
     });
+
+    // ✅ Now OUTSIDE transaction — safe Firestore call, properly awaited
+    if (groupId != null && paidAmount != null) {
+      await _updateGroupWisePaymentHistory(groupId!, paidAmount!);
+    }
 
     return paymentHistoryData;
   }
 
-  /// Writes payment history to fee_history_daywise collection
+  /// Writes payment history to fee_history_daywise collection.
+  /// Includes dedup protection — skips write if installmentId already exists.
   Future<void> _writePaymentHistory(Map<String, dynamic> paymentData) async {
     try {
+      debugPrint('💾 Attempting to write payment history...');
+      debugPrint('💾 Data: $paymentData');
+
+      // Dedup check: skip if this installmentId already has a history record
+      final instId = paymentData['installmentId'] as String?;
+      if (instId != null) {
+        final existing =
+            await _remoteDataSource
+                .collection('fee_history_daywise')
+                .where('installmentId', isEqualTo: instId)
+                .limit(1)
+                .get();
+        if (existing.docs.isNotEmpty) {
+          debugPrint(
+            '⚠️ History record already exists for installmentId: $instId — skipping duplicate write',
+          );
+          return;
+        }
+      }
+
       final historyRef =
           _remoteDataSource.collection('fee_history_daywise').doc();
       await historyRef.set(paymentData);
-      print('Payment history logged successfully');
-    } catch (e) {
-      // Log error but don't fail the entire operation since payment is already confirmed
-      print('Warning: Failed to log payment history: $e');
+
+      debugPrint('✅ Payment history written! Doc ID: ${historyRef.id}');
+    } catch (e, stack) {
+      debugPrint('❌ _writePaymentHistory FAILED: $e');
+      debugPrint('📍 Stack: $stack');
+      rethrow;
     }
   }
 
-  /// Update Group Wise Fee History
   Future<void> _updateGroupWisePaymentHistory(
     String groupId,
     double paymentAmount,
   ) async {
-    var docref = _remoteDataSource
+    debugPrint('✍️ Updating fee history for groupId: "$groupId" with increment: $paymentAmount');
+    final docRef = _remoteDataSource
         .collection('fee_history_group_wise')
         .doc(groupId);
 
-    DocumentSnapshot<Map<String, dynamic>> snapshot = await docref.get();
-
-    if (!snapshot.exists) {
-      docref.set({"received": paymentAmount});
-    } else {
-      Map<String, dynamic>? snapshotData = snapshot.data();
-      if (snapshotData != null) {
-        paymentAmount = paymentAmount + snapshotData["received"];
-        Map<String, dynamic> updatedMap = {"received": paymentAmount};
-        await docref.update(updatedMap);
-      } else {
-        throw ("Assertion error snapshot data did not found");
-      }
+    try {
+      await docRef.set({
+        "received": FieldValue.increment(paymentAmount)
+      }, SetOptions(merge: true));
+      debugPrint('✅ Group-wise fee history updated for "$groupId"');
+    } catch (e) {
+      debugPrint('❌ Failed to update group-wise fee history: $e');
+      rethrow;
     }
   }
 
@@ -297,13 +338,148 @@ class SuperAdminFeeRepositoryImpl implements SuperAdminFeeRepository {
 
   @override
   Future fetchGroupFeeHistory(String groupId) async {
-    DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
-        await _remoteDataSource.collection(_collectionPath3).doc(groupId).get();
-    Map<String, dynamic>? mapData = documentSnapshot.data();
-    if (mapData != null) {
-      return GroupFeeHistory.fromMap(mapData);
-    } else {
-      return "No Fee History";
+    debugPrint('📊 Aggregating installment data for group: "$groupId"');
+
+    try {
+      // Query all students belonging to this group from the installment table
+      // (single source of truth as per admin installment system)
+      debugPrint('🔍 Querying student_installment where groupId == "$groupId"');
+
+      final querySnapshot =
+          await _remoteDataSource
+              .collection(_collectionPath2) // student_installment
+              .where('groupId', isEqualTo: groupId)
+              .get();
+
+      debugPrint(
+        '📄 Query returned ${querySnapshot.docs.length} documents from Firestore',
+      );
+
+      if (querySnapshot.docs.isEmpty) {
+        debugPrint(
+          '⚠️ No students found in student_installment for group: "$groupId"',
+        );
+        return "No Fee History";
+      }
+
+      double totalFeeSum = 0.0;
+      double receivedSum = 0.0;
+      int studentsProcessed = 0;
+      int studentsSkipped = 0;
+      List<String> skippedStudentIds = [];
+      List<String> errorMessages = [];
+
+      for (final doc in querySnapshot.docs) {
+        try {
+          // Skip group configuration document (same ID as group name)
+          // Real students have IDs like "a24-1", "a24-2", etc.
+          if (doc.id.toLowerCase() == groupId.toLowerCase()) {
+            debugPrint('  ⏭️ Skipping group config doc: ${doc.id}');
+            studentsSkipped++;
+            continue;
+          }
+
+          final data = doc.data();
+
+          // Validate document has required fields
+          if (data.isEmpty) {
+            debugPrint(
+              '  ⚠️ Student ${doc.id}: Document data is empty, skipping',
+            );
+            studentsSkipped++;
+            skippedStudentIds.add(doc.id);
+            errorMessages.add('${doc.id}: empty data');
+            continue;
+          }
+
+          // Use document-level totalFee (set correctly at creation)
+          if (!data.containsKey('totalFee')) {
+            debugPrint(
+              '  ⚠️ Student ${doc.id}: Missing totalFee field, using 0',
+            );
+          }
+          final totalFee = (data['totalFee'] as num?)?.toDouble() ?? 0.0;
+          totalFeeSum += totalFee;
+
+          // Sum paidAmount from ALL installments — matching admin card logic
+          // This includes Paid, pending, and skipped (skipped has paidAmount=0)
+          // The admin installment page shows: Received = sum of all paidAmounts
+          final installments = data['installments'] as List<dynamic>?;
+
+          if (installments == null) {
+            debugPrint(
+              '  ⚠️ Student ${doc.id}: Missing installments field, received=0',
+            );
+          }
+
+          double studentReceived = 0.0;
+          if (installments != null) {
+            for (final inst in installments) {
+              try {
+                final instMap = inst as Map<String, dynamic>;
+                final paid = (instMap['paidAmount'] as num?)?.toDouble() ?? 0.0;
+                studentReceived += paid;
+              } catch (e) {
+                debugPrint(
+                  '  ⚠️ Student ${doc.id}: Error parsing installment: $e',
+                );
+              }
+            }
+          }
+
+          receivedSum += studentReceived;
+          studentsProcessed++;
+
+          debugPrint(
+            '  ✅ Student ${doc.id}: total=$totalFee, '
+            'received=$studentReceived, '
+            'remaining=${totalFee - studentReceived}',
+          );
+        } catch (e) {
+          debugPrint('  ❌ Error processing student ${doc.id}: $e');
+          studentsSkipped++;
+          skippedStudentIds.add(doc.id);
+          errorMessages.add('${doc.id}: $e');
+        }
+      }
+
+      final remaining = totalFeeSum - receivedSum;
+
+      debugPrint('📊 Group "$groupId" SUMMARY:');
+      debugPrint(
+        '   📥 Total documents from query: ${querySnapshot.docs.length}',
+      );
+      debugPrint('   ✅ Students processed: $studentsProcessed');
+      debugPrint('   ⏭️ Students skipped: $studentsSkipped');
+      if (skippedStudentIds.isNotEmpty) {
+        debugPrint('   ❌ Skipped IDs: ${skippedStudentIds.join(", ")}');
+      }
+      if (errorMessages.isNotEmpty) {
+        debugPrint('   ⚠️ Errors: ${errorMessages.join("; ")}');
+      }
+      debugPrint(
+        '   💰 Total: $totalFeeSum | Received: $receivedSum | Remaining: $remaining',
+      );
+
+      // Return error if no students were successfully processed
+      if (studentsProcessed == 0) {
+        return "Error: No valid student records found for group '$groupId'";
+      }
+
+      return GroupFeeHistory(
+        total: totalFeeSum,
+        received: receivedSum,
+        remaining: remaining,
+      );
+    } on FirebaseException catch (e, stackTrace) {
+      debugPrint('❌ FirebaseException in fetchGroupFeeHistory: ${e.code}');
+      debugPrint('   Message: ${e.message}');
+      debugPrint('   Stack: $stackTrace');
+      return "Firebase Error: ${e.message ?? e.code}";
+    } catch (e, stackTrace) {
+      debugPrint('❌ Unexpected error in fetchGroupFeeHistory: $e');
+      debugPrint('   Stack: $stackTrace');
+      return "Error: $e";
     }
   }
 }

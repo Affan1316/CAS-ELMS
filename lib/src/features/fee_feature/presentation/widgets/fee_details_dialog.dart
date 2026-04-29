@@ -18,8 +18,11 @@ class FeeDetailsDialog extends StatelessWidget {
             _getPaymentMethodIcon(fee.paymentMethod),
             color: _getPaymentMethodColor(fee.paymentMethod),
           ),
-          const SizedBox(width: 8),
-          const Text('Transaction Details'),
+          const SizedBox(width: 2),
+          const Text(
+            'Transaction Details',
+            style: TextStyle(color: Colors.black),
+          ),
         ],
       ),
       content: Column(
@@ -59,7 +62,7 @@ class FeeDetailsDialog extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                color: Colors.grey[600],
+                color: const Color.fromARGB(255, 0, 0, 0),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -67,7 +70,10 @@ class FeeDetailsDialog extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
             ),
           ),
         ],

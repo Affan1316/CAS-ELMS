@@ -76,101 +76,103 @@ class _NewLeavePageState extends State<NewLeavePage> {
     }
   }
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: const Color(0xFFF5F5F5), // ⬅️ Replaces bluish NeumorphicBackground
-    body: SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  NeumorphicButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: NeumorphicStyle(
-                      shape: NeumorphicShape.flat,
-                      boxShape: const NeumorphicBoxShape.circle(),
-                      depth: 4,
-                      color: Colors.white,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(
+        0xFFF5F5F5,
+      ), // ⬅️ Replaces bluish NeumorphicBackground
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    NeumorphicButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: NeumorphicStyle(
+                        shape: NeumorphicShape.flat,
+                        boxShape: const NeumorphicBoxShape.circle(),
+                        depth: 4,
+                        color: Colors.white,
+                      ),
+                      padding: const EdgeInsets.all(12),
+                      child: const Icon(Icons.arrow_back, color: Colors.black),
                     ),
-                    padding: const EdgeInsets.all(12),
-                    child: const Icon(Icons.arrow_back, color: Colors.black),
-                  ),
-                  const SizedBox(width: 16),
-                  const Text(
-                    "New Leave",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                    const SizedBox(width: 16),
+                    const Text(
+                      "New Leave",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              NeumorphicTextField(
-                label: "Cause",
-                icon: Icons.edit,
-                controller: causeController,
-                focusNode: causeFocus,
-                isFocused: activeFocus == causeFocus,
-              ),
-              NeumorphicTextField(
-                label: "From Date",
-                icon: Icons.date_range,
-                controller: fromDateController,
-                focusNode: fromFocus,
-                readOnly: true,
-                onTap: () => _pickDate(fromDateController),
-                isFocused: activeFocus == fromFocus,
-              ),
-              NeumorphicTextField(
-                label: "To Date",
-                icon: Icons.date_range,
-                controller: toDateController,
-                focusNode: toFocus,
-                readOnly: true,
-                onTap: () => _pickDate(toDateController),
-                isFocused: activeFocus == toFocus,
-              ),
-              NeumorphicTextField(
-                label: "Details",
-                controller: detailsController,
-                focusNode: detailsFocus,
-                maxLines: 10,
-                isFocused: activeFocus == detailsFocus,
-              ),
-              const SizedBox(height: 20),
-              NeumorphicButton(
-                onPressed: _submitForm,
-                style: NeumorphicStyle(
-                  color: Colors.blue, // ⬅️ Changed from blue
-                  boxShape: NeumorphicBoxShape.roundRect(
-                    BorderRadius.circular(16),
-                  ),
-                  depth: 4,
+                  ],
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                child: const Center(
-                  child: Text(
-                    'Apply for Leave',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                const SizedBox(height: 24),
+                NeumorphicTextField(
+                  label: "Cause",
+                  icon: Icons.edit,
+                  controller: causeController,
+                  focusNode: causeFocus,
+                  isFocused: activeFocus == causeFocus,
+                ),
+                NeumorphicTextField(
+                  label: "From Date",
+                  icon: Icons.date_range,
+                  controller: fromDateController,
+                  focusNode: fromFocus,
+                  readOnly: true,
+                  onTap: () => _pickDate(fromDateController),
+                  isFocused: activeFocus == fromFocus,
+                ),
+                NeumorphicTextField(
+                  label: "To Date",
+                  icon: Icons.date_range,
+                  controller: toDateController,
+                  focusNode: toFocus,
+                  readOnly: true,
+                  onTap: () => _pickDate(toDateController),
+                  isFocused: activeFocus == toFocus,
+                ),
+                NeumorphicTextField(
+                  label: "Details",
+                  controller: detailsController,
+                  focusNode: detailsFocus,
+                  maxLines: 10,
+                  isFocused: activeFocus == detailsFocus,
+                ),
+                const SizedBox(height: 20),
+                NeumorphicButton(
+                  onPressed: _submitForm,
+                  style: NeumorphicStyle(
+                    color: Colors.blue, // ⬅️ Changed from blue
+                    boxShape: NeumorphicBoxShape.roundRect(
+                      BorderRadius.circular(16),
+                    ),
+                    depth: 4,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: const Center(
+                    child: Text(
+                      'Apply for Leave',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

@@ -107,8 +107,26 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
       _handleFilterFavouredStudentsByGroup,
     );
     on<UpdateInstallmentDueDateEvent>(_handleUpdateInstallmentDueDate);
+    on<UpdateInstallmentPaidDateEvent>(_handleUpdateInstallmentPaidDate);
+    on<CleanupDuplicateFeeHistory>(_handleCleanupDuplicateFeeHistory);
 
     debugPrint("FeeAdminBloc: Initialization complete");
+  }
+
+  // ========================================
+  // CLEANUP HANDLER
+  // ========================================
+  Future<void> _handleCleanupDuplicateFeeHistory(
+    CleanupDuplicateFeeHistory event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    emit(const FeeHistoryLoading());
+    try {
+      final count = await actualImplemetationInstallmentRepo.cleanupDuplicateFeeHistory();
+      emit(FeeHistoryRepairComplete(repairedCount: count));
+    } catch (e) {
+      emit(FeeHistoryError('Cleanup failed: $e'));
+    }
   }
 
   // ========================================
@@ -958,6 +976,44 @@ class FeeAdminBloc extends Bloc<FeeAdminEvent, FeeAdminState> {
       }
     } catch (e) {
       debugPrint("❌ ERROR in _handleUpdateInstallmentDueDate: $e");
+      emit(FeeAdminErrorState(error: e.toString()));
+    }
+  }
+
+  Future<void> _handleUpdateInstallmentPaidDate(
+    UpdateInstallmentPaidDateEvent event,
+    Emitter<FeeAdminState> emit,
+  ) async {
+    debugPrint("========================================");
+    debugPrint("_handleUpdateInstallmentPaidDate: START");
+    debugPrint("Student ID: ${event.studentId}");
+    debugPrint("Installment ID: ${event.installmentId}");
+    debugPrint("New Paid Date: ${event.newPaidDate}");
+    debugPrint("========================================");
+
+    emit(StudentInstalmentLoadingState());
+
+    try {
+      final updatedStudent = await actualImplemetationInstallmentRepo
+          .updateInstallmentPaidDate(
+            studentId: event.studentId,
+            installmentId: event.installmentId,
+            newPaidDate: event.newPaidDate,
+          );
+
+      if (updatedStudent != null) {
+        debugPrint("✅ _handleUpdateInstallmentPaidDate: SUCCESS");
+        emit(InstallmentPaidDateUpdatedState(student: updatedStudent));
+      } else {
+        debugPrint(
+          "❌ _handleUpdateInstallmentPaidDate: Updated student is null",
+        );
+        emit(
+          FeeAdminErrorState(error: "Failed to update installment paid date"),
+        );
+      }
+    } catch (e) {
+      debugPrint("❌ ERROR in _handleUpdateInstallmentPaidDate: $e");
       emit(FeeAdminErrorState(error: e.toString()));
     }
   }

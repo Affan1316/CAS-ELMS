@@ -308,3 +308,23 @@ class UpdateInstallmentDueDateEvent extends FeeAdminEvent {
   @override
   List<Object?> get props => [studentId, installmentId, newDueDate];
 }
+
+class UpdateInstallmentPaidDateEvent extends FeeAdminEvent {
+  final String studentId;
+  final String installmentId;
+  final DateTime newPaidDate;
+
+  const UpdateInstallmentPaidDateEvent({
+    required this.studentId,
+    required this.installmentId,
+    required this.newPaidDate,
+  });
+
+  @override
+  List<Object?> get props => [studentId, installmentId, newPaidDate];
+}
+
+/// One-time event: removes duplicate fee_history_daywise records.
+class CleanupDuplicateFeeHistory extends FeeAdminEvent {
+  const CleanupDuplicateFeeHistory();
+}

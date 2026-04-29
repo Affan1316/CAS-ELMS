@@ -16,7 +16,8 @@ class LastWeekEvent extends TimeGraphPageEvent {
 }
 
 class ThisMonthEvent extends TimeGraphPageEvent {
-  const ThisMonthEvent();
+  final String? rollNo;
+  const ThisMonthEvent({required this.rollNo});
 }
 
 class SelectiveRangeEvent extends TimeGraphPageEvent {
