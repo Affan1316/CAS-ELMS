@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
@@ -46,6 +47,12 @@ void callbackDispatcher() async {
         await WorkManagerService.checkLocationEnabledAndReCreateFence(
           notificationService,
         );
+      } else if (task == WorkManagerService.orphanCleanupTask) {
+        await WorkManagerService.orphanCleanupFunc(
+          hiveRepo,
+          sharePreferenceRepository,
+          notificationService,
+        );
       }
 
       // Add logic for other tasks like periodicLocationUpdateTask here if needed.
@@ -74,6 +81,7 @@ class WorkManagerService {
   static const String exitTask = "exitTask";
   static const String periodicLocationUpdateAndReCreateFenceTask =
       "periodicLocationUpdateAndReCreateFenceTask";
+  static const String orphanCleanupTask = "orphanCleanupTask";
   static const String isPeriodicTaskRegisteredKey = "isPeriodicTaskRegistered";
 
   // static const String simplePeriodicTaskKey = "simplePeriodicTask";
@@ -93,7 +101,10 @@ class WorkManagerService {
       inputData: inputData,
       initialDelay: Duration(seconds: 5),
       constraints: Constraints(
-        networkType: NetworkType.connected,
+        // CRITICAL: No network requirement for exit task — cleanup must
+        // not be blocked by connectivity. Firestore has offline persistence
+        // and will sync when network becomes available.
+        networkType: NetworkType.notRequired,
         requiresBatteryNotLow: false,
         requiresCharging: false,
         requiresStorageNotLow: false,
@@ -150,6 +161,74 @@ class WorkManagerService {
       notificationService,
     );
     log("Exit task completed successfully", name: "WorkManager");
+  }
+
+  /// Checks for orphaned sessions and closes them — but ONLY if the
+  /// foreground service is dead. If the service is still running, this
+  /// is a no-op (the service will handle its own exit).
+  static Future<void> orphanCleanupFunc(
+    HiveRepository hiveRepo,
+    SharePreferenceRepository sharePreferenceRepository,
+    NotificationService notificationService,
+  ) async {
+    // Check if foreground service is still alive
+    final isServiceRunning = await FlutterForegroundTask.isRunningService;
+
+    // Check if there's an active session
+    final checkInTime = await sharePreferenceRepository.getCheckInTime();
+
+    if (isServiceRunning) {
+      log(
+        "Service is still running, skipping orphan cleanup",
+        name: "WorkManager",
+      );
+      return;
+    }
+
+    if (checkInTime == null) {
+      log("No active checkInTime, nothing to clean up", name: "WorkManager");
+      return;
+    }
+
+    // Service is dead AND there's a dangling checkInTime → orphaned session
+    log(
+      "⚠️ Service dead with active checkIn=$checkInTime, recovering orphan",
+      name: "WorkManager",
+    );
+    if (!isServiceRunning && checkInTime != null) {
+      await MyGeofenceService.onExit(
+        hiveRepo,
+        sharePreferenceRepository,
+        notificationService,
+      );
+    }
+
+    await MyGeofenceService.recoverOrphanedSession(
+      hiveRepo,
+      sharePreferenceRepository,
+    );
+    log("Orphan cleanup task completed", name: "WorkManager");
+  }
+
+  /// Register a periodic watchdog task to detect and close orphaned sessions.
+  /// Runs every 15 minutes (Android minimum for periodic WorkManager tasks).
+  /// Checks if the foreground service is dead with a dangling checkInTime.
+  static Future<void> registerOrphanCleanupTask() async {
+    await Workmanager().registerPeriodicTask(
+      orphanCleanupTask,
+      orphanCleanupTask,
+      frequency: const Duration(minutes: 15),
+      initialDelay: const Duration(minutes: 1),
+      constraints: Constraints(
+        networkType: NetworkType.notRequired,
+        requiresBatteryNotLow: false,
+      ),
+      existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+    );
+    log(
+      "Orphan cleanup watchdog registered (every 15 min)",
+      name: "WorkManager",
+    );
   }
 
   static Future<void>

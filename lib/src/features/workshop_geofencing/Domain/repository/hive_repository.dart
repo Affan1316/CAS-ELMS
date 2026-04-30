@@ -62,9 +62,15 @@ class HiveRepository {
     if (box.isEmpty) {
       return totalDuration;
     }
+    final today = DateTime.now();
     for (var session in box.values) {
-      totalDuration += session.checkOutTime.difference(session.checkInTime);
-      log(totalDuration.toString(), name: "totalDuration in loop");
+      // Only sum sessions from today to prevent cross-day accumulation
+      if (session.checkInTime.year == today.year &&
+          session.checkInTime.month == today.month &&
+          session.checkInTime.day == today.day) {
+        totalDuration += session.checkOutTime.difference(session.checkInTime);
+        log(totalDuration.toString(), name: "totalDuration in loop");
+      }
     }
     log(totalDuration.toString(), name: "totalDuration final in Func");
     return totalDuration;
@@ -148,6 +154,9 @@ class HiveRepository {
 
       if (rollNo != null) {
         final firestore = FireStoreRepository();
+        // Defensive init — ensures Firebase is ready even in background
+        // recovery paths (onStart, WorkManager) where init may not have run.
+        await firestore.init();
         log("rollNo at creating a record $rollNo");
 
         await firestore.addDaysWorkshopTime(
@@ -164,7 +173,6 @@ class HiveRepository {
               ).toMap(),
         );
         log("time updated successfully");
-       
       }
 
       // dv.log("saveSessionsForAday", name: "saveSessionsForAday");

@@ -158,6 +158,33 @@ class MyGeofenceService {
     NotificationService notificationService,
   ) async {
     var checkInTime = await sharePreferenceRepository.getCheckInTime();
+
+    // ── Stale session detection ──────────────────────────────────────
+    // If checkInTime exists but is from a previous day, the last session
+    // was never closed (force-kill / crash). Close it before new entry.
+    if (checkInTime != null) {
+      final now = DateTime.now();
+      final isSameDay =
+          checkInTime.year == now.year &&
+          checkInTime.month == now.month &&
+          checkInTime.day == now.day;
+
+      if (!isSameDay) {
+        dv.log(
+          "⚠️ Stale checkInTime detected from ${checkInTime.toIso8601String()}, force-closing old session",
+          name: "onEnter_recovery",
+        );
+        // Close the orphaned session with end-of-that-day as checkout
+        await _closeOrphanedSession(
+          hiveRepo,
+          sharePreferenceRepository,
+          checkInTime,
+        );
+        checkInTime = null; // Allow new entry below
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────
+
     if (checkInTime == null) {
       var time = await getCurrentDate();
 
@@ -173,7 +200,7 @@ class MyGeofenceService {
         dv.log("Hive input task completed");
       }
 
-      sharePreferenceRepository.setCheckInTime(time);
+      await sharePreferenceRepository.setCheckInTime(time);
 
       notificationService.showEnteredNotification(time);
     }
@@ -184,42 +211,50 @@ class MyGeofenceService {
     SharePreferenceRepository sharePreferenceRepository,
     NotificationService notificationService,
   ) async {
-    // HiveRepository hiveRepo = HiveRepository();
-    // await tryToPromoteToForeground();
     var spCheckInTime = await sharePreferenceRepository.getCheckInTime();
-
-    var checkOutTime = await getCurrentDate();
     dv.log("CheckInTime at exit $spCheckInTime");
-    if (spCheckInTime != null) {
-      String totalTime = formatDuration(checkOutTime.difference(spCheckInTime));
 
-      Sessions session = Sessions(
-        checkInTime: spCheckInTime,
-        checkOutTime: checkOutTime,
-        timeSpend: totalTime,
-      );
-      dv.log(session.toString(), name: "session at on exit");
-      await hiveRepo.saveSession(session);
+    // No active session — clean up defensively and return early
+    if (spCheckInTime == null) {
+      await sharePreferenceRepository.setCheckInTime(null);
+      await sharePreferenceRepository.resetAttendanceTimerState();
+      return;
+    }
 
-      await notificationService.showExitNotification(checkOutTime, totalTime);
-
-      // await NotificationService().showNotification(
-      //   2,
-      //   "record related ",
-      //   "record saved a Session $session",
-      // );
-
+    // Get current time with fallback — must not throw during onDestroy
+    DateTime checkOutTime;
+    try {
+      checkOutTime = await getCurrentDate();
+    } catch (e) {
+      // Fallback to DateTime.now() if auto-time check fails.
+      // Better to save with device time than lose the session entirely.
+      checkOutTime = DateTime.now();
       dv.log(
-        "${spCheckInTime.day == checkOutTime.day}",
-        name: "isExitedSameDay",
+        "⚠️ getCurrentDate failed in onExit, using DateTime.now(): $e",
+        name: "onExit_fallback",
       );
+    }
 
-      if (spCheckInTime.day != checkOutTime.day) {
-        await hiveRepo.createRecord();
-      }
+    String totalTime = formatDuration(checkOutTime.difference(spCheckInTime));
+
+    Sessions session = Sessions(
+      checkInTime: spCheckInTime,
+      checkOutTime: checkOutTime,
+      timeSpend: totalTime,
+    );
+    dv.log(session.toString(), name: "session at on exit");
+    await hiveRepo.saveSession(session);
+
+    await notificationService.showExitNotification(checkOutTime, totalTime);
+
+    dv.log("${spCheckInTime.day == checkOutTime.day}", name: "isExitedSameDay");
+
+    if (spCheckInTime.day != checkOutTime.day) {
+      await hiveRepo.createRecord();
     }
 
     await sharePreferenceRepository.setCheckInTime(null);
+    await sharePreferenceRepository.resetAttendanceTimerState();
   }
 
   static Future<void> onDwell(FireStoreRepository firestore) async {
@@ -240,12 +275,77 @@ class MyGeofenceService {
     }
   }
 
+  /// Closes an orphaned session from a previous day that was never properly
+  /// exited (e.g. due to force-kill, crash, or battery optimization kill).
+  /// Sets checkOutTime to end-of-day (23:59:59) to cap the duration.
+  static Future<void> _closeOrphanedSession(
+    HiveRepository hiveRepo,
+    SharePreferenceRepository sharePreferenceRepository,
+    DateTime orphanedCheckIn,
+  ) async {
+    // Use end-of-day as the checkout time to cap duration
+    final endOfDay = DateTime(
+      orphanedCheckIn.year,
+      orphanedCheckIn.month,
+      orphanedCheckIn.day,
+      23,
+      59,
+      59,
+    );
+
+    final duration = endOfDay.difference(orphanedCheckIn);
+    final session = Sessions(
+      checkInTime: orphanedCheckIn,
+      checkOutTime: endOfDay,
+      timeSpend: formatDuration(duration),
+    );
+
+    dv.log(session.toString(), name: "orphaned_session_closed");
+    await hiveRepo.saveSession(session);
+
+    // Finalize the day's record
+    await hiveRepo.createRecord();
+
+    // Clear stale state
+    await sharePreferenceRepository.setCheckInTime(null);
+    await sharePreferenceRepository.resetAttendanceTimerState();
+  }
+
+  /// Recovery method callable from app startup or service onStart.
+  /// Detects and closes any orphaned session from a previous day.
+  static Future<void> recoverOrphanedSession(
+    HiveRepository hiveRepo,
+    SharePreferenceRepository sharePreferenceRepository,
+  ) async {
+    final checkInTime = await sharePreferenceRepository.getCheckInTime();
+    if (checkInTime == null) return;
+
+    final now = DateTime.now();
+    final isSameDay =
+        checkInTime.year == now.year &&
+        checkInTime.month == now.month &&
+        checkInTime.day == now.day;
+
+    if (!isSameDay) {
+      dv.log(
+        "🔄 Recovering orphaned session from ${checkInTime.toIso8601String()}",
+        name: "startup_recovery",
+      );
+      await _closeOrphanedSession(
+        hiveRepo,
+        sharePreferenceRepository,
+        checkInTime,
+      );
+    }
+  }
+
   static Future<void> dispose() async {
     SharePreferenceRepository sharePreferenceRepository =
         SharePreferenceRepository();
     await sharePreferenceRepository.setCheckInTime(null);
     await sharePreferenceRepository.setRollNo(null);
     await sharePreferenceRepository.setIsCreated(false);
+    await sharePreferenceRepository.resetAttendanceTimerState();
     await NativeGeofenceManager.instance.removeAllGeofences();
   }
 }

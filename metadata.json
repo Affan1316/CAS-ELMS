@@ -1,0 +1,14 @@
+{
+  "title": "CAS-ELMS Geofencing Attendance Bug Fixes",
+  "summary": "Production debugging and fixes for 3 critical bugs in the CAS-ELMS Flutter geofencing attendance app: (1) attendance not marked despite time tracking working, (2) impossible 26+ hour tracked durations, (3) force-kill/swipe-away not performing exit cleanup. Root causes identified and fixed across 5 files with a 4-layer defense-in-depth strategy.",
+  "created": "2026-04-29T19:30:00Z",
+  "updated": "2026-04-30T00:36:00Z",
+  "references": [
+    {
+      "type": "conversation",
+      "id": "1f2c3184-7545-45c9-9c1d-f2f9d56b65f0",
+      "title": "CAS-ELMS Geofencing Attendance Production Debug"
+    }
+  ],
+  "tags": ["flutter", "geofencing", "android", "foreground-service", "attendance", "workmanager", "hive", "firestore"]
+}

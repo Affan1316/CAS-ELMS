@@ -40,6 +40,13 @@ class LocationTaskHandler extends TaskHandler {
     WorkManagerService.initialize();
     notificationService.initNotification();
     await hiveRepo.initInService();
+    await s.init();
+
+    // Recover any orphaned session from a previous day (force-kill recovery)
+    await MyGeofenceService.recoverOrphanedSession(hiveRepo, s);
+
+    // Register periodic orphan cleanup watchdog (every 15 min)
+    await WorkManagerService.registerOrphanCleanupTask();
 
     isInCAS = false;
     entryTime = null; // Reset entry time
@@ -47,12 +54,34 @@ class LocationTaskHandler extends TaskHandler {
 
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
-    TimerForAttendance.stopTimer();
-    await workManagerService.registerOneOfTask(
-      taskName: WorkManagerService.exitTask,
-      uniqueName:
-          "${WorkManagerService.exitTask}_${DateTime.now().millisecondsSinceEpoch}",
+    dv.log(
+      "onDestroy called, isTimeout=$isTimeout",
+      name: "LocationTaskHandler",
     );
+    TimerForAttendance.stopTimer();
+
+    // ── WorkManager exit task ─────────────────────────────────────────
+    // Register WorkManager immediately — it's the most reliable approach.
+    // WorkManager registers instantly and survives process death.
+    // We intentionally skip synchronous onExit() here because it can be
+    // slow (Firestore sync on poor network) and the process may die
+    // before it completes, wasting the limited onDestroy window.
+    try {
+      await workManagerService.registerOneOfTask(
+        taskName: WorkManagerService.exitTask,
+        uniqueName:
+            "${WorkManagerService.exitTask}_${DateTime.now().millisecondsSinceEpoch}",
+      );
+      dv.log(
+        "WorkManager exit task registered in onDestroy",
+        name: "LocationTaskHandler",
+      );
+    } catch (e) {
+      dv.log(
+        "WorkManager registration failed in onDestroy: $e",
+        name: "LocationTaskHandler",
+      );
+    }
   }
 
   @override
@@ -109,28 +138,29 @@ class LocationTaskHandler extends TaskHandler {
       locationSettings: LocationSettings(accuracy: LocationAccuracy.best),
     );
     if (!pos.isMocked) {
-    if (data == enterTag) {
-      dv.log("Received Enter Tag", name: "LocationTaskHandler");
-      isInCAS = true;
-      await MyGeofenceService.onEnter(hiveRepo, s, notificationService);
-      await TimerForAttendance.startTimer(FireStoreRepository());
+      if (data == enterTag) {
+        dv.log("Received Enter Tag", name: "LocationTaskHandler");
+        isInCAS = true;
+        await MyGeofenceService.onEnter(hiveRepo, s, notificationService);
+        // Pass the already-initialized fireStoreRepository, not a new instance
+        await TimerForAttendance.startTimer(fireStoreRepository);
 
-      // Handle enter event
-    } else if (data == exitTag) {
-      // Handle's exit event
+        // Handle enter event
+      } else if (data == exitTag) {
+        // Handle's exit event
 
-      dv.log("Received Exit Tag", name: "LocationTaskHandler");
-      if (isInCAS) {
-        await MyGeofenceService.onExit(hiveRepo, s, notificationService);
+        dv.log("Received Exit Tag", name: "LocationTaskHandler");
+        if (isInCAS) {
+          await MyGeofenceService.onExit(hiveRepo, s, notificationService);
 
-        isInCAS = false;
+          isInCAS = false;
+        }
+        await locationServiceManager.stopLocationService();
+      } else if (data == dWellTag) {
+        dv.log("Received Dwell Tag", name: "LocationTaskHandler");
+        // Handle dwell event
+        await MyGeofenceService.onDwell(fireStoreRepository);
       }
-      await locationServiceManager.stopLocationService();
-    } else if (data == dWellTag) {
-      dv.log("Received Dwell Tag", name: "LocationTaskHandler");
-      // Handle dwell event
-      await MyGeofenceService.onDwell(fireStoreRepository);
-    }
     } else {
       notificationService.showSpoofedLocNotification();
     }
@@ -218,28 +248,86 @@ class TimerForAttendance {
   static int _minutesPassed = 0;
   static bool isMarked = false;
 
-
+  /// Starts the attendance timer with state persistence.
+  /// Guards against duplicate timers and restores state from SharedPreferences
+  /// so the timer survives process death and service restarts.
   static Future<void> startTimer(FireStoreRepository firestore) async {
-    _attendanceTimer = Timer.periodic(const Duration(minutes: 1), (timer) async {
-      ++_minutesPassed;
-      print("minutes passed $_minutesPassed");
-      // ⭐ After 40 minutes → mark attendance
-      if (_minutesPassed >= 40 && !isMarked) {
-        String? rollNo = await SharePreferenceRepository().getRollNo();
-        try {
-          DateTime date = await getCurrentDate();
+    // Guard: prevent duplicate timers
+    if (_attendanceTimer != null) {
+      dv.log(
+        "Timer already running, skipping duplicate startTimer",
+        name: "TimerForAttendance",
+      );
+      return;
+    }
 
-          if (rollNo != null) {
-            await firestore.markAttendance(
-              studentId: rollNo,
-              date: formatDate(date: date),
-              isPresent: true,
-              day: DateFormat("EEEE").format(date),
+    // Restore persisted state (survives process death)
+    final prefs = SharePreferenceRepository();
+    _minutesPassed = await prefs.getAttendanceMinutesPassed();
+    final today = formatDate(date: DateTime.now());
+    isMarked = await prefs.isAttendanceMarkedForDate(today);
+
+    dv.log(
+      "Timer starting: restored _minutesPassed=$_minutesPassed, isMarked=$isMarked",
+      name: "TimerForAttendance",
+    );
+
+    // If already marked for today, no need to start the timer
+    if (isMarked) {
+      dv.log(
+        "Attendance already marked for today, timer not needed",
+        name: "TimerForAttendance",
+      );
+      return;
+    }
+
+    _attendanceTimer = Timer.periodic(const Duration(minutes: 1), (
+      timer,
+    ) async {
+      ++_minutesPassed;
+      dv.log("minutes passed $_minutesPassed", name: "TimerForAttendance");
+
+      // Persist minutes so they survive process death
+      await prefs.setAttendanceMinutesPassed(_minutesPassed);
+
+      // ⭐ After 5 minutes → mark attendance
+      if (_minutesPassed >= 5 && !isMarked) {
+        try {
+          // Ensure Firebase is initialized (may be a restarted isolate)
+          await firestore.init();
+
+          String? rollNo = await SharePreferenceRepository().getRollNo();
+
+          // Validate rollNo explicitly
+          if (rollNo == null || rollNo.isEmpty) {
+            dv.log(
+              "❌ Cannot mark attendance: rollNo is null or empty",
+              name: "TimerForAttendance",
             );
-            isMarked = true;
+            // Don't stop timer — retry next minute in case rollNo becomes available
+            return;
           }
+
+          DateTime date = await getCurrentDate();
+          final dateKey = formatDate(date: date);
+
+          await firestore.markAttendance(
+            studentId: rollNo,
+            date: dateKey,
+            isPresent: true,
+            day: DateFormat("EEEE").format(date),
+          );
+
+          isMarked = true;
+          await prefs.setAttendanceMarked(dateKey);
+          dv.log(
+            "✅ Attendance marked for $rollNo on $dateKey",
+            name: "TimerForAttendance",
+          );
         } catch (e) {
-          debugPrint(e.toString());
+          dv.log("❌ Failed to mark attendance: $e", name: "TimerForAttendance");
+          // Don't stop timer on failure — will retry next minute
+          return;
         }
         TimerForAttendance.stopTimer();
       }
@@ -249,5 +337,8 @@ class TimerForAttendance {
   static void stopTimer() {
     _attendanceTimer?.cancel(); // stop timer
     _attendanceTimer = null;
+    // Note: We do NOT reset _minutesPassed or isMarked here.
+    // They are persisted in SharedPreferences and should only be reset
+    // when the session is fully closed (via resetAttendanceTimerState).
   }
 }
