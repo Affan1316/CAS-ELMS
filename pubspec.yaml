@@ -108,6 +108,7 @@ flutter:
     - assets/icons/
     - assets/markDown/
     - assets/certificate/
+    - assets/img_bg_loc_acess.jpg
   shaders:
     - shaders/avatar_glow.frag
 
