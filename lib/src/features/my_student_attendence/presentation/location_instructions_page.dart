@@ -63,10 +63,22 @@ class LocationInstructionsPage extends StatelessWidget {
 
               _buildSection(
                 '1. Keep Location Services ON',
-                'Your attendance is tracked automatically using your phone\'s GPS. Do not turn off location while you are at the workshop.',
+                'Your attendance is tracked automatically using your phone\'s GPS. For this to work, you must set location permission to "Allow all the time" in your device settings.',
               ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadiusGeometry.circular(20),
+                child: Image.asset("assets/img_bg_loc_acess.jpg"),
+              ),
+              const SizedBox(height: 12),
+              _buildNotificationNotice(
+                'Review app with background location access',
+                'If you see a "Security & privacy" notification like "Review app with background location access", you MUST select "Allow all the time" or "Keep Always".\n\nAndroid periodically asks this to confirm you still want the app to track your location in the background. Without this, your attendance won\'t be recorded when the app is minimized.',
+              ),
+
+              const SizedBox(height: 12),
               _buildWarning(
-                'If you turn off location while at the workshop, your attendance session will be paused. You may lose tracked time.',
+                'If you turn off location or restrict permission while at the workshop, your attendance session will be paused. You may lose tracked time.',
               ),
               const SizedBox(height: 32),
 
@@ -121,7 +133,7 @@ class LocationInstructionsPage extends StatelessWidget {
                 'Tap the 📍 Location button in the top-right corner of the header',
               ),
               ClipRRect(
-                borderRadius: BorderRadiusGeometry.circular(12),
+                borderRadius: BorderRadiusGeometry.circular(20),
                 child: Image.asset("assets/img_loc_btn.jpg"),
               ),
               _buildStepItem(
@@ -171,9 +183,57 @@ class LocationInstructionsPage extends StatelessWidget {
     );
   }
 
+  Widget _buildNotificationNotice(String title, String message) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF2F2F2),
+        border: Border.all(color: const Color(0xFFE0E0E0), width: 0.8),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.security_rounded,
+                size: 18,
+                color: Color(0xFF5A5550),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  title.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF5A5550),
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            message,
+            style: const TextStyle(
+              fontSize: 12.5,
+              color: Color(0xFF5A5550),
+              height: 1.45,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildWarning(String text) {
     return Container(
-      margin: const EdgeInsets.only(top: 16),
+      margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF1F1),
