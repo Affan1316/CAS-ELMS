@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SignUpButton extends StatelessWidget {
+  // ── LOGIC UNCHANGED: same constructor signature ───────────────────────────
   final bool isLoading;
   final VoidCallback onPressed;
 
@@ -12,32 +13,37 @@ class SignUpButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 48,
-      child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue.shade600,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 2,
+    return GestureDetector(
+      onTap: isLoading ? null : onPressed,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        width: double.infinity,
+        height: 52,
+        decoration: BoxDecoration(
+          color: isLoading ? const Color(0xFF555555) : const Color(0xFF111111),
+          borderRadius: BorderRadius.circular(16),
         ),
-        child:
-            isLoading
-                ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        child: Center(
+          child:
+              isLoading
+                  ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white54,
+                    ),
+                  )
+                  : const Text(
+                    'Create account',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      letterSpacing: 0.1,
+                    ),
                   ),
-                )
-                : const Text(
-                  'Sign Up',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
+        ),
       ),
     );
   }

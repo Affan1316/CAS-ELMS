@@ -1,10 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_state.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/SlideInWidget.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/StudentLoginScreen.dart';
+
+// ── Design tokens ─────────────────────────────────────────────────────────────
+
+class _T {
+  static const pageBg = Color(0xFFF5F5F5);
+  static const cardBg = Color(0xFFFFFFFF);
+  static const surfaceBg = Color(0xFFEAEAEA);
+  static const heroBg = Color(0xFF111111);
+  static const inkDeep = Color(0xFF111111);
+  static const inkMid = Color(0xFF555555);
+  static const inkSoft = Color(0xFFAAAAAA);
+  static const divider = Color(0xFFEBEBEB);
+  static const focusBorder = Color(0xFF111111);
+
+  // Network image — professional student / learning scene from Unsplash
+  // Stable production URL (w=800 for crisp rendering on all densities)
+  static const heroImageUrl =
+      'https://images.unsplash.com/photo-1522202176988-66273c2fd55f'
+      '?w=800&q=80&auto=format&fit=crop';
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 class UserIdInputScreen extends StatefulWidget {
   const UserIdInputScreen({super.key});
@@ -15,6 +38,7 @@ class UserIdInputScreen extends StatefulWidget {
 
 class _UserIdInputScreenState extends State<UserIdInputScreen>
     with SingleTickerProviderStateMixin {
+  // ── LOGIC UNCHANGED ───────────────────────────────────────────────────────
   final TextEditingController _userIdController = TextEditingController();
   late AnimationController _shakeController;
   late Animation<double> _shakeAnimation;
@@ -32,261 +56,129 @@ class _UserIdInputScreenState extends State<UserIdInputScreen>
   }
 
   @override
+  void dispose() {
+    _userIdController.dispose();
+    _shakeController.dispose();
+    super.dispose();
+  }
+  // ── END LOGIC ─────────────────────────────────────────────────────────────
+
+  // Focus tracking for field highlight
+  final FocusNode _idFocus = FocusNode();
+  bool _isFocused = false;
+
+  @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final screenHeight = screenSize.height;
-    final screenWidth = screenSize.width;
-    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-
-    final isSmallScreen = screenWidth < 360;
-    final isMediumScreen = screenWidth >= 360 && screenWidth < 600;
-    final isKeyboardOpen = keyboardHeight > 0;
-
-    // Fixed dimensions - don't change when keyboard opens
-    final topSectionHeight = screenHeight * 0.35;
-    final horizontalPadding = (screenWidth * 0.06).clamp(16.0, 32.0);
-    final illustrationSize =
-        isSmallScreen
-            ? screenWidth * 0.45
-            : isMediumScreen
-            ? screenWidth * 0.5
-            : screenWidth * 0.4;
-
-    final titleFontSize = isSmallScreen ? 20.0 : 24.0;
-    final subtitleFontSize = isSmallScreen ? 13.0 : 14.0;
-    final inputFontSize = isSmallScreen ? 15.0 : 16.0;
-
-    // Fixed spacing - don't change when keyboard opens
-    final titleSpacing = 15.0;
-    final inputSpacing = 18.0;
-    final verticalSpacing = 15.0;
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+      ),
+    );
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 216, 240, 239),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Enter Your ID',
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
-        ),
-      ),
+      backgroundColor: _T.pageBg,
+      // ── LOGIC UNCHANGED: BlocListener ─────────────────────────────────
       body: BlocListener<OnboardingBloc, OnboardingState>(
         listener: (context, state) {
           if (state is OnboardingInitial && state.shouldShake) {
-            _shakeController.forward().then((_) {
-              _shakeController.reset();
-            });
+            _shakeController.forward().then((_) => _shakeController.reset());
           }
         },
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            children: [
-              // Top section with illustration
-              Container(
-                height: topSectionHeight,
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Color.fromARGB(255, 216, 240, 239),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(30),
-                    bottomRight: Radius.circular(30),
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    // Decorative elements
-                    Positioned(
-                      top: 20,
-                      left: 20,
-                      child: SlideInWidget(
+        child: Column(
+          children: [
+            // ── Hero image section ───────────────────────────────────────
+            _HeroImage(onBack: () => Navigator.pop(context)),
+
+            // ── Form section ─────────────────────────────────────────────
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(22, 24, 22, 32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Eyebrow + title
+                      SlideInWidget(
                         delay: const Duration(milliseconds: 200),
-                        begin: const Offset(-1, -1),
-                        child: Container(
-                          width: isSmallScreen ? 40 : 60,
-                          height: isSmallScreen ? 40 : 60,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(
-                              isSmallScreen ? 20 : 30,
+                        begin: const Offset(0, 0.3),
+                        child: const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'CAS LEARNING',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1.2,
+                                color: _T.inkSoft,
+                              ),
                             ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 40,
-                      right: 30,
-                      child: SlideInWidget(
-                        delay: const Duration(milliseconds: 400),
-                        begin: const Offset(1, -1),
-                        child: Container(
-                          width: isSmallScreen ? 30 : 40,
-                          height: isSmallScreen ? 30 : 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(
-                              isSmallScreen ? 15 : 20,
+                            SizedBox(height: 6),
+                            Text(
+                              'Welcome back.',
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.7,
+                                height: 1.1,
+                                color: _T.inkDeep,
+                              ),
                             ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Main illustration
-                    Center(
-                      child: SlideInWidget(
-                        delay: const Duration(milliseconds: 600),
-                        child: Container(
-                          margin: EdgeInsets.only(top: 20),
-                          child: Image.asset(
-                            'assets/images/login.webp',
-                            width: illustrationSize.clamp(150.0, 220.0),
-                            height: illustrationSize.clamp(150.0, 220.0),
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                width: illustrationSize.clamp(120.0, 180.0),
-                                height: illustrationSize.clamp(120.0, 180.0),
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      width: 60,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue.shade100,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Icon(
-                                        Icons.person,
-                                        size: 30,
-                                        color: Colors.blue.shade600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Container(
-                                      width: 80,
-                                      height: 30,
-                                      decoration: BoxDecoration(
-                                        color: Colors.orange.shade100,
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Icon(
-                                        Icons.laptop,
-                                        size: 20,
-                                        color: Colors.orange.shade600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Bottom section with form
-              Container(
-                width: double.infinity,
-                color: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                child: Column(
-                  children: [
-                    SizedBox(height: verticalSpacing),
-
-                    // Title
-                    SlideInWidget(
-                      delay: const Duration(milliseconds: 800),
-                      begin: const Offset(0, 0.5),
-                      child: Text(
-                        'Welcome to CAS!',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                          height: 1.3,
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(height: isKeyboardOpen ? 4 : 8),
-
-                    // Subtitle
-                    SlideInWidget(
-                      delay: const Duration(milliseconds: 1000),
-                      begin: const Offset(0, 0.5),
-                      child: Text(
-                        'Please enter your student ID to continue.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: subtitleFontSize,
-                          color: Colors.grey,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(height: titleSpacing),
-
-                    // User ID input with shake animation
-                    SlideInWidget(
-                      delay: const Duration(milliseconds: 1200),
-                      begin: const Offset(0, 0.5),
-                      child: AnimatedBuilder(
-                        animation: _shakeAnimation,
-                        builder: (context, child) {
-                          return Transform.translate(
-                            offset: Offset(
-                              10.0 *
-                                  _shakeAnimation.value *
-                                  (1.0 - _shakeAnimation.value) *
-                                  2.0 *
-                                  (0.5 - _shakeAnimation.value).sign,
-                              0.0,
+                            SizedBox(height: 8),
+                            Text(
+                              'Enter your student ID to access\nyour dashboard.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: _T.inkSoft,
+                                height: 1.55,
+                              ),
                             ),
-                            child: _buildInputField(
-                              controller: _userIdController,
-                              hintText: 'Enter Your Student ID',
-                              icon: Icons.person_outline,
-                              fontSize: inputFontSize,
-                              isSmallScreen: isSmallScreen,
-                            ),
-                          );
-                        },
+                          ],
+                        ),
                       ),
-                    ),
 
-                    SizedBox(height: 40),
+                      const SizedBox(height: 28),
 
-                    // Next Button
-                    SlideInWidget(
-                      delay: const Duration(milliseconds: 1400),
-                      begin: const Offset(0, 0.5),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton(
-                          onPressed: () {
+                      // ── ID input with shake animation (LOGIC UNCHANGED) ──
+                      SlideInWidget(
+                        delay: const Duration(milliseconds: 350),
+                        begin: const Offset(0, 0.3),
+                        child: AnimatedBuilder(
+                          animation: _shakeAnimation,
+                          builder: (context, child) {
+                            return Transform.translate(
+                              offset: Offset(
+                                10.0 *
+                                    _shakeAnimation.value *
+                                    (1.0 - _shakeAnimation.value) *
+                                    2.0 *
+                                    (0.5 - _shakeAnimation.value).sign,
+                                0.0,
+                              ),
+                              child: _IdInputField(
+                                controller: _userIdController,
+                                focusNode: _idFocus,
+                                isFocused: _isFocused,
+                                onFocusChange:
+                                    (v) => setState(() => _isFocused = v),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // ── Continue button (LOGIC UNCHANGED) ────────────────
+                      SlideInWidget(
+                        delay: const Duration(milliseconds: 500),
+                        begin: const Offset(0, 0.3),
+                        child: _ContinueButton(
+                          onTap: () {
                             final userId = _userIdController.text.trim();
                             if (userId.isNotEmpty) {
-                              // Navigate to login screen
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder:
@@ -295,113 +187,296 @@ class _UserIdInputScreenState extends State<UserIdInputScreen>
                                 ),
                               );
                             } else {
-                              // Trigger shake animation via bloc
+                              // LOGIC UNCHANGED: shake via bloc
                               context.read<OnboardingBloc>().add(
                                 LoginEvent(''),
                               );
                             }
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4DD0E1),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: const Text(
-                            'Next',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
                         ),
                       ),
-                    ),
-
-                    SizedBox(height: isKeyboardOpen ? 20 : 40),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildInputField({
-    required TextEditingController controller,
-    required String hintText,
-    required IconData icon,
-    required double fontSize,
-    required bool isSmallScreen,
-    bool isPassword = false,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: isSmallScreen ? 12 : 16,
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade400,
-            offset: const Offset(-4, -4),
-            blurRadius: 8,
-            spreadRadius: -1,
+// ── Hero image ────────────────────────────────────────────────────────────────
+
+class _HeroImage extends StatelessWidget {
+  final VoidCallback onBack;
+  const _HeroImage({required this.onBack});
+
+  @override
+  Widget build(BuildContext context) {
+    final topPad = MediaQuery.of(context).padding.top;
+    return SizedBox(
+      height: 260 + topPad,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Network image
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(28),
+              bottomRight: Radius.circular(28),
+            ),
+            child: Image.network(
+              _T.heroImageUrl,
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+              // Fallback while loading or on error
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  color: const Color(0xFF1A1A1A),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.5,
+                      color: Colors.white38,
+                    ),
+                  ),
+                );
+              },
+              errorBuilder:
+                  (context, error, stackTrace) => Container(
+                    color: _T.heroBg,
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.08),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.school_rounded,
+                              color: Colors.white38,
+                              size: 30,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'CAS Learning System',
+                            style: TextStyle(
+                              color: Colors.white38,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+            ),
           ),
-          BoxShadow(
-            color: Colors.grey.shade300,
-            offset: const Offset(4, 4),
-            blurRadius: 8,
-            spreadRadius: -1,
+
+          // Dark overlay at bottom for readability
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 80,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(28),
+                bottomRight: Radius.circular(28),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.35),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
-          BoxShadow(
-            color: Colors.grey.shade200,
-            offset: const Offset(0, 0),
-            blurRadius: 4,
-            spreadRadius: -2,
+
+          // Back button
+          Positioned(
+            top: topPad + 12,
+            left: 16,
+            child: GestureDetector(
+              onTap: onBack,
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.85),
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 15,
+                    color: _T.inkDeep,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Bottom label
+          Positioned(
+            left: 20,
+            bottom: 18,
+            child: const Text(
+              'Student Portal',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.white70,
+                letterSpacing: 0.3,
+              ),
+            ),
           ),
         ],
       ),
-      child: TextField(
-        controller: controller,
-        obscureText: isPassword,
-        style: TextStyle(fontSize: fontSize, color: Colors.black),
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: TextStyle(color: Colors.grey, fontSize: fontSize),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(
-            vertical: isSmallScreen ? 12 : 16,
+    );
+  }
+}
+
+// ── ID input field ────────────────────────────────────────────────────────────
+
+class _IdInputField extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final bool isFocused;
+  final ValueChanged<bool> onFocusChange;
+
+  const _IdInputField({
+    required this.controller,
+    required this.focusNode,
+    required this.isFocused,
+    required this.onFocusChange,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      onFocusChange: onFocusChange,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          color: _T.cardBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isFocused ? _T.focusBorder : _T.divider,
+            width: isFocused ? 1.5 : 1.0,
           ),
-          prefixIcon: Icon(
-            icon,
-            color: Colors.grey,
-            size: isSmallScreen ? 20 : 24,
-          ),
-          suffixIcon:
-              isPassword
-                  ? Icon(
-                    Icons.visibility_off_outlined,
-                    color: Colors.grey,
-                    size: isSmallScreen ? 20 : 24,
-                  )
-                  : null,
+        ),
+        child: Row(
+          children: [
+            // Icon bed
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: isFocused ? _T.heroBg : _T.surfaceBg,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.person_outline_rounded,
+                  size: 16,
+                  color: isFocused ? Colors.white : _T.inkMid,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // Label + input stacked
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'STUDENT ID',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.8,
+                      color: _T.inkSoft,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  TextField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: _T.inkDeep,
+                      letterSpacing: -0.1,
+                    ),
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your student ID',
+                      hintStyle: TextStyle(
+                        fontSize: 14,
+                        color: _T.inkSoft,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    onSubmitted: (_) => focusNode.unfocus(),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+}
+
+// ── Continue button ───────────────────────────────────────────────────────────
+
+class _ContinueButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _ContinueButton({required this.onTap});
 
   @override
-  void dispose() {
-    _userIdController.dispose();
-    _shakeController.dispose();
-    super.dispose();
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 52,
+        decoration: BoxDecoration(
+          color: _T.heroBg,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Center(
+          child: Text(
+            'Continue',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              letterSpacing: 0.1,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
