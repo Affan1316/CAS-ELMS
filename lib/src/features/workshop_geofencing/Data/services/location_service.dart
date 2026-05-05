@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as dv;
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/getTimeConversions.dart';
 import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/services/notification_service.dart';
@@ -26,6 +27,8 @@ class LocationTaskHandler extends TaskHandler {
   static const String enterTag = "EnteringCAS";
   static const String exitTag = "ExitingCAS";
   static const String dWellTag = "Dwell";
+  int _consecutiveOutsideReadings = 0;
+  static const int _exitThreshold = 3;
 
   bool isInCAS = false;
   final hiveRepo = HiveRepository();
@@ -103,16 +106,23 @@ class LocationTaskHandler extends TaskHandler {
       locationSettings: AndroidSettings(accuracy: LocationAccuracy.best),
     );
     if (pos.isMocked ||
-        !isInGeofenceMeters(pointLat: pos.latitude, pointLon: pos.longitude)) {
+        !isInGeofenceMeters(
+          pointLat: pos.latitude,
+          pointLon: pos.longitude,
+          radiusMeters: 130,
+        )) {
+      _consecutiveOutsideReadings++;
       dv.log(
         "Location OFF at entry, skipping session. location : $serviceEnabled and isInCAS: $isInCAS",
         name: "locationCheck",
       );
-      await MyGeofenceService.onExit(hiveRepo, s, notificationService);
-      locationServiceManager.stopLocationService();
-      isInCAS = false;
-      TimerForAttendance.stopTimer(); // <-- Reset entry timestamp since user exited
-      return;
+      if (_consecutiveOutsideReadings >= _exitThreshold) {
+        await MyGeofenceService.onExit(hiveRepo, s, notificationService);
+        locationServiceManager.stopLocationService();
+        isInCAS = false;
+        TimerForAttendance.stopTimer(); // <-- Reset entry timestamp since user exited
+        return;
+      }
     }
   }
 
@@ -304,10 +314,15 @@ class TimerForAttendance {
               "❌ Cannot mark attendance: rollNo is null or empty",
               name: "TimerForAttendance",
             );
+            NotificationService().showNotification(
+              11122,
+              "attendance not marked",
+              "RollNo is null or empty",
+            );
             // Don't stop timer — retry next minute in case rollNo becomes available
             return;
           }
-
+          checkConnectionType(NotificationService());
           DateTime date = await getCurrentDate();
           final dateKey = formatDate(date: date);
 
@@ -317,7 +332,11 @@ class TimerForAttendance {
             isPresent: true,
             day: DateFormat("EEEE").format(date),
           );
-
+          // NotificationService().showNotification(
+          //   11123,
+          //   "attendance  marked",
+          //   // "RollNo is null or empty",
+          // );
           isMarked = true;
           await prefs.setAttendanceMarked(dateKey);
           dv.log(
@@ -340,5 +359,24 @@ class TimerForAttendance {
     // Note: We do NOT reset _minutesPassed or isMarked here.
     // They are persisted in SharedPreferences and should only be reset
     // when the session is fully closed (via resetAttendanceTimerState).
+  }
+}
+
+Future<void> checkConnectionType(
+  NotificationService notificationService,
+) async {
+  final List<ConnectivityResult> connectivityResult =
+      await (Connectivity().checkConnectivity());
+
+  if (connectivityResult.contains(ConnectivityResult.mobile)) {
+    print("Connected to Mobile Data (SIM)");
+  } else if (connectivityResult.contains(ConnectivityResult.wifi)) {
+    print("Connected to Wi-Fi");
+  } else if (connectivityResult.contains(ConnectivityResult.none)) {
+    notificationService.showNotification(
+      001122,
+      "Attendance not marked",
+      "No Internet Connection it maybe marked when online",
+    );
   }
 }

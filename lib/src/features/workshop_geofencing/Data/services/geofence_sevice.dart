@@ -105,7 +105,7 @@ class MyGeofenceService {
   Future<void> createGeofence({
     double latitude = 29.382988,
     double longitude = 71.715538,
-    double radius = 20, // meters
+    double radius = 50, // meters
   }) async {
     // nativeGeofence.initialize();
     Geofence workshop = Geofence(

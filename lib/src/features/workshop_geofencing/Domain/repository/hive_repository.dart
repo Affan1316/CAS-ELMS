@@ -65,12 +65,9 @@ class HiveRepository {
     final today = DateTime.now();
     for (var session in box.values) {
       // Only sum sessions from today to prevent cross-day accumulation
-      if (session.checkInTime.year == today.year &&
-          session.checkInTime.month == today.month &&
-          session.checkInTime.day == today.day) {
-        totalDuration += session.checkOutTime.difference(session.checkInTime);
-        log(totalDuration.toString(), name: "totalDuration in loop");
-      }
+
+      totalDuration += session.checkOutTime.difference(session.checkInTime);
+      log(totalDuration.toString(), name: "totalDuration in loop");
     }
     log(totalDuration.toString(), name: "totalDuration final in Func");
     return totalDuration;

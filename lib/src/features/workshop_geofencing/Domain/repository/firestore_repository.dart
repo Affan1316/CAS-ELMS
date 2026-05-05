@@ -34,25 +34,21 @@ class FireStoreRepository {
         .doc(studentId)
         .collection(FirebaseCollections.daysCollection)
         .doc(date)
-        .set(data);
+        .set(data, SetOptions(merge: true));
   }
 
   Future<void> markAttendance({
     required String studentId,
     required String date,
     required bool isPresent,
-    required String day
+    required String day,
   }) async {
     await FirebaseFirestore.instance
         .collection(FirebaseCollections.studentCollection)
         .doc(studentId)
         .collection(FirebaseCollections.attendanceCollection)
         .doc(date)
-        .set({
-          "status": isPresent,
-          "date": date,
-          "day": day,
-        });
+        .set({"status": isPresent, "date": date, "day": day});
   }
 
   Future<WorkshoptimeModel?> getDaysWorkshopTimeOfSpecificDate({
