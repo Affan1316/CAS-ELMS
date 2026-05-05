@@ -1,12 +1,14 @@
 // ══════════════════════════════════════════════════════════════════════════════
 // REDESIGNED: RoleSelectionScreen
-// Designer note: Full UI facelift — zero logic changes.
-// Philosophy: "Frosted glass meets warm teal" — premium, calm, intentional.
+// Designer note: Rethemed to match StudentHomePage editorial palette.
+// Philosophy: "Warm stone editorial" — same _Ink tokens, DM Serif Display,
+//             newspaper double-rules, cream surfaces. Zero logic changes.
 // ══════════════════════════════════════════════════════════════════════════════
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_cas_app_main/src/features/admin_login_screen/presentation/page/admin_login_page.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_bloc.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/bloc/login_onboarding_event.dart';
@@ -15,46 +17,54 @@ import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/pr
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildTeacherAvatar.dart';
 import 'package:flutter_cas_app_main/src/features/categories_and_login_screen/presentation/widgets/buildUserIdScreen.dart';
 
-// ── Design Tokens ─────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+// PALETTE — mirrors StudentHomePage _Ink tokens exactly
+// ══════════════════════════════════════════════════════════════════════════════
 
-class _DS {
-  // Core palette — derived from existing app teal + white
-  static const bgTop = Color(0xFFD8F0EF); // existing teal bg (preserved)
-  static const bgBottom = Color(0xFFF5FAFA); // warm off-white
-  static const tealCore = Color(0xFF26B5AE); // richer teal for interactive
-  static const tealLight = Color(0xFF4DD0C9); // button / selected ring
-  static const tealFaint = Color(0xFFE2F7F6); // card bg when selected
-  static const ink = Color(0xFF0F2526); // near-black for text
-  static const inkMid = Color(0xFF4A6366); // secondary text
-  static const inkFaint = Color(0xFF8FADB0); // hint / label
-  static const surface = Color(0xFFFFFFFF); // card surface
-  static const divider = Color(0xFFD4ECEC);
+class _Ink {
+  static const pageBg = Color(0xFFF9F7F4); // warm cream
+  static const inkDeep = Color(0xFF1C1A17); // near-black
+  static const inkMid = Color(0xFF5A5550); // editorial gray
+  static const inkSoft = Color(0xFF8C8680); // muted label
+  static const inkFaint = Color(0xFFB5B0A8); // hairline
+  static const divider = Color(0xFFDDD9D3); // rule line
+  static const surface = Color(0xFFFFFFFF); // card white
 
-  // Elevation — single consistent shadow recipe
+  // Feature card tones — same as StudentHomePage
+  static const sand = Color(0xFFEDE9E4);
+  static const sage = Color(0xFFE4EDE7);
+
+  // Icon bed / stroke tones
+  static const sandBed = Color(0xFFC8BCA8);
+  static const sageBed = Color(0xFFB5CDB9);
+  static const sandStroke = Color(0xFF6B5C44);
+  static const sageStroke = Color(0xFF3B6B44);
+
+  // Shared shadow recipe
   static List<BoxShadow> cardShadow = [
     BoxShadow(
-      color: const Color(0xFF26B5AE).withValues(alpha: 0.08),
+      color: const Color(0xFF1C1A17).withOpacity(0.06),
       blurRadius: 24,
       offset: const Offset(0, 8),
     ),
     BoxShadow(
-      color: Colors.black.withValues(alpha: 0.04),
-      blurRadius: 8,
+      color: Colors.black.withOpacity(0.03),
+      blurRadius: 6,
       offset: const Offset(0, 2),
     ),
   ];
 
   static List<BoxShadow> cardShadowSelected = [
     BoxShadow(
-      color: const Color(0xFF26B5AE).withValues(alpha: 0.22),
-      blurRadius: 32,
+      color: const Color(0xFF1C1A17).withOpacity(0.13),
+      blurRadius: 28,
       offset: const Offset(0, 10),
     ),
   ];
 
   static List<BoxShadow> buttonShadow = [
     BoxShadow(
-      color: const Color(0xFF26B5AE).withValues(alpha: 0.38),
+      color: const Color(0xFF1C1A17).withOpacity(0.22),
       blurRadius: 20,
       offset: const Offset(0, 8),
     ),
@@ -79,7 +89,7 @@ class RoleSelectionScreen extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: _DS.bgBottom,
+      backgroundColor: _Ink.pageBg,
       body: BlocBuilder<OnboardingBloc, OnboardingState>(
         builder: (context, state) {
           // ── Preserved: exact same state cast ────────────────────────────
@@ -108,7 +118,7 @@ class RoleSelectionScreen extends StatelessWidget {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// REDESIGNED BODY
+// REDESIGNED BODY — editorial scroll layout
 // ══════════════════════════════════════════════════════════════════════════════
 
 class _RedesignedBody extends StatefulWidget {
@@ -130,13 +140,21 @@ class _RedesignedBodyState extends State<_RedesignedBody>
     super.initState();
     _enterCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 1100),
     );
-    _fadeIn = CurvedAnimation(parent: _enterCtrl, curve: Curves.easeOut);
+    _fadeIn = CurvedAnimation(
+      parent: _enterCtrl,
+      curve: const Interval(0.0, 0.65, curve: Curves.easeOut),
+    );
     _slideUp = Tween<Offset>(
-      begin: const Offset(0, 0.06),
+      begin: const Offset(0, 0.04),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _enterCtrl, curve: Curves.easeOutCubic));
+    ).animate(
+      CurvedAnimation(
+        parent: _enterCtrl,
+        curve: const Interval(0.0, 0.75, curve: Curves.easeOutCubic),
+      ),
+    );
     _enterCtrl.forward();
   }
 
@@ -148,52 +166,39 @@ class _RedesignedBodyState extends State<_RedesignedBody>
 
   @override
   Widget build(BuildContext context) {
-    final mq = MediaQuery.of(context);
-    final h = mq.size.height;
-    final top = mq.padding.top;
-
     return FadeTransition(
       opacity: _fadeIn,
       child: SlideTransition(
         position: _slideUp,
-        child: Stack(
-          children: [
-            // ── Background: soft gradient arch (replaces flat teal rect) ──
-            _GradientArch(topInset: top),
+        child: SafeArea(
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              // ── Edition banner (dateline pill) ───────────────────────────
+              SliverToBoxAdapter(child: _EditionBanner()),
 
-            // ── Subtle dot-grid texture — depth without noise ──────────────
-            Positioned.fill(child: _DotGrid()),
+              // ── Hairline rule ────────────────────────────────────────────
+              SliverToBoxAdapter(child: _HeroRule()),
 
-            // ── Main content ──────────────────────────────────────────────
-            SafeArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: h * 0.04),
+              // ── Typographic greeting block ───────────────────────────────
+              SliverToBoxAdapter(child: _HeadlineBlock()),
 
-                  // Logo mark
-                  _CasLogo(),
+              // ── Double editorial rule ────────────────────────────────────
+              SliverToBoxAdapter(child: _ThickRule()),
 
-                  SizedBox(height: h * 0.032),
+              // ── Section label ────────────────────────────────────────────
+              SliverToBoxAdapter(child: _SectionLabel('Choose your chapter')),
 
-                  // Headline
-                  _Headline(),
+              // ── Role cards ───────────────────────────────────────────────
+              SliverToBoxAdapter(child: _RoleCardRow(state: widget.state)),
 
-                  SizedBox(height: h * 0.048),
+              // ── Continue CTA ─────────────────────────────────────────────
+              SliverToBoxAdapter(child: _ContinueButton(state: widget.state)),
 
-                  // Role cards — side by side, equal weight
-                  Expanded(child: _RoleCardRow(state: widget.state)),
-
-                  SizedBox(height: h * 0.028),
-
-                  // CTA Button
-                  _ContinueButton(state: widget.state),
-
-                  SizedBox(height: h * 0.04),
-                ],
-              ),
-            ),
-          ],
+              // ── Footer colophon ──────────────────────────────────────────
+              SliverToBoxAdapter(child: _Footer()),
+            ],
+          ),
         ),
       ),
     );
@@ -201,143 +206,152 @@ class _RedesignedBodyState extends State<_RedesignedBody>
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// BACKGROUND COMPONENTS
+// EDITION BANNER — matches StudentHomePage _EditionBanner exactly
 // ══════════════════════════════════════════════════════════════════════════════
 
-class _GradientArch extends StatelessWidget {
-  final double topInset;
-  const _GradientArch({required this.topInset});
-
-  @override
-  Widget build(BuildContext context) {
-    final h = MediaQuery.of(context).size.height;
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        height: h * 0.50,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFC2EAE8), // slightly cooler at top-left
-              Color(0xFFD8F0EF), // existing teal bg — preserved
-              Color(0xFFE8F8F7), // feathers into white
-            ],
-            stops: [0.0, 0.55, 1.0],
-          ),
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(48),
-            bottomRight: Radius.circular(48),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DotGrid extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(painter: _DotGridPainter());
-  }
-}
-
-class _DotGridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = const Color(0xFF26B5AE).withValues(alpha: 0.055)
-          ..strokeCap = StrokeCap.round
-          ..style = PaintingStyle.fill;
-
-    const gap = 28.0;
-    const r = 1.4;
-    for (double x = gap; x < size.width; x += gap) {
-      for (double y = gap; y < size.height * 0.50; y += gap) {
-        canvas.drawCircle(Offset(x, y), r, paint);
-      }
-    }
+class _EditionBanner extends StatelessWidget {
+  String get _dateString {
+    final now = DateTime.now();
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${days[now.weekday - 1]}, ${now.day} ${months[now.month - 1]} ${now.year}';
   }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// ══════════════════════════════════════════════════════════════════════════════
-// LOGO MARK — premium app identity touch
-// ══════════════════════════════════════════════════════════════════════════════
-
-class _CasLogo extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 52,
-          height: 52,
-          decoration: BoxDecoration(
-            color: _DS.tealCore,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: _DS.tealCore.withValues(alpha: 0.35),
-                blurRadius: 18,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: const Center(
-            child: Text(
-              'CAS',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                letterSpacing: 1.2,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ══════════════════════════════════════════════════════════════════════════════
-// HEADLINE — clean typographic hierarchy
-// ══════════════════════════════════════════════════════════════════════════════
-
-class _Headline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.fromLTRB(24, 14, 24, 14),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _TagPill('Welcome Edition'),
+          Text(
+            _dateString,
+            style: const TextStyle(
+              fontSize: 11,
+              color: _Ink.inkSoft,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TagPill extends StatelessWidget {
+  final String label;
+  const _TagPill(this.label);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        border: Border.all(color: _Ink.divider),
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: const TextStyle(
+          fontSize: 9,
+          letterSpacing: 1.6,
+          fontWeight: FontWeight.w500,
+          color: _Ink.inkSoft,
+        ),
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RULES — identical to StudentHomePage _HeroRule / _ThickRule
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _HeroRule extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Divider(height: 1, thickness: 0.8, color: _Ink.divider);
+  }
+}
+
+class _ThickRule extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(height: 2.5, color: _Ink.inkDeep),
+          const SizedBox(height: 3),
+          Row(
+            children: [
+              Expanded(child: Container(height: 0.8, color: _Ink.divider)),
+              const SizedBox(width: 6),
+              Expanded(child: Container(height: 0.8, color: _Ink.divider)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// HEADLINE BLOCK — DM Serif Display, same style as _GreetingBlock
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _HeadlineBlock extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Join CAS as a...',
-            textAlign: TextAlign.center,
+            'Get started',
             style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.w700,
-              color: _DS.ink,
-              letterSpacing: -0.5,
-              height: 1.1,
+              fontSize: 11,
+              letterSpacing: 1.4,
+              color: _Ink.inkSoft,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 10),
           Text(
-            'Create and deliver courses as a Teacher,\nor learn and grow as a Student.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14.5,
-              color: _DS.inkMid,
-              height: 1.6,
+            'Join CAS as a...',
+            style: GoogleFonts.dmSerifDisplay(
+              fontSize: 44,
               fontWeight: FontWeight.w400,
+              color: _Ink.inkDeep,
+              height: 1.05,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 14),
+          const Text(
+            '"Education is not the filling of a pail, but the lighting of a fire."',
+            style: TextStyle(
+              fontSize: 12.5,
+              color: _Ink.inkSoft,
+              fontStyle: FontStyle.italic,
+              height: 1.55,
+              letterSpacing: 0.1,
             ),
           ),
         ],
@@ -347,7 +361,32 @@ class _Headline extends StatelessWidget {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// ROLE CARD ROW — side-by-side, equal sizing, premium card treatment
+// SECTION LABEL — identical to StudentHomePage _SectionLabel
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _SectionLabel extends StatelessWidget {
+  final String text;
+  const _SectionLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+      child: Text(
+        text.toUpperCase(),
+        style: const TextStyle(
+          fontSize: 10,
+          letterSpacing: 1.5,
+          fontWeight: FontWeight.w500,
+          color: _Ink.inkSoft,
+        ),
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ROLE CARD ROW — two equal cards, stone-palette tones
 // ══════════════════════════════════════════════════════════════════════════════
 
 class _RoleCardRow extends StatelessWidget {
@@ -357,28 +396,34 @@ class _RoleCardRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: _PremiumRoleCard(
+            child: _EditorialRoleCard(
               role: 'Teacher',
               label: 'Teacher',
+              labelItalic: 'Mode',
               sublabel: 'Create & deliver\ncourses',
               avatar: buildTeacherAvatar(),
-              accentColor: _DS.tealCore,
+              bgColor: _Ink.sand,
+              iconBed: _Ink.sandBed,
+              iconStroke: _Ink.sandStroke,
               isSelected: state.selectedRole == 'Teacher',
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 12),
           Expanded(
-            child: _PremiumRoleCard(
+            child: _EditorialRoleCard(
               role: 'Student',
               label: 'Student',
+              labelItalic: 'Mode',
               sublabel: 'Enroll & learn\nat your pace',
               avatar: buildStudentAvatar(),
-              accentColor: const Color(0xFF3A8FC7),
+              bgColor: _Ink.sage,
+              iconBed: _Ink.sageBed,
+              iconStroke: _Ink.sageStroke,
               isSelected: state.selectedRole == 'Student',
             ),
           ),
@@ -389,31 +434,37 @@ class _RoleCardRow extends StatelessWidget {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// PREMIUM ROLE CARD
+// EDITORIAL ROLE CARD — square card styled like _SquareChapterCard
 // ══════════════════════════════════════════════════════════════════════════════
 
-class _PremiumRoleCard extends StatefulWidget {
+class _EditorialRoleCard extends StatefulWidget {
   final String role;
   final String label;
+  final String labelItalic;
   final String sublabel;
   final Widget avatar;
-  final Color accentColor;
+  final Color bgColor;
+  final Color iconBed;
+  final Color iconStroke;
   final bool isSelected;
 
-  const _PremiumRoleCard({
+  const _EditorialRoleCard({
     required this.role,
     required this.label,
+    required this.labelItalic,
     required this.sublabel,
     required this.avatar,
-    required this.accentColor,
+    required this.bgColor,
+    required this.iconBed,
+    required this.iconStroke,
     required this.isSelected,
   });
 
   @override
-  State<_PremiumRoleCard> createState() => _PremiumRoleCardState();
+  State<_EditorialRoleCard> createState() => _EditorialRoleCardState();
 }
 
-class _PremiumRoleCardState extends State<_PremiumRoleCard>
+class _EditorialRoleCardState extends State<_EditorialRoleCard>
     with SingleTickerProviderStateMixin {
   bool _pressed = false;
   late final AnimationController _pulseCtrl;
@@ -428,12 +479,12 @@ class _PremiumRoleCardState extends State<_PremiumRoleCard>
     );
     _pulseAnim = Tween<double>(
       begin: 1.0,
-      end: 1.04,
+      end: 1.03,
     ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
   }
 
   @override
-  void didUpdateWidget(_PremiumRoleCard old) {
+  void didUpdateWidget(_EditorialRoleCard old) {
     super.didUpdateWidget(old);
     if (widget.isSelected && !old.isSelected) {
       _pulseCtrl.repeat(reverse: true);
@@ -468,93 +519,90 @@ class _PremiumRoleCardState extends State<_PremiumRoleCard>
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 280),
             curve: Curves.easeInOut,
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 14),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color:
-                  widget.isSelected
-                      ? widget.accentColor.withValues(alpha: 0.07)
-                      : _DS.surface,
-              borderRadius: BorderRadius.circular(24),
+              color: widget.bgColor,
+              borderRadius: BorderRadius.circular(22),
               border: Border.all(
                 color:
                     widget.isSelected
-                        ? widget.accentColor.withValues(alpha: 0.55)
-                        : _DS.divider,
-                width: widget.isSelected ? 2.0 : 1.0,
+                        ? _Ink.inkDeep.withOpacity(0.35)
+                        : Colors.transparent,
+                width: widget.isSelected ? 1.5 : 0,
               ),
               boxShadow:
-                  widget.isSelected
-                      ? [
-                        BoxShadow(
-                          color: widget.accentColor.withValues(alpha: 0.18),
-                          blurRadius: 28,
-                          offset: const Offset(0, 10),
-                        ),
-                      ]
-                      : _DS.cardShadow,
+                  widget.isSelected ? _Ink.cardShadowSelected : _Ink.cardShadow,
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Avatar container ──────────────────────────────────
+                // ── Icon bed ───────────────────────────────────────────
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 280),
-                  width: 80,
-                  height: 80,
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
                     color:
                         widget.isSelected
-                            ? widget.accentColor.withValues(alpha: 0.15)
-                            : const Color(0xFFF2FAFA),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color:
-                          widget.isSelected
-                              ? widget.accentColor.withValues(alpha: 0.3)
-                              : Colors.transparent,
-                    ),
+                            ? _Ink.inkDeep.withOpacity(0.08)
+                            : widget.iconBed,
+                    borderRadius: BorderRadius.circular(11),
                   ),
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(7),
                   child: widget.avatar,
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-                // ── Role label ───────────────────────────────────────
-                AnimatedDefaultTextStyle(
-                  duration: const Duration(milliseconds: 280),
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: widget.isSelected ? widget.accentColor : _DS.ink,
-                    letterSpacing: -0.2,
+                // ── DM Serif Display label — same as _SquareChapterCard ─
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: widget.label,
+                        style: GoogleFonts.dmSerifDisplay(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: _Ink.inkDeep,
+                          height: 1.05,
+                        ),
+                      ),
+                      TextSpan(
+                        text: '\n${widget.labelItalic}',
+                        style: GoogleFonts.dmSerifDisplay(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          color: _Ink.inkDeep,
+                        ),
+                      ),
+                    ],
                   ),
-                  child: Text(widget.label, textAlign: TextAlign.center),
                 ),
 
-                const SizedBox(height: 5),
+                const SizedBox(height: 6),
 
-                // ── Role sublabel ─────────────────────────────────────
                 Text(
                   widget.sublabel,
-                  textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 11.5,
-                    color: _DS.inkFaint,
+                    fontSize: 11,
+                    color: _Ink.inkSoft,
                     height: 1.5,
-                    fontWeight: FontWeight.w400,
                   ),
                 ),
 
                 const SizedBox(height: 14),
 
-                // ── Selected indicator dot ────────────────────────────
+                // ── Selected pill indicator — same animation as _PremiumRoleCard ──
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
                   width: widget.isSelected ? 28 : 8,
-                  height: 5,
+                  height: 4,
                   decoration: BoxDecoration(
-                    color: widget.isSelected ? widget.accentColor : _DS.divider,
+                    color:
+                        widget.isSelected
+                            ? _Ink.inkDeep
+                            : _Ink.inkFaint.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
@@ -568,7 +616,7 @@ class _PremiumRoleCardState extends State<_PremiumRoleCard>
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// CONTINUE BUTTON — premium CTA with shadow glow
+// CONTINUE BUTTON — inkDeep CTA matching StudentHomePage's dark-slab style
 // ══════════════════════════════════════════════════════════════════════════════
 
 class _ContinueButton extends StatelessWidget {
@@ -581,12 +629,12 @@ class _ContinueButton extends StatelessWidget {
         state.selectedRole != null && state.selectedRole!.isNotEmpty;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-          boxShadow: isActive ? _DS.buttonShadow : [],
+          boxShadow: isActive ? _Ink.buttonShadow : [],
         ),
         child: SizedBox(
           width: double.infinity,
@@ -610,9 +658,9 @@ class _ContinueButton extends StatelessWidget {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  isActive ? _DS.tealCore : const Color(0xFFCDE9E8),
-              foregroundColor: isActive ? Colors.white : _DS.inkFaint,
+              backgroundColor: isActive ? _Ink.inkDeep : _Ink.divider,
+              foregroundColor:
+                  isActive ? const Color(0xFFF9F7F4) : _Ink.inkFaint,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
               ),
@@ -625,19 +673,20 @@ class _ContinueButton extends StatelessWidget {
                   isActive
                       ? 'Continue as ${state.selectedRole}'
                       : 'Select a role to continue',
-                  style: TextStyle(
-                    fontSize: 15.5,
-                    fontWeight: FontWeight.w600,
+                  style: GoogleFonts.dmSerifDisplay(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w400,
+                    fontStyle: isActive ? FontStyle.italic : FontStyle.normal,
+                    color: isActive ? const Color(0xFFF9F7F4) : _Ink.inkFaint,
                     letterSpacing: 0.1,
-                    color: isActive ? Colors.white : _DS.inkFaint,
                   ),
                 ),
                 if (isActive) ...[
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   const Icon(
                     Icons.arrow_forward_rounded,
-                    size: 18,
-                    color: Colors.white,
+                    size: 17,
+                    color: Color(0xFFF9F7F4),
                   ),
                 ],
               ],
@@ -645,6 +694,46 @@ class _ContinueButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// FOOTER — masthead colophon, identical to StudentHomePage _Footer style
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _Footer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: Divider(height: 1, thickness: 0.8, color: _Ink.divider),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              Text(
+                'CAS LEARNING SYSTEM',
+                style: TextStyle(
+                  fontSize: 9,
+                  letterSpacing: 1.4,
+                  color: _Ink.inkFaint,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                'Onboarding · v1.0',
+                style: TextStyle(fontSize: 10, color: _Ink.inkFaint),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
