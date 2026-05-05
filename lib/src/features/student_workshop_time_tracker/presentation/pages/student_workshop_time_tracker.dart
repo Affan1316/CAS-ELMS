@@ -412,7 +412,6 @@ class _StudentTimeTrackerPageState extends State<StudentTimeTrackerPage>
   // ── Filter map (original) ─────────────────────────────────────────────────
   final Map<String, List<DailyStudyData>> _filterOptions = {
     'Last Week': studyData['Last Week']!.toList(),
-    'This Month': studyData['This Month']!.toList(),
     'Custom': [],
   };
 
@@ -462,6 +461,17 @@ class _StudentTimeTrackerPageState extends State<StudentTimeTrackerPage>
           ),
     );
     if (picked != null && picked != _selectedDateRange) {
+      if (picked.duration.inDays > 10) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Date range cannot exceed 10 days'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+        return;
+      }
       setState(() {
         _selectedDateRange = picked;
         selectedFilter = 'Custom';
@@ -492,10 +502,6 @@ class _StudentTimeTrackerPageState extends State<StudentTimeTrackerPage>
       case 'Last Week':
         context.read<TimeGraphPageBloc>().add(
           LastWeekEvent(rollNo: widget.rollNo),
-        );
-      case 'This Month':
-        context.read<TimeGraphPageBloc>().add(
-          ThisMonthEvent(rollNo: widget.rollNo),
         );
     }
   }
@@ -846,7 +852,7 @@ class _InfoRow extends StatelessWidget {
 
 // ══════════════════════════════════════════════════════════════════════════════
 // ③ TIME RANGE CHIPS  (MyChoiceChips + custom date button)
-//   Fires: ThisWeekEvent, LastWeekEvent, ThisMonthEvent, SelectiveRangeEvent
+//   Fires: ThisWeekEvent, LastWeekEvent, SelectiveRangeEvent
 // ══════════════════════════════════════════════════════════════════════════════
 
 class _TimeRangeChips extends StatelessWidget {
@@ -860,7 +866,7 @@ class _TimeRangeChips extends StatelessWidget {
     required this.onTap,
   });
 
-  static const _chips = ['This Week', 'Last Week', 'This Month'];
+  static const _chips = ['This Week', 'Last Week'];
 
   @override
   Widget build(BuildContext context) {
@@ -1113,36 +1119,48 @@ class _ChartCard extends StatelessWidget {
 class _SummaryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final totalHours = context.watch<TimeGraphPageBloc>().totalHours;
-    final averageHours = context.watch<TimeGraphPageBloc>().averageHours;
+    return BlocBuilder<TimeGraphPageBloc, TimeGraphPageState>(
+      builder: (context, state) {
+        final double totalHours;
+        final double averageHours;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: _StatSlab(
-              icon: Icons.schedule_rounded,
-              iconBed: _P.sandBed,
-              iconStroke: _P.sandStroke,
-              label: 'Weekly total',
-              value: '${totalHours.toStringAsFixed(1)} hrs',
-              sub: 'selected period',
-            ),
+        if (state is TimeGraphPageLoaded) {
+          totalHours = state.totalHours ?? 0;
+          averageHours = state.averageHours ?? 0;
+        } else {
+          totalHours = 0;
+          averageHours = 0;
+        }
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: _StatSlab(
+                  icon: Icons.schedule_rounded,
+                  iconBed: _P.sandBed,
+                  iconStroke: _P.sandStroke,
+                  label: 'Total hours',
+                  value: '${totalHours.toStringAsFixed(1)} hrs',
+                  sub: 'selected period',
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _StatSlab(
+                  icon: Icons.trending_up_rounded,
+                  iconBed: _P.sageBed,
+                  iconStroke: _P.sageStroke,
+                  label: 'Daily average',
+                  value: '${averageHours.toStringAsFixed(1)} hrs',
+                  sub: 'hrs per day',
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _StatSlab(
-              icon: Icons.trending_up_rounded,
-              iconBed: _P.sageBed,
-              iconStroke: _P.sageStroke,
-              label: 'Daily average',
-              value: '${averageHours.toStringAsFixed(1)} hrs',
-              sub: 'hrs per day',
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

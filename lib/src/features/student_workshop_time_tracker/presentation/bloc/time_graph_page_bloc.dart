@@ -42,6 +42,8 @@ class TimeGraphPageBloc extends Bloc<TimeGraphPageEvent, TimeGraphPageState> {
           studentData: data,
           selectiveFilter: selectiveFilter,
           dateRange: null,
+          totalHours: totalHours,
+          averageHours: averageHours,
         ),
       );
     } else {
@@ -69,6 +71,8 @@ class TimeGraphPageBloc extends Bloc<TimeGraphPageEvent, TimeGraphPageState> {
           studentData: data,
           selectiveFilter: selectiveFilter,
           dateRange: null,
+          totalHours: totalHours,
+          averageHours: averageHours,
         ),
       );
     } else {
@@ -92,6 +96,8 @@ class TimeGraphPageBloc extends Bloc<TimeGraphPageEvent, TimeGraphPageState> {
         studentData: data,
         selectiveFilter: selectiveFilter,
         dateRange: null,
+        totalHours: totalHours,
+        averageHours: averageHours,
       ),
     );
   }
@@ -101,29 +107,23 @@ class TimeGraphPageBloc extends Bloc<TimeGraphPageEvent, TimeGraphPageState> {
     Emitter<TimeGraphPageState> emit,
   ) async {
     emit(TimeGraphPageLoading());
-    await Future.delayed(const Duration(seconds: 2));
-    var data = await fireStoreRepository.getAllDaysWorkshopTime(
+    var rangedData = await fireStoreRepository.getDaysWorkshopTimeInRange(
       studentId:
           event.rollNo ?? await sharePreferenceRepository.getRollNo() ?? "",
+      start: event.dateRange.start,
+      end: event.dateRange.end,
     );
-    if (data != null) {
-      var rangedData =
-          data.where((data) {
-            return data.date.isAfter(
-                  event.dateRange.start.subtract(const Duration(days: 1)),
-                ) &&
-                data.date.isBefore(
-                  event.dateRange.end.add(const Duration(days: 1)),
-                );
-          }).toList();
-      selectiveFilter = 'Custom';
-      totalHours = data.fold(0.0, (sum, item) => sum + item.hours);
-      averageHours = data.isNotEmpty ? totalHours / data.length : 0;
+    selectiveFilter = 'Custom';
+    if (rangedData != null && rangedData.isNotEmpty) {
+      totalHours = rangedData.fold(0.0, (sum, item) => sum + item.hours);
+      averageHours = rangedData.isNotEmpty ? totalHours / rangedData.length : 0;
       emit(
         TimeGraphPageLoaded(
           studentData: rangedData,
           selectiveFilter: selectiveFilter,
           dateRange: event.dateRange,
+          totalHours: totalHours,
+          averageHours: averageHours,
         ),
       );
     } else {

@@ -101,13 +101,17 @@ class FireStoreRepository {
     required DateTime start,
     required DateTime end,
   }) async {
+    // Normalize to start-of-day / end-of-day to avoid time-component exclusions
+    final startOfDay = DateTime(start.year, start.month, start.day);
+    final endOfDay = DateTime(end.year, end.month, end.day, 23, 59, 59, 999);
+
     var data =
         await FirebaseFirestore.instance
             .collection(FirebaseCollections.studentWorkshopTime)
             .doc(studentId)
             .collection(FirebaseCollections.daysCollection)
-            .where('date', isGreaterThanOrEqualTo: start.millisecondsSinceEpoch)
-            .where('date', isLessThanOrEqualTo: end.millisecondsSinceEpoch)
+            .where('date', isGreaterThanOrEqualTo: startOfDay.millisecondsSinceEpoch)
+            .where('date', isLessThanOrEqualTo: endOfDay.millisecondsSinceEpoch)
             .get();
     if (data.docs.isNotEmpty) {
       var list =
@@ -130,11 +134,12 @@ class FireStoreRepository {
   Future<List<DailyStudyData>?> getDaysWorkshopTimeForThisWeek({
     required String studentId,
   }) async {
-    DateTime now = DateTime.now();
-    DateTime startOfWeek = now.subtract(
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day); // strip time
+    final startOfWeek = today.subtract(
       Duration(days: now.weekday - 1),
-    ); // Monday
-    DateTime endOfWeek = startOfWeek.add(const Duration(days: 6)); // Sunday
+    ); // Monday 00:00
+    final endOfWeek = startOfWeek.add(const Duration(days: 6)); // Sunday 00:00 (normalized to 23:59:59 in range query)
 
     return await getDaysWorkshopTimeInRange(
       studentId: studentId,
@@ -146,13 +151,14 @@ class FireStoreRepository {
   Future<List<DailyStudyData>?> getDaysWorkshopTimeForLastWeek({
     required String studentId,
   }) async {
-    DateTime now = DateTime.now();
-    DateTime endOfLastWeek = now.subtract(
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day); // strip time
+    final endOfLastWeek = today.subtract(
       Duration(days: now.weekday),
-    ); // Last Sunday
-    DateTime startOfLastWeek = endOfLastWeek.subtract(
+    ); // Last Sunday 00:00
+    final startOfLastWeek = endOfLastWeek.subtract(
       const Duration(days: 6),
-    ); // Last Monday
+    ); // Last Monday 00:00
 
     return await getDaysWorkshopTimeInRange(
       studentId: studentId,
