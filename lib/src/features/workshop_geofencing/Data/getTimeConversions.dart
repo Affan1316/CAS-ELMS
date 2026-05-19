@@ -55,7 +55,7 @@ Future<DateTime> getCurrentDate() async {
     );
   }
 }
-
+/// Returns True if is in Fence
 bool isInGeofenceMeters({
   required double pointLat,
   required double pointLon,

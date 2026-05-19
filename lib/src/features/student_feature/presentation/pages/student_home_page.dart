@@ -192,11 +192,14 @@
 // All BLoC wiring is unchanged from original.
 // VISUAL ENHANCEMENT ONLY — zero logic, state, navigation, or backend changes.
 
+import 'dart:developer' as dv;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cas_app_main/src/features/workshop_geofencing/Data/getTimeConversions.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:flutter_cas_app_main/src/features/student_feature/data/student_entity_class.dart';
@@ -207,6 +210,11 @@ import 'package:flutter_cas_app_main/src/features/student_feature/presentation/p
 import 'package:flutter_cas_app_main/src/features/student_quiz_page/presentation/pages/quiz_home_screen.dart';
 import 'package:flutter_cas_app_main/src/features/student_workshop_time_tracker/presentation/pages/student_workshop_time_tracker.dart';
 import 'package:flutter_cas_app_main/src/features/my_student_attendence/presentation/student_adentence_page.dart';
+import 'package:intl/intl.dart';
+import '../../../workshop_geofencing/Data/services/location_service.dart';
+import '../../../workshop_geofencing/Data/services/notification_service.dart';
+import '../../../workshop_geofencing/Domain/repository/firestore_repository.dart';
+import '../../../workshop_geofencing/Domain/repository/shared_preference_repository.dart';
 import '../bloc/Student_feature_event.dart';
 import '../bloc/student_feature_bloc.dart';
 
@@ -239,6 +247,10 @@ class _Ink {
   static const lavStroke = Color(0xFF5B3D6B);
   static const stoneStroke = Color(0xFF6B4A33);
   static const mistStroke = Color(0xFF3B5C5A);
+
+  static const sunset = Color(0xFFFDF2E9);
+  static const sunsetBed = Color(0xFFF6DDCC);
+  static const sunsetStroke = Color(0xFFD35400);
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -452,6 +464,8 @@ class _StudentHomePageState extends State<StudentHomePage>
   late final Animation<double> _fade;
   late final Animation<Offset> _lift;
   late final _TimeContext _time;
+  late Future<Position?> _locationFuture;
+
 
   @override
   void initState() {
@@ -482,6 +496,43 @@ class _StudentHomePageState extends State<StudentHomePage>
     );
 
     _ctrl.forward();
+    _locationFuture = _getCurrentLocation();
+  }
+
+  Future<Position?> _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      debugPrint('Location services are disabled.');
+      return null;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        debugPrint('Location permissions are denied');
+        return null;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      debugPrint('Location permissions are permanently denied.');
+      return null;
+    }
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      debugPrint("Current Position: ${position.latitude}, ${position.longitude}");
+      return position;
+    } catch (e) {
+      debugPrint("Error getting location: $e");
+      return null;
+    }
   }
 
   @override
@@ -571,6 +622,97 @@ class _StudentHomePageState extends State<StudentHomePage>
                     SliverToBoxAdapter(
                       child: _HeroChapterCard(
                         studentName: widget.studentEntityClass.name,
+                      ),
+                    ),
+                    // TODO: add diaplay logic
+                    SliverToBoxAdapter(
+                      child: FutureBuilder<Position?>(
+                        future: _locationFuture,
+                        builder: (context, snapshot) {
+                          Widget sizeBox = SizedBox.shrink();
+                          String subtitle = 'Mark your presence for today';
+                          Position?  pos = snapshot.data;
+                          bool isMocked = snapshot.data?.isMocked ?? false;
+
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            subtitle = 'Fetching location...';
+                          } else if (pos == null ){
+                            return sizeBox;
+                          }else if(!isInGeofenceMeters(pointLat: pos.latitude, pointLon: pos.longitude,radiusMeters: 180)){
+                            return sizeBox;
+                          }else if (pos.isMocked){
+                            subtitle = 'Your Location is Mocked please Remove Mock Location';
+                          }
+
+                          return _WideChapterCard(
+                            title: 'Mark',
+                            titleItalic: 'Attendance',
+                            subtitle: subtitle,
+                            bgColor: _Ink.sunset,
+                            accentColor:
+                                isMocked
+                                    ? Colors.red
+                                    : const Color(0xFFD35400),
+                            iconBed: _Ink.sunsetBed,
+                            iconStroke:
+                                isMocked ? Colors.red : _Ink.sunsetStroke,
+                            icon:
+                                isMocked
+                                    ? Icons.location_off_rounded
+                                    : Icons.how_to_reg_rounded,
+                            onTap: () async{
+                              if (isMocked) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Mock location detected. Attendance denied.',
+                                    ),
+                                    backgroundColor: Colors.red,
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              } else {
+                                String? rollNo = await
+                                SharePreferenceRepository().getRollNo();
+                                // Validate rollNo explicitly
+                                if (rollNo == null || rollNo.isEmpty) {
+                                  dv.log(
+                                    "❌ Cannot mark attendance: rollNo is null or empty",
+                                    name: "TimerForAttendance",
+                                  );
+                                  NotificationService().showNotification(
+                                    11122,
+                                    "attendance not marked",
+                                    "RollNo is null or empty",
+                                  );
+                                  // Don't stop timer — retry next minute in case rollNo becomes available
+                                  return;
+                                }
+                                checkConnectionType(NotificationService());
+                                DateTime date = await getCurrentDate();
+                                final dateKey = formatDate(date: date);
+
+                                await FireStoreRepository().markAttendance(
+                                  studentId: rollNo,
+                                  date: dateKey,
+                                  isPresent: true,
+                                  day: DateFormat("EEEE").format(date),
+                                );
+                               if(context.mounted){
+                                 ScaffoldMessenger.of(context).showSnackBar(
+                                   const SnackBar(
+                                     content: Text(
+                                       'TODO: Mark Attendance Logic',
+                                     ),
+                                     behavior: SnackBarBehavior.floating,
+                                   ),
+                                 );
+                               }
+                              }
+                            },
+                          );
+                        },
                       ),
                     ),
                     SliverToBoxAdapter(
@@ -1172,7 +1314,8 @@ class _WideChapterCard extends StatefulWidget {
   final Color iconBed;
   final Color iconStroke;
   final IconData icon;
-  final Widget destination;
+  final Widget? destination;
+  final VoidCallback? onTap;
 
   const _WideChapterCard({
     required this.title,
@@ -1183,7 +1326,8 @@ class _WideChapterCard extends StatefulWidget {
     required this.iconBed,
     required this.iconStroke,
     required this.icon,
-    required this.destination,
+    this.destination,
+    this.onTap,
   });
 
   @override
@@ -1201,10 +1345,14 @@ class _WideChapterCardState extends State<_WideChapterCard> {
         onTapDown: (_) => setState(() => _pressed = true),
         onTapUp: (_) {
           setState(() => _pressed = false);
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => widget.destination),
-          );
+          if (widget.onTap != null) {
+            widget.onTap!();
+          } else if (widget.destination != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => widget.destination!),
+            );
+          }
         },
         onTapCancel: () => setState(() => _pressed = false),
         child: AnimatedScale(
